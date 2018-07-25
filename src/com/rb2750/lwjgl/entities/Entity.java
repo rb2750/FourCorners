@@ -25,7 +25,9 @@ public abstract class Entity {
     @Setter
     private boolean gravity = false;
     @Setter
-    private Entity interactingWith = null;
+    private Entity interactingWithX = null;
+    @Setter
+    private Entity interactingWithY = null;
     @Getter
     @Setter
     private boolean canBeInteractedWith = true;
@@ -45,18 +47,42 @@ public abstract class Entity {
         this.size = size;
     }
 
-    public void move(Location location) {
-
+    public boolean move(Location location, boolean force) {
+        if (!force && location.getWorld().intersects(this, getRectangle()) != null) return false;
         this.location = location;
+        return true;
+    }
+
+    public boolean move(Location location) {
+        return move(location, false);
     }
 
     public void setSize(Size size) {
+        Entity intersectsWith = location.getWorld().intersects(this, new Rectangle((int) getLocation().getX(), (int) getLocation().getY(), (int) size.getWidth(), (int) size.getHeight()));
+
+        if (intersectsWith != null) {
+            boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
+            boolean right = intersectsWith.getLocation().getX() > getLocation().getX();
+            boolean top = intersectsWith.getLocation().getY() >= getLocation().getY();
+            boolean bottom = intersectsWith.getLocation().getY() + intersectsWith.getSize().getHeight() > getLocation().getY();
+
+            if (top && !left && !right) return;
+            if (bottom)
+                if (!move(new Location(getWorld(), getLocation().getX(), getLocation().getY() + Math.abs(getSize().getHeight() - size.getHeight()))))
+                    return;
+            if (right)
+                if (!move(new Location(getWorld(), getLocation().getX() - Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY())))
+                    return;
+            if (left)
+                if (!move(new Location(getWorld(), getLocation().getX() + Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY())))
+                    return;
+        }
 
         this.size = size;
     }
 
     public boolean onGround() {
-        return getLocation().getY() <= 0 || (interactingWith != null && interactingWith.getLocation().getY() < getLocation().getY());
+        return getLocation().getY() <= 0 || (interactingWithY != null && interactingWithY.getLocation().getY() + interactingWithY.getSize().getHeight() <= getLocation().getY());
     }
 
     public Rectangle getRectangle() {

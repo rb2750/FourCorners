@@ -181,6 +181,7 @@ public class Main {
     }
 
     Tile selectyTile;
+    boolean jumping = false;
 
     public void handleControls(SteamController state, SteamController last) {
         int speed = 8;
@@ -190,10 +191,12 @@ public class Main {
         player.getAcceleration().setX((int) (speed * state.getAnalogStickPosition().x()));
 
         if (state.isAHeld() && !last.isAHeld()) {
-            if (!doubleJump && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
+            if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
                 doubleJump = true;
+                jumping = false;
                 player.addAnimation(new FlipAnimation());
             } else if (!player.onGround()) return;
+            else jumping = true;
 
             player.getAcceleration().setY(21);
         }
@@ -235,13 +238,22 @@ public class Main {
                 player.addAnimation(new SquatAnimation(false));
             }
         }
-        selectyTile.setSize(new Size(100f * (float) (1 - state.getLeftTrigger()), 100f * (float) (1 - state.getRightTrigger())));
-        selectyTile.move(new Location(world, (int) tileX, (int) tileY));
-        if (!state.isRightPadTouched()) selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+
+        if (state.isHomeHeld()) {
+            player.setSize(new Size(player.getSize().getWidth() + 1, player.getSize().getHeight()));
+        }
+        System.out.println(player.getLocation().toString());
+
+        Size size = new Size(100f * (float) Math.max(1 - state.getLeftTrigger(), 0.3), 100f * (float) Math.max(1 - state.getRightTrigger(), 0.3));
+
+        selectyTile.setSize(size);
+        selectyTile.move(new Location(world, (int) tileX, (int) tileY), true);
+        if (!state.isRightPadTouched())
+            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, (int) tileX, (int) tileY));
-                newTile.setSize(new Size(100f * (float) (1 - state.getLeftTrigger()), 100f * (float) (1 - state.getRightTrigger())));
+                newTile.setSize(size);
 
                 for (Entity entity : world.getEntities())
                     if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
