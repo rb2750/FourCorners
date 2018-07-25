@@ -30,7 +30,6 @@ public abstract class Entity {
     @Setter
     private boolean canBeInteractedWith = true;
     @Getter
-    @Setter
     private Size size;
     @Getter
     @Setter
@@ -46,8 +45,14 @@ public abstract class Entity {
         this.size = size;
     }
 
-    public void teleport(Location location) {
+    public void move(Location location) {
+
         this.location = location;
+    }
+
+    public void setSize(Size size) {
+
+        this.size = size;
     }
 
     public boolean onGround() {
