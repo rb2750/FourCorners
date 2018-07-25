@@ -40,7 +40,7 @@ public class Main {
     private Location cursorLocation = new Location();
 
     /**
-     * Rob Notes
+     * Rob Notes for Rob
      * I3 Commands:
      * Mod+Control+Shift+Equals = PC Mode
      * Mod+Control+Equals = Game Mode
