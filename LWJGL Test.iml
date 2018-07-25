@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="lwjgl" level="application" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Coding Stuff/Bukkit Libs/lombok.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../lwjgl/joml-1.8.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Maven: com.github.AlbinEriksson:Java-Steam-Controller:1.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:usb4java-javax:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: javax.usb:usb-api:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:usb4java:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:linux-x86:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:linux-x86_64:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:linux-arm:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:windows-x86:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:windows-x86_64:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:osx-x86:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.usb4java:libusb4java:osx-x86_64:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.github.AlbinEriksson:JBinary:2.0.0" level="project" />
+  </component>
+</module>
