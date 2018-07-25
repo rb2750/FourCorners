@@ -83,7 +83,6 @@ public class World {
         entity.update();
     }
 
-
     public Entity intersects(Entity e, Rectangle rect) {
         for (Entity entity : getEntities()) {
             if (e == entity || !entity.isCanBeInteractedWith()) continue;

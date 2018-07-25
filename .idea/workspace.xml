@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ba809aca-0181-494a-8531-b8b469accdd8" name="Default" comment="" />
+    <list default="true" id="ba809aca-0181-494a-8531-b8b469accdd8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/rb2750/lwjgl/entities/Entity.class" beforeDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,11 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="996">
-              <caret line="264" column="41" selection-start-line="264" selection-start-column="41" selection-end-line="264" selection-end-column="41" />
+            <state relative-caret-position="312">
+              <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
             </state>
           </provider>
         </entry>
@@ -28,8 +33,8 @@
       <file leaf-file-name="World.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-238">
-              <caret line="31" column="73" selection-start-line="31" selection-start-column="67" selection-end-line="31" selection-end-column="73" />
+            <state relative-caret-position="833">
+              <caret line="79" column="5" selection-start-line="79" selection-start-column="5" selection-end-line="79" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -37,11 +42,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Entity.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Entity.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="61" column="41" lean-forward="true" selection-start-line="61" selection-start-column="41" selection-end-line="61" selection-end-column="41" />
+            <state relative-caret-position="447">
+              <caret line="48" selection-start-line="48" selection-end-line="48" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -78,6 +83,7 @@
       <find>ongro</find>
       <find>ground</find>
       <find>pending</find>
+      <find>setsi</find>
     </findStrings>
     <replaceStrings>
       <replace>width</replace>
@@ -115,9 +121,9 @@
         <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/animations/SquatAnimation.java" />
         <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/util/Point.java" />
         <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/util/Util.java" />
+        <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java" />
         <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java" />
         <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java" />
-        <option value="$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java" />
       </list>
     </option>
   </component>
@@ -383,12 +389,12 @@
       <workItem from="1532132225544" duration="14000" />
       <workItem from="1532203445816" duration="1811000" />
       <workItem from="1532387256971" duration="48000" />
-      <workItem from="1532388508059" duration="13684000" />
+      <workItem from="1532388508059" duration="15204000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="83360000" />
+    <option name="totallyTimeSpent" value="84880000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="13" width="1920" height="1067" extended-state="6" />
@@ -405,7 +411,7 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="2" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39936775" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.39936775" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Messages" order="7" weight="0.32876712" />
       <window_info anchor="right" id="Palette&#9;" order="3" />
@@ -414,7 +420,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.40990517" />
       <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22630458" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22630458" />
       <window_info anchor="bottom" id="Problems" order="7" weight="0.32982087" />
       <window_info anchor="bottom" id="JProfiler" order="8" />
       <window_info anchor="right" id="Theme Preview" order="3" />
@@ -920,30 +926,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java">
+    <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="996">
-          <caret line="264" column="41" selection-start-line="264" selection-start-column="41" selection-end-line="264" selection-end-column="41" />
+        <state relative-caret-position="447">
+          <caret line="48" selection-start-line="48" selection-end-line="48" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-238">
-          <caret line="31" column="73" selection-start-line="31" selection-start-column="67" selection-end-line="31" selection-end-column="73" />
+        <state relative-caret-position="833">
+          <caret line="79" column="5" selection-start-line="79" selection-start-column="5" selection-end-line="79" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java">
+    <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="61" column="41" lean-forward="true" selection-start-line="61" selection-start-column="41" selection-end-line="61" selection-end-column="41" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="312">
+          <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
         </state>
       </provider>
     </entry>

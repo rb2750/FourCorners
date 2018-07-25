@@ -151,7 +151,6 @@ public class Main {
 //                glFrustum(-fW, fW, -fH, fH, zNear, zFar);
                 glOrtho(0, width, 0, height, 1, -1);
 
-//                glFrustum(0, width, 0, height, 0.00100f, 100f);
                 glMatrixMode(GL_MODELVIEW);
             }
         });
@@ -161,10 +160,6 @@ public class Main {
             currentState = state;
             lastState = last;
             handleControls(currentState, lastState);
-//            if (state.isAHeld()/* && !last.isAHeld()*/)
-//                System.out.println("A button pressed!");
-//            if (state.isBHeld() && !last.isBHeld())
-//                System.out.println("B button pressed!");
         });
 
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
@@ -178,21 +173,10 @@ public class Main {
         while (!glfwWindowShouldClose(window)) {
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-//            if (currentState != null) handleControls(currentState, lastState);
-
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update();
-
-//            glLoadIdentity();
-//            GL11.glTranslatef(0f, 0.0f, -10f);
-//            GL11.glRotatef(45f, 1.0f, 1.0f, 0.0f);
-//            GL11.glColor3f(0.5f, 0.5f, 1.0f);
-//
-//            Util.drawCube(0, 0, 0, 1, 1, 1);
-
             glfwSwapBuffers(window);
             glfwPollEvents();
-//            if ((System.currentTimeMillis() - start) > 2) System.out.println((System.currentTimeMillis() - start) + "");
         }
     }
 
@@ -252,8 +236,8 @@ public class Main {
             }
         }
         selectyTile.setSize(new Size(100f * (float) (1 - state.getLeftTrigger()), 100f * (float) (1 - state.getRightTrigger())));
-        selectyTile.teleport(new Location(world, (int) tileX, (int) tileY));
-        if (!state.isRightPadTouched()) selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        selectyTile.move(new Location(world, (int) tileX, (int) tileY));
+        if (!state.isRightPadTouched()) selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, (int) tileX, (int) tileY));
