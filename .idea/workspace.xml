@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ba809aca-0181-494a-8531-b8b469accdd8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/rb2750/lwjgl/entities/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/rb2750/lwjgl/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/rb2750/lwjgl/entities/Entity.class" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -25,7 +22,7 @@
         <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="312">
-              <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+              <caret line="242" column="87" selection-start-line="242" selection-start-column="87" selection-end-line="242" selection-end-column="87" />
             </state>
           </provider>
         </entry>
@@ -389,12 +386,12 @@
       <workItem from="1532132225544" duration="14000" />
       <workItem from="1532203445816" duration="1811000" />
       <workItem from="1532387256971" duration="48000" />
-      <workItem from="1532388508059" duration="15204000" />
+      <workItem from="1532388508059" duration="15758000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="84880000" />
+    <option name="totallyTimeSpent" value="85434000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="13" width="1920" height="1067" extended-state="6" />
@@ -949,7 +946,7 @@
     <entry file="file://$PROJECT_DIR$/src/com/rb2750/lwjgl/Main.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="312">
-          <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+          <caret line="242" column="87" selection-start-line="242" selection-start-column="87" selection-end-line="242" selection-end-column="87" />
         </state>
       </provider>
     </entry>

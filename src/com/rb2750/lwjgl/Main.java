@@ -241,11 +241,10 @@ public class Main {
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, (int) tileX, (int) tileY));
+                newTile.setSize(new Size(100f * (float) (1 - state.getLeftTrigger()), 100f * (float) (1 - state.getRightTrigger())));
 
                 for (Entity entity : world.getEntities())
                     if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-
-                newTile.setSize(new Size(100f * (float) (1 - state.getLeftTrigger()), 100f * (float) (1 - state.getRightTrigger())));
                 world.addEntity(newTile);
             }
         });
