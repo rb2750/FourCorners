@@ -1,6 +1,5 @@
 package com.rb2750.lwjgl;
 
-import com.rb2750.lwjgl.animations.FlipAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
@@ -21,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 import se.albin.steamcontroller.SteamController;
 import se.albin.steamcontroller.SteamControllerListener;
+
 import java.nio.IntBuffer;
 import java.util.Stack;
 
@@ -179,7 +179,7 @@ public class Main {
         Sync sync = new Sync();
 
         while (!glfwWindowShouldClose(window)) {
-            deltaTime = Util.getTime()-lastFrame;
+            deltaTime = Util.getTime() - lastFrame;
             lastFrame = Util.getTime();
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
@@ -206,7 +206,7 @@ public class Main {
             if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
                 doubleJump = true;
                 jumping = false;
-                player.addAnimation(new FlipAnimation());
+//                player.addAnimation(new FlipAnimation());
             } else if (!player.onGround()) return;
             else jumping = true;
 
@@ -255,12 +255,12 @@ public class Main {
             player.setSize(new Size(player.getSize().getWidth() + 1, player.getSize().getHeight()));
         }
 
-        Size size = new Size(100f * (double) Math.max(1 - state.getLeftTrigger(), 0.3), 100f * (double) Math.max(1 - state.getRightTrigger(), 0.3));
+        Size size = new Size(100f * Math.max(1 - state.getLeftTrigger(), 0.3), 100f * Math.max(1 - state.getRightTrigger(), 0.3));
 
         selectyTile.setSize(size);
-        selectyTile.move(new Location(world, tileX, tileY), true);
-        if (!state.isRightPadTouched())
-            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
+//        selectyTile.move(new Location(world, tileX, tileY), true);
+//        if (!state.isRightPadTouched() || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
+//            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));

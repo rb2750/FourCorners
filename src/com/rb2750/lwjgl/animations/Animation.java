@@ -54,7 +54,7 @@ public abstract class Animation {
             entity.setSize(entity.getSize().clone().add(dSize));
             Size halfSize = dSize.clone().multiply(0.5);
             
-            entity.move(entity.getLocation().add(-halfSize.getWidth(),0));
+            entity.move(entity.getLocation().clone().add(-halfSize.getWidth(),0));
         }
 
         timeOfCurrFrame += dTime;

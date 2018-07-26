@@ -1,7 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
 import com.rb2750.lwjgl.animations.Animation;
-import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public abstract class Entity implements Cloneable{
+public abstract class Entity implements Cloneable {
     @Getter
     private Location location;
     @Getter
@@ -48,7 +47,7 @@ public abstract class Entity implements Cloneable{
     }
 
     public boolean move(Location location, boolean force) {
-        if (!force && location.getWorld().intersects(this, Util.getRectangle(location, getSize())) != null)
+        if (!force && (location.getWorld().intersects(this, Util.getRectangle(location, getSize())) != null || location.getY() < 0 || location.getX() < 0))
             return false;
         this.location = location;
         return true;
@@ -68,15 +67,21 @@ public abstract class Entity implements Cloneable{
             boolean bottom = intersectsWith.getLocation().getY() + intersectsWith.getSize().getHeight() > getLocation().getY();
 
             if (top && !left && !right) return;
-            if (bottom)
-                if (!move(new Location(getWorld(), getLocation().getX(), getLocation().getY() + Math.abs(getSize().getHeight() - size.getHeight()))))
-                    return;
+//            if (bottom)
+//                if (!move(new Location(getWorld(), getLocation().getX(), getLocation().getY() + Math.abs(getSize().getHeight() - size.getHeight()))))
+//                    return;
+            Location moveTo = null;
+
             if (right)
-                if (!move(new Location(getWorld(), getLocation().getX() - Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY())))
-                    return;
+                moveTo = new Location(getWorld(), getLocation().getX() - Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY());
             if (left)
-                if (!move(new Location(getWorld(), getLocation().getX() + Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY())))
-                    return;
+                moveTo = new Location(getWorld(), getLocation().getX() + Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY());
+
+            if (moveTo != null) {
+                if (location.getWorld().intersects(this, Util.getRectangle(moveTo, size)) == null)
+                    this.location = moveTo;
+                else return;
+            }
         }
 
         this.size = size;
@@ -192,7 +197,7 @@ public abstract class Entity implements Cloneable{
 
     public Entity clone() {
         try {
-            return (Entity)super.clone();
+            return (Entity) super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             return null;
