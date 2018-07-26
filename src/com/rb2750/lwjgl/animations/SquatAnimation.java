@@ -8,7 +8,9 @@ import com.rb2750.lwjgl.util.Util;
 import java.awt.geom.Rectangle2D;
 
 public class SquatAnimation extends Animation {
-
+    public SquatAnimation() {
+        super(1);
+    }
     public SquatAnimation(int time) {
         super(time);
     }
