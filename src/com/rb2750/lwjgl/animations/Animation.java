@@ -27,8 +27,6 @@ public abstract class Animation {
     }
 
     public void doAnimation(Entity entity) {
-
-
         if(original == null) original = entity.clone();
         if(paused) return;
 
@@ -49,7 +47,7 @@ public abstract class Animation {
             entity.move(dLoc);
         }
         if(currFrame.rotation != 0 && nextFrame.rotation != 0){
-            double dRot = entity.getRotation()+(nextFrame.rotation - currFrame.rotation) * entity.getFacing() * dTime;
+            double dRot = (entity.getRotation()+((nextFrame.rotation - currFrame.rotation) * dTime) * entity.getFacing());
             entity.rotate(dRot);
         }
         if(currFrame.size != null && nextFrame.size != null){
