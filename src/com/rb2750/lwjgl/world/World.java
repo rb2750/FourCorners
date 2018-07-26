@@ -1,11 +1,14 @@
 package com.rb2750.lwjgl.world;
 
+import com.rb2750.lwjgl.Input.Action;
+import com.rb2750.lwjgl.Input.Input;
 import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.entities.Entity;
+import com.rb2750.lwjgl.entities.Player;
+import com.rb2750.lwjgl.entities.Tile;
 import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
 
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +108,14 @@ public class World {
         return null;
     }
 
-    public void update() {
+    public void update(Player player, Tile protoTile) {
         handleEntities();
+
+        if(Input.ButtonMap.get(Action.Clear).state) {
+            getEntities().clear();
+
+            addEntity(player);
+            addEntity(protoTile);
+        }
     }
 }
