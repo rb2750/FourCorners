@@ -2,3 +2,5 @@ core
 *.log
 .idea/
 target/
+
+LWJGL Test\.iml
