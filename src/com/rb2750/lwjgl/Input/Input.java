@@ -21,15 +21,18 @@ public class Input {
     }
 
 
-    public static void update(SteamController state, SteamController last) {
+    public static void updateSteamController(SteamController state, SteamController last) {
         Input.state = state;
         Input.last = last;
 
         Analog_Stick.set(state.getAnalogStickPosition().x(),state.getAnalogStickPosition().y());
 
-
         ButtonMap.get(Action.Jump).Set(state.isAHeld(), last.isAHeld());
         ButtonMap.get(Action.Clear).Set(state.isBHeld(), last.isBHeld());
         ButtonMap.get(Action.Squat).Set(state.isXHeld(), last.isXHeld());
+        ButtonMap.get(Action.PlaceBlock).Set(state.isRightPadPressed(), last.isRightPadPressed());
+        ButtonMap.get(Action.ShowBlock).Set(state.isRightPadTouched(), last.isRightPadTouched());
+        ButtonMap.get(Action.Home).Set(state.isHomeHeld(), last.isHomeHeld());
+        ButtonMap.get(Action.ShowGUI).Set(state.isLeftPadTouched(), last.isLeftPadTouched());
     }
 }
