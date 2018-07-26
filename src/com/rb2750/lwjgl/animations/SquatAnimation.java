@@ -8,58 +8,17 @@ import com.rb2750.lwjgl.util.Util;
 import java.awt.geom.Rectangle2D;
 
 public class SquatAnimation extends Animation {
-    private boolean newState;
 
-    public SquatAnimation(boolean newState) {
-        super();
-        this.newState = newState;
+    public SquatAnimation(int time) {
+        super(time);
     }
 
     @Override
-    public int getFrames() {
-        return 25;
-    }
-
-    @Override
-    public boolean doAnimation(Entity entity) {
-        Size newSize;
-
-        if (newState)
-            newSize = new Size(100, Math.max(20, entity.getSize().getHeight() - (80 / getFrames())));
-        else
-            newSize = new Size(100, Math.min(100, entity.getSize().getHeight() + (80 / getFrames())));
-
-        Rectangle2D rect = Util.getRectangle(entity.getLocation(), newSize);
-
-        for (Entity e : entity.getLocation().getWorld().getEntities())
-            if (!e.equals(entity) && e.getRectangle().intersects(rect)) return false;
-
-        if (newState && entity.getSize().getHeight() == 20 || !newState && entity.getSize().getHeight() == 100)
-            entity.removeAnimation(this);
-
-        entity.setSize(newSize);
-        return true;
-    }
-
-    @Override
-    public void onComplete(Entity entity) {
-        if (newState) {
-            entity.setSize(new Size(100, 20));
-            entity.setSquat(true);
-        } else {
-            entity.setSize(new Size(100, 100));
-            entity.setSquat(false);
-        }
-    }
-
-    @Override
-    public void onFinish(Entity entity) {
-        entity.setSize(new Size(100, 100));
-        entity.setSquat(false);
-    }
-
-    @Override
-    public int getFlags() {
-        return AnimationFlag.SIZE;
+    public Keyframe[] getKeyFrames() {
+        return new Keyframe[] {
+                new Keyframe(null, 0, new Size(1.0f,1.0f)),
+                new Keyframe(null, 0, new Size(1.5f,0.5f)),
+                new Keyframe(null, 0, new Size(1.0f,1.0f))
+        };
     }
 }

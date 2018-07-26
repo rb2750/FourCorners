@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public abstract class Entity {
+public abstract class Entity implements Cloneable{
     @Getter
     private Location location;
     @Getter
@@ -135,9 +135,18 @@ public abstract class Entity {
         return false;
     }
 
+    public Animation getAnimation(Class<? extends Animation> clazz) {
+        for (Animation a : new ArrayList<>(animations)) {
+            if (a.getClass().equals(clazz)) {
+                return a;
+            }
+        }
+        return null;
+    }
+
     public void addAnimation(Animation animation) {
         //Stop any issues with changing size while squatting
-        if (squat && !(animation instanceof SquatAnimation) && (animation.getFlags() & AnimationFlag.SIZE) > 0) return;
+        //if (squat && !(animation instanceof SquatAnimation) && (animation.getFlags() & AnimationFlag.SIZE) > 0) return;
 
         for (Animation a : new ArrayList<>(animations)) {
             if (a.getClass().equals(animation.getClass())) {
@@ -147,7 +156,7 @@ public abstract class Entity {
         }
 
         //Find conflicts (stop glitchy rendering)
-        for (Animation a : animations) if ((a.getFlags() & animation.getFlags()) > 0) return;
+        //for (Animation a : animations) if ((a.getFlags() & animation.getFlags()) > 0) return;
 
         animations.add(animation);
     }
@@ -177,10 +186,16 @@ public abstract class Entity {
             addAnimation(pending);
         }
         for (Animation animation : new ArrayList<>(animations)) {
-            if (animation.getRemainingTime() <= 0) {
-                animation.onComplete(this);
-                animations.remove(animation);
-            } else if (animation.doAnimation(this)) animation.setRemainingTime(animation.getRemainingTime() - 1);
+            animation.doAnimation(this);
+        }
+    }
+
+    public Entity clone() {
+        try {
+            return (Entity)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
