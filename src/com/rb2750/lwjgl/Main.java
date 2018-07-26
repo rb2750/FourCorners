@@ -258,9 +258,9 @@ public class Main {
         Size size = new Size(100f * Math.max(1 - state.getLeftTrigger(), 0.3), 100f * Math.max(1 - state.getRightTrigger(), 0.3));
 
         selectyTile.setSize(size);
-//        selectyTile.move(new Location(world, tileX, tileY), true);
-//        if (!state.isRightPadTouched() || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
-//            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
+        selectyTile.move(new Location(world, tileX, tileY), true);
+        if (!state.isRightPadTouched() || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
+            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
