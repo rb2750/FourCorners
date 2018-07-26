@@ -1,11 +1,6 @@
 package com.rb2750.lwjgl.animations;
 
-import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.util.AnimationFlag;
 import com.rb2750.lwjgl.util.Size;
-import com.rb2750.lwjgl.util.Util;
-
-import java.awt.geom.Rectangle2D;
 
 public class SquatAnimation extends Animation {
     public SquatAnimation() {

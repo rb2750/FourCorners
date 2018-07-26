@@ -1,8 +1,5 @@
 package com.rb2750.lwjgl.animations;
 
-import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.util.AnimationFlag;
-import com.rb2750.lwjgl.util.Direction;
 import com.rb2750.lwjgl.util.Size;
 
 public class SquashAnimation extends Animation {

@@ -1,9 +1,5 @@
 package com.rb2750.lwjgl.animations;
 
-import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.util.AnimationFlag;
-import com.rb2750.lwjgl.util.Direction;
-
 public class FlipAnimation extends Animation {
     public FlipAnimation() {
         super(0.15);
