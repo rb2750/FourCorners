@@ -1,5 +1,7 @@
 package com.rb2750.lwjgl;
 
+import com.rb2750.lwjgl.Input.Action;
+import com.rb2750.lwjgl.Input.Input;
 import com.ivan.xinput.XInputButtons;
 import com.ivan.xinput.XInputComponents;
 import com.ivan.xinput.enums.XInputButton;
@@ -127,9 +129,6 @@ public class Main {
         world.addEntity(player);
     }
 
-    private SteamController currentState;
-    private SteamController lastState;
-
     private Stack<Runnable> toRun = new Stack<>();
 
     public void runOnUIThread(Runnable runnable) {
@@ -178,23 +177,6 @@ public class Main {
                 glMatrixMode(GL_MODELVIEW);
             }
         });
-
-        try
-        {
-            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
-
-            listener.open();
-            listener.addSubscriber((state, last) -> {
-                currentState = state;
-                lastState = last;
-                handleControls(currentState, lastState);
-            });
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            e.printStackTrace();
-            System.err.println("Failed to find Steam Controller.");
-        }
 
         // check if XInput 1.3 is available
         if (XInputDevice.isAvailable())
@@ -308,16 +290,19 @@ public class Main {
                         }
                     }
                 });
+            
+
+        Input.Setup();
+        
         SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
         listener.open();
         listener.addSubscriber((state, last) -> {
-            currentState = state;
-            lastState = last;
-            handleControls(currentState, lastState);
+            Input.updateSteamController(state, last);
+            handleControls(state, last);
             runOnUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    guiManager.handleInput(currentState, lastState);
+                    guiManager.handleInput(state, last);
                 }
             });
         });
@@ -378,7 +363,7 @@ public class Main {
             }
 
             while (!toRun.isEmpty()) toRun.pop().run();
-            world.update();
+            world.update(player, selectyTile);
 
             if (xInputDevice != null)
             {
@@ -394,41 +379,11 @@ public class Main {
         }
     }
 
-    Tile selectyTile;
-    boolean jumping = false;
 
+    public Tile selectyTile;
     public void handleControls(SteamController state, SteamController last) {
-        int speed = 8;
-
-        if (state.isLGHeld()) speed *= 2;
-
-        player.getAcceleration().setX((int) (speed * state.getAnalogStickPosition().x()));
-
-        if (state.isAHeld()) {
-            if (!doubleJump && jumping && !player.onGround() && !last.isAHeld()/* && player.getAcceleration().getY() < 0*/) {
-                doubleJump = true;
-                jumping = false;
-            } else if (!player.onGround()) return;
-            else jumping = true;
-
-            player.getAcceleration().setY(21);
-        }
-
-        if (state.isBHeld() && !last.isBHeld()) {
-            world.getEntities().clear();
-
-            world.addEntity(player);
-            world.addEntity(selectyTile);
-        }
-
-        if (player.onGround()) doubleJump = false;
-
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
-
-        /**
-         * X = halfGameWidth * controller.x + halfGameWidth
-         */
 
         double tileX = halfGameWidth * state.getRightTouchPosition().x() + halfGameWidth;
         double tileY = halfGameHeight * state.getRightTouchPosition().y() + halfGameHeight;
@@ -438,39 +393,16 @@ public class Main {
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
 
-        if (!player.animationExists(SquatAnimation.class)) {
-            if (state.isXHeld() && !last.isXHeld()) {
-                player.addAnimation(new SquatAnimation());
-            }
-        } else {
-            if (!state.isXHeld()) {
-                player.getAnimation(SquatAnimation.class).Pause();
-            }
-            if (state.isXHeld()) {
-                player.getAnimation(SquatAnimation.class).Unpause();
-            }
-        }
-
-        if (state.isHomeHeld()) {
-            player.setSize(new Size(player.getSize().getWidth() + 1, player.getSize().getHeight()));
-        }
-
         Size size = new Size(100f * Math.max(1 - state.getLeftTrigger(), 0.3), 100f * Math.max(1 - state.getRightTrigger(), 0.3));
-
         selectyTile.setSize(size);
 
-        runOnUIThread(() -> {
-            if (state.isLeftPadTouched()) {
-                guiManager.displayGUI(new SelectionGUI());
-            } else guiManager.hideGUI(SelectionGUI.class);
-        });
-
-        if (!state.isRightPadTouched() || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
+        if (!Input.ButtonMap.get(Action.ShowBlock).state || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         else
             selectyTile.move(new Location(world, tileX, tileY), true);
+
         runOnUIThread(() -> {
-            if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
+            if (Input.ButtonMap.get(Action.PlaceBlock).state) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
                 newTile.setSize(size);
 
@@ -478,6 +410,10 @@ public class Main {
                     if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
                 world.addEntity(newTile);
             }
+
+            if (Input.ButtonMap.get(Action.ShowGUI).state) {
+                guiManager.displayGUI(new SelectionGUI());
+            } else guiManager.hideGUI(SelectionGUI.class);
         });
     }
 
