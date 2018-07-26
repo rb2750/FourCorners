@@ -24,19 +24,9 @@ public abstract class Animation {
         this.timePerFrame = (float)time / (float)getKeyFrames().length;
         this.paused = false;
         this.timeOfCurrFrame = 0;
-
-
-        System.out.println("Animation info");
-        System.out.println("Current frame time:" + timePerFrame);
-        System.out.println("Total time:" + time);
-        System.out.println("End animation info");
     }
 
     public void doAnimation(Entity entity) {
-        System.out.println("Frame: " + currentFrame);
-        System.out.println("Frame info");
-        System.out.println("Current frame time:" + timeOfCurrFrame);
-        System.out.println("End frame info");
 
 
         if(original == null) original = entity.clone();
