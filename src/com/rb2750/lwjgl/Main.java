@@ -181,7 +181,6 @@ public class Main {
         });
 
         while (!glfwWindowShouldClose(window)) {
-            lastFrame = Util.getTime();
 
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
@@ -189,6 +188,7 @@ public class Main {
             world.update();
             glfwSwapBuffers(window);
             glfwPollEvents();
+            lastFrame = Util.getTime();
         }
     }
 
