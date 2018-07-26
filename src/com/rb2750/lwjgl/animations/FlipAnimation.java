@@ -6,7 +6,7 @@ import com.rb2750.lwjgl.util.Direction;
 
 public class FlipAnimation extends Animation {
     public FlipAnimation() {
-        super(1000);
+        super(0.15);
     }
 
     @Override
