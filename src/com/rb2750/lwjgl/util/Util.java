@@ -1,14 +1,17 @@
 package com.rb2750.lwjgl.util;
 
+import static java.lang.Math.*;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.geom.Rectangle2D;
-
-import static org.lwjgl.opengl.GL11.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Util {
     public static void drawSquare(double x, double y, double width, double height) {
-        glColor3d(1, 0, 0);
         glTranslated(x, y, 0);
 
         glBegin(GL_POLYGON);
@@ -75,22 +78,60 @@ public class Util {
         glLoadIdentity();
     }
 
+    public static boolean checkPointInCircle(double x, double y, double centerX, double centerY, double radius, double startAngle, double endAngle) {
+        double radiusSquared = radius * radius;
+        double startVectorX = cos(startAngle);
+        double startVectorY = sin(startAngle);
+        double endVectorX = cos(endAngle);
+        double endVectorY = sin(endAngle);
+        double distanceX = x - centerX;
+        double distanceY = y - centerY;
+
+        if (((distanceX * distanceX) + (distanceY * distanceY)) > radiusSquared) return false;
+        if (((distanceX * -startVectorY) + (distanceY * startVectorX)) < 0.0f) return false;
+        if (((distanceX * -endVectorY) + (distanceY * endVectorX)) > 0.0f) return false;
+
+        return true;
+    }
+
+    public static boolean checkPoint(double x, double y, double centerX, double centerY, double radius, double startAngle, double endAngle) {
+        x = centerX - x;
+        y = centerY - y;
+        double polarradius = Math.sqrt(x * x + y * y);
+        double Angle = Math.atan(y / x);
+        return (Angle >= startAngle && Angle <= endAngle && polarradius < radius);
+    }
+
     public static long getTime() {
         return System.nanoTime() / 1000000;
     }
 
-    private static double DEG2RAD = 3.14159 / 180;
+    public static List<Pair<Double, Double>> drawCircle(double x, double y, double radius) {
+        return drawCircle(x, y, radius, 2);
+    }
 
-    public static void drawCircle(double x, double y, double radius) {
+    public static List<Pair<Double, Double>> drawCircle(double x, double y, double radius, double radians) {
         glTranslated(x, y, 0);
 
-        glBegin(GL_LINE_LOOP);
-        for (int i = 0; i < 360; i++) {
-            double degInRad = i * DEG2RAD;
-            glVertex2d(Math.cos(degInRad) * radius, Math.sin(degInRad) * radius);
+        int triangles = 50;
+        double pi = radians * 3.14159f;
+
+        List<Pair<Double, Double>> trianglesList = new ArrayList<>();
+
+        glBegin(GL_TRIANGLE_FAN);
+        glVertex2d(0, 0); // origin
+        for (int i = 0; i <= triangles; i++) {
+            glVertex2d(radius * cos(i * pi / triangles),
+                    radius * sin(i * pi / triangles));
+            trianglesList.add(Pair.of(x + radius * cos(i * pi / triangles), y + radius * sin(i * pi / triangles)));
         }
         glEnd();
         glLoadIdentity();
+        return trianglesList;
+    }
+
+    public static void glColor(double red, double green, double blue, double alpha) {
+        glColor4d(red / 255, green / 255, blue / 255, alpha / 255);
     }
 
     public static Rectangle2D getRectangle(Location location, Size size) {
@@ -110,7 +151,7 @@ public class Util {
     }
 
     public static Point getNearestPointInPerimeter(Rectangle2D rect, double x, double y) {
-        double l = (double) rect.getX(), t = (double) rect.getY(), w = (double) rect.getWidth(), h = (double) rect.getHeight();
+        double l = rect.getX(), t = rect.getY(), w = rect.getWidth(), h = rect.getHeight();
 
         double r = l + w, b = t + h;
 

@@ -1,9 +1,5 @@
 package com.rb2750.lwjgl.animations;
 
-import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.util.AnimationFlag;
-import com.rb2750.lwjgl.util.Direction;
-
 public class FlipAnimation extends Animation {
     public FlipAnimation() {
         super(0.15);
@@ -11,7 +7,7 @@ public class FlipAnimation extends Animation {
 
     @Override
     public Keyframe[] getKeyFrames() {
-        return new Keyframe[] {
+        return new Keyframe[]{
                 new Keyframe(null, 90, null),
                 new Keyframe(null, 180, null),
                 new Keyframe(null, 270, null),

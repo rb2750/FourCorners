@@ -1,13 +1,11 @@
 package com.rb2750.lwjgl;
 
-import com.rb2750.lwjgl.animations.FlipAnimation;
-import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
 import com.rb2750.lwjgl.gui.GUIManager;
-import com.rb2750.lwjgl.gui.SelectionGUI;
+import com.rb2750.lwjgl.gui.selection.SelectionGUI;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.util.Sync;
@@ -144,6 +142,8 @@ public class Main {
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
         glClearDepth(1f);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
             @Override

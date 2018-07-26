@@ -11,15 +11,22 @@ public class GUIManager {
     private List<GUI> displayedGUIs = new ArrayList<>();
 
     public void displayGUI(GUI gui) {
-        if (!displayedGUIs.contains(gui)) displayedGUIs.add(gui);
+        GUI existing = guiExists(gui.getClass());
+        if (existing == null) displayedGUIs.add(gui);
+    }
+
+    public GUI guiExists(Class<? extends GUI> gui) {
+        for (GUI instance : new ArrayList<>(displayedGUIs)) {
+            if (instance.getClass().equals(gui)) {
+                return instance;
+            }
+        }
+        return null;
     }
 
     public void hideGUI(Class<? extends GUI> gui) {
-        for (GUI instance : new ArrayList<>(displayedGUIs)) {
-            if (instance.getClass().equals(gui)) {
-                displayedGUIs.remove(instance);
-            }
-        }
+        GUI existing = guiExists(gui);
+        displayedGUIs.remove(existing);
     }
 
     public void update() {

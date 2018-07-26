@@ -2,8 +2,8 @@ package com.rb2750.lwjgl.gui;
 
 import se.albin.steamcontroller.SteamController;
 
-abstract class GUI {
-    abstract void draw();
+public abstract class GUI {
+    public abstract void draw();
 
-    abstract void handleInput(SteamController state, SteamController last);
+    public abstract void handleInput(SteamController state, SteamController last);
 }
