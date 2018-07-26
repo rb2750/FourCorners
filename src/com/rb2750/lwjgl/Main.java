@@ -10,6 +10,7 @@ import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.util.Sync;
 import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
+import lombok.Getter;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -117,14 +118,9 @@ public class Main {
         toRun.push(runnable);
     }
 
-    public static int getDelta() {
-        long time = Util.getTime();
-        int delta = (int) (time - lastFrame);
-        lastFrame = time;
-        return delta;
-    }
-
     private static long lastFrame;
+    @Getter
+    private static long deltaTime;
 
     private void loop() {
         GL.createCapabilities();
@@ -183,6 +179,8 @@ public class Main {
         Sync sync = new Sync();
 
         while (!glfwWindowShouldClose(window)) {
+            deltaTime = Util.getTime()-lastFrame;
+            lastFrame = Util.getTime();
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
             while (!toRun.isEmpty()) toRun.pop().run();
@@ -191,7 +189,6 @@ public class Main {
             glfwPollEvents();
 
             sync.sync(120);
-            lastFrame = Util.getTime();
         }
     }
 
