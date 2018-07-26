@@ -15,6 +15,12 @@
             <artifactId>Java-Steam-Controller</artifactId>
             <version>1.1.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.strikerx3</groupId>
+            <artifactId>jxinput</artifactId>
+            <version>ca55984</version>    <!-- JXInput 0.8 -->
+        </dependency>
     </dependencies>
     <build>
         <plugins>
