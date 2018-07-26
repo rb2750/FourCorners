@@ -35,7 +35,7 @@ public abstract class Entity {
     private Size size;
     @Getter
     @Setter
-    private Direction facing = Direction.RIGHT;
+    private int facing = Direction.RIGHT;
     private java.util.List<Animation> animations = new ArrayList<>();
     private List<Animation> pendingAnimations = new ArrayList<>();
     @Getter

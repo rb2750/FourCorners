@@ -7,6 +7,7 @@ import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Sync;
 import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
 import org.lwjgl.Version;
@@ -19,7 +20,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 import se.albin.steamcontroller.SteamController;
 import se.albin.steamcontroller.SteamControllerListener;
-
 import java.nio.IntBuffer;
 import java.util.Stack;
 
@@ -180,15 +180,18 @@ public class Main {
             }
         });
 
-        while (!glfwWindowShouldClose(window)) {
-            lastFrame = Util.getTime();
+        Sync sync = new Sync();
 
+        while (!glfwWindowShouldClose(window)) {
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update();
             glfwSwapBuffers(window);
             glfwPollEvents();
+
+            sync.sync(120);
+            lastFrame = Util.getTime();
         }
     }
 
