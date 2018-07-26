@@ -25,7 +25,7 @@ public class Size implements Cloneable{
         return this;
     }
 
-    public Size multiply(float factor) {
+    public Size multiply(double factor) {
         this.width *= factor;
         this.height *= factor;
         return this;
