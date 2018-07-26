@@ -39,4 +39,9 @@ public class Size implements Cloneable{
             return null;
         }
     }
+
+    public String toString()
+    {
+        return "Width: "+width+", Height"+height;
+    }
 }
