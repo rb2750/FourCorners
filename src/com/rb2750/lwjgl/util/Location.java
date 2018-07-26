@@ -35,6 +35,11 @@ public class Location implements Cloneable {
         this.x += x;
         this.y += y;
     }
+    public Location add(Location loc) {
+        this.x += loc.x;
+        this.y += loc.y;
+        return this;
+    }
 
     public void subtract(float x, float y) {
         this.x -= x;
@@ -43,5 +48,16 @@ public class Location implements Cloneable {
 
     public String toString() {
         return "X: " + x + ", " + "Y:" + y;
+    }
+    public Location subtract(Location loc) {
+        this.x -= loc.x;
+        this.y -= loc.y;
+        return this;
+    }
+
+    public Location multiply(float factor) {
+        this.x *= factor;
+        this.y *= factor;
+        return this;
     }
 }
