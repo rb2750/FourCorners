@@ -5,8 +5,8 @@ import com.rb2750.lwjgl.util.AnimationFlag;
 import com.rb2750.lwjgl.util.Direction;
 
 public class FlipAnimation extends Animation {
-    public FlipAnimation(int time) {
-        super(time);
+    public FlipAnimation() {
+        super(1000);
     }
 
     @Override
