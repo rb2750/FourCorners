@@ -40,7 +40,6 @@ public abstract class Animation {
         Keyframe currFrame = getKeyFrames()[currentFrame];
         Keyframe nextFrame = getKeyFrames()[currentFrame+1];
         double dTime = (double)Main.getDeltaTime()/1000;
-        System.out.println("Delta time: " + dTime);
 
         if(currFrame.position != null && nextFrame.position != null){
             Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
@@ -64,7 +63,6 @@ public abstract class Animation {
     }
 
     public void onFinish(Entity entity) {
-        System.out.println("Finish animation");
         //entity.move(original.getLocation());
         entity.setRotation(original.getRotation());
         entity.setSize(original.getSize());
