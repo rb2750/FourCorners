@@ -31,9 +31,10 @@ public class Location implements Cloneable {
         return null;
     }
 
-    public void add(double x, double y) {
+    public Location add(double x, double y) {
         this.x += x;
         this.y += y;
+        return this;
     }
     public Location add(Location loc) {
         this.x += loc.x;
