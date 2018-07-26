@@ -7,22 +7,24 @@ import java.awt.geom.Rectangle2D;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Util {
-    public static void drawSquare(double x1, double y1, double width, double height) {
+    public static void drawSquare(double x, double y, double width, double height) {
         glColor3d(1, 0, 0);
+        glTranslated(x, y, 0);
 
         glBegin(GL_POLYGON);
 
-        glVertex2d(x1, y1);
-        glVertex2d(x1 + width, y1);
-        glVertex2d(x1 + width, y1 + height);
-        glVertex2d(x1, y1 + height);
+        glVertex2d(0, 0);
+        glVertex2d(width, 0);
+        glVertex2d(width, height);
+        glVertex2d(0, height);
 
         glEnd();
+        glLoadIdentity();
     }
 
     public static void drawCube(double x, double y, double z, double w, double h, double l) {
 //        glLoadIdentity();                 // Reset the model-view matrix
-//        glTranslatef(x, y, -150.0f);  // Move right and into the screen
+        glTranslated(x, y, 0);  // Move right and into the screen
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEPTH_BUFFER_BIT);
         GL11.glDepthFunc(GL11.GL_LEQUAL);
@@ -30,24 +32,24 @@ public class Util {
         glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
         // Front face
         glColor3d(0f, 0f, 1f);     // Green
-        glVertex3d(x, y, z);
-        glVertex3d(x + w, y, z);
-        glVertex3d(x + w, y + h, z);
-        glVertex3d(x, y + h, z);
+        glVertex3d(0, 0, 0);
+        glVertex3d(w, 0, 0);
+        glVertex3d(w, h, 0);
+        glVertex3d(0, h, 0);
 
         // Top face
         glColor3d(1.0f, 0.5f, 0.0f);     // Orange
-        glVertex3d(x, y + h, z);
-        glVertex3d(x, y + h, z + l);
-        glVertex3d(x + w, y + h, z + l);
-        glVertex3d(x + w, y + h, z);
+        glVertex3d(0, h, 0);
+        glVertex3d(0, h, l);
+        glVertex3d(w, h, l);
+        glVertex3d(w, h, 0);
 //
 //        // Right face
         glColor3d(1.0f, 0.0f, 0.0f);     // Red
-        glVertex3d(x + w, y, z); // 2
-        glVertex3d(x + w, y, z + l); // 1
-        glVertex3d(x + w, y + h, z + l); // 4
-        glVertex3d(x + w, y + h, z); // 3
+        glVertex3d(w, 0, 0); // 2
+        glVertex3d(w, 0, l); // 1
+        glVertex3d(w, h, l); // 4
+        glVertex3d(w, h, 0); // 3
 //
 //        // Back face (z = -1.0f)
 //        glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
@@ -70,10 +72,25 @@ public class Util {
 //        glVertex3f(100f, -100f, 100f);
 //        glVertex3f(100f, -100f, -100f);
         glEnd();  // End of drawing color-cube
+        glLoadIdentity();
     }
 
     public static long getTime() {
         return System.nanoTime() / 1000000;
+    }
+
+    private static double DEG2RAD = 3.14159 / 180;
+
+    public static void drawCircle(double x, double y, double radius) {
+        glTranslated(x, y, 0);
+
+        glBegin(GL_LINE_LOOP);
+        for (int i = 0; i < 360; i++) {
+            double degInRad = i * DEG2RAD;
+            glVertex2d(Math.cos(degInRad) * radius, Math.sin(degInRad) * radius);
+        }
+        glEnd();
+        glLoadIdentity();
     }
 
     public static Rectangle2D getRectangle(Location location, Size size) {

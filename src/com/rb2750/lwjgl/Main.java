@@ -4,6 +4,8 @@ import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
+import com.rb2750.lwjgl.gui.GUIManager;
+import com.rb2750.lwjgl.gui.SelectionGUI;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.util.Sync;
@@ -35,11 +37,15 @@ public class Main {
     // The window handle
     private long window;
     private GLFWVidMode vidmode;
-    private int gameWidth = 1000;
-    private int gameHeight = 1000;
+    @Getter
+    private static int gameWidth = 1000;
+    @Getter
+    private static int gameHeight = 1000;
     private Player player;
     private World world = new World();
     private Location cursorLocation = new Location();
+    @Getter
+    private GUIManager guiManager = new GUIManager();
 
     /**
      * Rob Notes for Rob
@@ -166,6 +172,12 @@ public class Main {
             currentState = state;
             lastState = last;
             handleControls(currentState, lastState);
+            runOnUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    guiManager.handleInput(currentState, lastState);
+                }
+            });
         });
 
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
@@ -185,6 +197,7 @@ public class Main {
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update();
+            guiManager.update();
             glfwSwapBuffers(window);
             glfwPollEvents();
 
@@ -202,11 +215,10 @@ public class Main {
 
         player.getAcceleration().setX((int) (speed * state.getAnalogStickPosition().x()));
 
-        if (state.isAHeld() && !last.isAHeld()) {
-            if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
+        if (state.isAHeld()) {
+            if (!doubleJump && jumping && !player.onGround() && !last.isAHeld()/* && player.getAcceleration().getY() < 0*/) {
                 doubleJump = true;
                 jumping = false;
-//                player.addAnimation(new FlipAnimation());
             } else if (!player.onGround()) return;
             else jumping = true;
 
@@ -258,9 +270,17 @@ public class Main {
         Size size = new Size(100f * Math.max(1 - state.getLeftTrigger(), 0.3), 100f * Math.max(1 - state.getRightTrigger(), 0.3));
 
         selectyTile.setSize(size);
-        selectyTile.move(new Location(world, tileX, tileY), true);
+
+        runOnUIThread(() -> {
+            if (state.isLeftPadTouched()) {
+                guiManager.displayGUI(new SelectionGUI());
+            } else guiManager.hideGUI(SelectionGUI.class);
+        });
+
         if (!state.isRightPadTouched() || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
+        else
+            selectyTile.move(new Location(world, tileX, tileY), true);
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
