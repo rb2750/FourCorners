@@ -1,5 +1,7 @@
 package com.rb2750.lwjgl;
 
+import com.rb2750.lwjgl.animations.FlipAnimation;
+import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
@@ -248,17 +250,16 @@ public class Main {
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
-        boolean wasSquatting = player.isSquat();
-        if (player.animationExists(SquatAnimation.class)) {
-            if (!player.isSquat() && !state.isXHeld()) {
-                player.removeAnimation(SquatAnimation.class);
-                wasSquatting = true;
-            }
-        }
+
         if (!player.animationExists(SquatAnimation.class)) {
-            if (state.isXHeld() && !wasSquatting) {
-                player.addAnimation(new SquatAnimation(1000));
-            } else if (!state.isXHeld() && wasSquatting) {
+            if (state.isXHeld() && !last.isXHeld()) {
+                player.addAnimation(new SquatAnimation());
+            }
+        } else {
+            if (!state.isXHeld()) {
+                player.getAnimation(SquatAnimation.class).Pause();
+            }
+            if (state.isXHeld()) {
                 player.getAnimation(SquatAnimation.class).Unpause();
             }
         }
