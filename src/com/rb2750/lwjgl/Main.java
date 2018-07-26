@@ -1,5 +1,11 @@
 package com.rb2750.lwjgl;
 
+import com.ivan.xinput.XInputButtons;
+import com.ivan.xinput.XInputComponents;
+import com.ivan.xinput.enums.XInputButton;
+import com.ivan.xinput.exceptions.XInputNotLoadedException;
+import com.ivan.xinput.listener.SimpleXInputDeviceListener;
+import com.ivan.xinput.listener.XInputDeviceListener;
 import com.rb2750.lwjgl.animations.FlipAnimation;
 import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
@@ -12,13 +18,11 @@ import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.util.Sync;
 import com.rb2750.lwjgl.util.Util;
+import com.rb2750.lwjgl.util.XInputState;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
@@ -34,6 +38,9 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import com.ivan.xinput.XInputDevice; // Class for XInput 1.3. Legacy for Win7.
+import com.ivan.xinput.XInputDevice14; // Class for XInput 1.4. Includes 1.3 API.
+
 public class Main {
     boolean doubleJump = false;
     // The window handle
@@ -46,6 +53,9 @@ public class Main {
     private Player player;
     private World world = new World();
     private Location cursorLocation = new Location();
+    private boolean usingXInput = false;
+    private boolean usingXInput14 = false;
+    private boolean showBox = false;
     @Getter
     private GUIManager guiManager = new GUIManager();
 
@@ -168,6 +178,136 @@ public class Main {
                 glMatrixMode(GL_MODELVIEW);
             }
         });
+
+        try
+        {
+            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
+
+            listener.open();
+            listener.addSubscriber((state, last) -> {
+                currentState = state;
+                lastState = last;
+                handleControls(currentState, lastState);
+            });
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            e.printStackTrace();
+            System.err.println("Failed to find Steam Controller.");
+        }
+
+        // check if XInput 1.3 is available
+        if (XInputDevice.isAvailable())
+        {
+            System.out.println("XInput 1.3 is available on this platform.");
+            usingXInput = true;
+        }
+
+        // check if XInput 1.4 is available
+        if (XInputDevice14.isAvailable())
+        {
+            System.out.println("XInput 1.4 is available on this platform.");
+            usingXInput14 = true;
+        }
+
+        Object xInputDevice;
+
+        if (usingXInput || usingXInput14)
+        {
+            System.out.println("Native library version (XInput): " + XInputDevice.getLibraryVersion());
+            boolean notLoaded = false;
+            Object[] devices;
+
+            try
+            {
+                if (usingXInput && !usingXInput14)
+                {
+                    devices = XInputDevice.getAllDevices();
+                }
+                else
+                {
+                    devices = XInputDevice14.getAllDevices();
+                }
+            }
+            catch (XInputNotLoadedException e)
+            {
+                e.printStackTrace();
+                System.err.println("XInput is not loaded.");
+                usingXInput = false;
+                usingXInput14 = false;
+                notLoaded = true;
+                devices = null;
+            }
+
+            if (!notLoaded)
+            {
+                xInputDevice = devices[0];
+
+                XInputDeviceListener listener = new SimpleXInputDeviceListener()
+                {
+                    @Override
+                    public void connected()
+                    {
+                        System.out.println("XInput device connected.");
+                    }
+
+                    @Override
+                    public void disconnected()
+                    {
+                        System.out.println("XInput device disconnected.");
+                    }
+
+                    @Override
+                    public void buttonChanged(final XInputButton button, final boolean pressed)
+                    {
+                        // the given button was just pressed (if pressed == true) or released (pressed == false)
+                        if (pressed)
+                        {
+                            System.out.println("XInput button pressed: " + button.name());
+                        }
+                        else
+                        {
+                            System.out.println("XInput button released: " + button.name());
+                        }
+
+                        XInputState.setButton(button, pressed);
+                    }
+                };
+
+                if (xInputDevice instanceof XInputDevice14)
+                {
+                    ((XInputDevice14) xInputDevice).addListener(listener);
+                }
+                else
+                {
+                    ((XInputDevice) xInputDevice).addListener(listener);
+                }
+            }
+            else
+            {
+                xInputDevice = null;
+            }
+        }
+        else
+        {
+            System.err.println("Not using XInput.");
+            xInputDevice = null;
+        }
+
+        glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback()
+                {
+                    @Override
+                    public void invoke(long window, boolean focused)
+                    {
+                        if (xInputDevice != null)
+                        {
+                            if (xInputDevice instanceof XInputDevice14)
+                            {
+                                XInputDevice14.setEnabled(focused);
+                            }
+                        }
+                    }
+                });
         SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
         listener.open();
         listener.addSubscriber((state, last) -> {
@@ -197,8 +337,55 @@ public class Main {
             lastFrame = Util.getTime();
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
+            if (xInputDevice != null)
+            {
+                if (xInputDevice instanceof XInputDevice14)
+                {
+                    if (XInputState.axes == null) XInputState.axes = ((XInputDevice14) xInputDevice).getComponents().getAxes();
+
+                    if(((XInputDevice14) xInputDevice).poll())
+                    {
+                        XInputComponents components = ((XInputDevice14) xInputDevice).getComponents();
+                        XInputButtons buttons = components.getButtons();
+                        XInputState.axes = components.getAxes();
+
+                        if (XInputDevice14.isGuideButtonSupported())
+                        {
+                            XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
+                        }
+                    }
+
+                    //((XInputDevice14) xInputDevice).setVibration(20000, 20000);
+                }
+                else
+                {
+                    if (XInputState.axes == null) XInputState.axes = ((XInputDevice) xInputDevice).getComponents().getAxes();
+
+                    if(((XInputDevice) xInputDevice).poll())
+                    {
+                        XInputComponents components = ((XInputDevice) xInputDevice).getComponents();
+                        XInputButtons buttons = components.getButtons();
+                        XInputState.axes = components.getAxes();
+
+                        if (XInputDevice.isGuideButtonSupported())
+                        {
+                            XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
+                        }
+                    }
+
+                    //((XInputDevice) xInputDevice).setVibration(5000, 5000);
+                }
+            }
+
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update();
+
+            if (xInputDevice != null)
+            {
+                handleXInputControls();
+                XInputState.update();
+            }
+
             guiManager.update();
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -285,6 +472,89 @@ public class Main {
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
+                newTile.setSize(size);
+
+                for (Entity entity : world.getEntities())
+                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
+                world.addEntity(newTile);
+            }
+        });
+    }
+
+    public void handleXInputControls() {
+        int speed = 8;
+
+        if (XInputState.isButtonDown(XInputButton.LEFT_SHOULDER)) speed *= 2;
+
+        player.getAcceleration().setX((int) (speed * XInputState.axes.lx));
+
+        if (XInputState.isButtonPressed(XInputButton.A)) {
+            if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
+                doubleJump = true;
+                jumping = false;
+                player.addAnimation(new FlipAnimation());
+            } else if (!player.onGround()) return;
+            else jumping = true;
+
+            player.getAcceleration().setY(21);
+        }
+
+        if (XInputState.isButtonPressed(XInputButton.B)) {
+            world.getEntities().clear();
+
+            world.addEntity(player);
+            world.addEntity(selectyTile);
+        }
+
+        if (player.onGround()) doubleJump = false;
+
+        double halfGameWidth = gameWidth / 2;
+        double halfGameHeight = gameHeight / 2;
+
+        /**
+         * X = halfGameWidth * controller.x + halfGameWidth
+         */
+
+        double tileX = halfGameWidth * XInputState.axes.rx + halfGameWidth;
+        double tileY = halfGameHeight * XInputState.axes.ry + halfGameHeight;
+        if (selectyTile == null) {
+            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectyTile.setCanBeInteractedWith(false);
+            runOnUIThread(() -> world.addEntity(selectyTile));
+        }
+        boolean wasSquatting = player.isSquat();
+        if (player.animationExists(SquatAnimation.class)) {
+            if (!player.isSquat() && XInputState.isButtonUp(XInputButton.X)) {
+                player.removeAnimation(SquatAnimation.class);
+                wasSquatting = true;
+            }
+        }
+        if (!player.animationExists(SquatAnimation.class)) {
+            if (XInputState.isButtonDown(XInputButton.X) && !wasSquatting) {
+                player.addAnimation(new SquatAnimation(true));
+            } else if (XInputState.isButtonUp(XInputButton.X) && wasSquatting) {
+                player.addAnimation(new SquatAnimation(false));
+            }
+        }
+
+        if (XInputState.isButtonDown(XInputButton.START)) {
+            player.setSize(new Size(player.getSize().getWidth() + 1, player.getSize().getHeight()));
+        }
+        //System.out.println(player.getLocation().toString());
+
+        //System.out.println(XInputState.axes.lt + ", " + XInputState.axes.rt);
+        Size size = new Size(100f * (float) Math.max(1 - XInputState.axes.lt, 0.3), 100f * (float) Math.max(1 - XInputState.axes.rt, 0.3));
+
+        selectyTile.setSize(size);
+        selectyTile.move(new Location(world, (int) tileX, (int) tileY), true);
+
+        if (XInputState.isButtonPressed(XInputButton.RIGHT_THUMBSTICK)) showBox = !showBox;
+
+        if (!showBox)
+            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
+        runOnUIThread(() -> {
+            if (XInputState.isButtonPressed(XInputButton.RIGHT_SHOULDER)/* && !last.isLeftPadPressed()*/) {
+                Tile newTile = new Tile(new Location(world, (int) tileX, (int) tileY));
                 newTile.setSize(size);
 
                 for (Entity entity : world.getEntities())
