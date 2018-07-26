@@ -245,9 +245,9 @@ public class Main {
         }
         if (!player.animationExists(SquatAnimation.class)) {
             if (state.isXHeld() && !wasSquatting) {
-                player.addAnimation(new SquatAnimation(true));
+                player.addAnimation(new SquatAnimation(1000));
             } else if (!state.isXHeld() && wasSquatting) {
-                player.addAnimation(new SquatAnimation(false));
+                player.getAnimation(SquatAnimation.class).Unpause();
             }
         }
 
