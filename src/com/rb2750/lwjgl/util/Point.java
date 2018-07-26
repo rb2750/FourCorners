@@ -10,8 +10,8 @@ import lombok.Setter;
 public class Point {
     @Getter
     @Setter
-    private float x;
+    private double x;
     @Getter
     @Setter
-    private float y;
+    private double y;
 }

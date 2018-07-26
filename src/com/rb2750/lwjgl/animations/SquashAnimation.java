@@ -5,9 +5,9 @@ import com.rb2750.lwjgl.util.AnimationFlag;
 import com.rb2750.lwjgl.util.Size;
 
 public class SquashAnimation extends Animation {
-//    private float amount;
+//    private double amount;
 //
-//    public SquashAnimation(float amount) {
+//    public SquashAnimation(double amount) {
 //        this.amount = amount * amount;
 //    }
 
@@ -21,7 +21,7 @@ public class SquashAnimation extends Animation {
     @Override
     public boolean doAnimation(Entity entity) {
         if (startSize == null) startSize = entity.getSize();
-        float xMove = (25 / (getFrames() / 2));
+        double xMove = (25 / (getFrames() / 2));
         if (getRemainingTime() > getFrames() / 2) {
             entity.setSize(new Size(entity.getSize().getWidth() + xMove, entity.getSize().getHeight() - (25 / (getFrames() / 2))));
             entity.getLocation().subtract(xMove / 2f, 0);

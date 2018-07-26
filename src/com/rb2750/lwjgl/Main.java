@@ -7,6 +7,7 @@ import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
@@ -116,6 +117,15 @@ public class Main {
         toRun.push(runnable);
     }
 
+    public static int getDelta() {
+        long time = Util.getTime();
+        int delta = (int) (time - lastFrame);
+        lastFrame = time;
+        return delta;
+    }
+
+    private static long lastFrame;
+
     private void loop() {
         GL.createCapabilities();
 
@@ -171,6 +181,8 @@ public class Main {
         });
 
         while (!glfwWindowShouldClose(window)) {
+            lastFrame = Util.getTime();
+
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
             while (!toRun.isEmpty()) toRun.pop().run();
@@ -242,17 +254,16 @@ public class Main {
         if (state.isHomeHeld()) {
             player.setSize(new Size(player.getSize().getWidth() + 1, player.getSize().getHeight()));
         }
-        System.out.println(player.getLocation().toString());
 
-        Size size = new Size(100f * (float) Math.max(1 - state.getLeftTrigger(), 0.3), 100f * (float) Math.max(1 - state.getRightTrigger(), 0.3));
+        Size size = new Size(100f * (double) Math.max(1 - state.getLeftTrigger(), 0.3), 100f * (double) Math.max(1 - state.getRightTrigger(), 0.3));
 
         selectyTile.setSize(size);
-        selectyTile.move(new Location(world, (int) tileX, (int) tileY), true);
+        selectyTile.move(new Location(world, tileX, tileY), true);
         if (!state.isRightPadTouched())
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         runOnUIThread(() -> {
             if (state.isRightPadPressed()/* && !last.isLeftPadPressed()*/) {
-                Tile newTile = new Tile(new Location(world, (int) tileX, (int) tileY));
+                Tile newTile = new Tile(new Location(world, tileX, tileY));
                 newTile.setSize(size);
 
                 for (Entity entity : world.getEntities())

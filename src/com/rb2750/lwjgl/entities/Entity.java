@@ -7,7 +7,7 @@ import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +20,7 @@ public abstract class Entity {
     private Vector2 acceleration = new Vector2(0, 0);
     @Getter
     @Setter
-    private float rotation = 0;
+    private double rotation = 0;
     @Getter
     @Setter
     private boolean gravity = false;
@@ -48,7 +48,8 @@ public abstract class Entity {
     }
 
     public boolean move(Location location, boolean force) {
-        if (!force && location.getWorld().intersects(this, getRectangle()) != null) return false;
+        if (!force && location.getWorld().intersects(this, Util.getRectangle(location, getSize())) != null)
+            return false;
         this.location = location;
         return true;
     }
@@ -58,7 +59,7 @@ public abstract class Entity {
     }
 
     public void setSize(Size size) {
-        Entity intersectsWith = location.getWorld().intersects(this, new Rectangle((int) getLocation().getX(), (int) getLocation().getY(), (int) size.getWidth(), (int) size.getHeight()));
+        Entity intersectsWith = location.getWorld().intersects(this, Util.getRectangle(getLocation(), size));
 
         if (intersectsWith != null) {
             boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
@@ -85,15 +86,15 @@ public abstract class Entity {
         return getLocation().getY() <= 0 || (interactingWithY != null && interactingWithY.getLocation().getY() + interactingWithY.getSize().getHeight() <= getLocation().getY());
     }
 
-    public Rectangle getRectangle() {
-        return new Rectangle((int) location.getX(), (int) location.getY(), (int) getSize().getWidth(), (int) getSize().getHeight());
+    public Rectangle2D getRectangle() {
+        return Util.getRectangle(getLocation(), getSize());
     }
 
     public Location getCenter() {
-        return new Location(location.getWorld(), (int) getRectangle().getCenterX(), (int) getRectangle().getCenterY());
+        return new Location(location.getWorld(), getRectangle().getCenterX(), getRectangle().getCenterY());
     }
 
-    public void rotate(float angle) {
+    public void rotate(double angle) {
         rotation += angle;
         rotation %= 360;
     }
@@ -104,11 +105,11 @@ public abstract class Entity {
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        float translateX = getLocation().getX() + (getSize().getWidth() / 2);
-        float translateY = getLocation().getY() + (getSize().getHeight() / 2);
-        glTranslatef(translateX, translateY, 0);
-        glRotatef(rotation, 0, 0, 1);
-        glTranslatef(-translateX, -translateY, 0);
+        double translateX = getLocation().getX() + (getSize().getWidth() / 2);
+        double translateY = getLocation().getY() + (getSize().getHeight() / 2);
+        glTranslated(translateX, translateY, 0);
+        glRotated(rotation, 0, 0, 1);
+        glTranslated(-translateX, -translateY, 0);
         render();
         glPopMatrix();
     }

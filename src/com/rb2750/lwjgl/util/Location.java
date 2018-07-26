@@ -15,11 +15,11 @@ public class Location implements Cloneable {
     @Accessors(chain = true)
     @Getter
     @Setter
-    private float x;
+    private double x;
     @Accessors(chain = true)
     @Getter
     @Setter
-    private float y;
+    private double y;
 
     @Override
     public Location clone() {
@@ -31,12 +31,12 @@ public class Location implements Cloneable {
         return null;
     }
 
-    public void add(float x, float y) {
+    public void add(double x, double y) {
         this.x += x;
         this.y += y;
     }
 
-    public void subtract(float x, float y) {
+    public void subtract(double x, double y) {
         this.x -= x;
         this.y -= y;
     }

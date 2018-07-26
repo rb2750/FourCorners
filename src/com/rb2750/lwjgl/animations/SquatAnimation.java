@@ -3,8 +3,9 @@ package com.rb2750.lwjgl.animations;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.util.AnimationFlag;
 import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Util;
 
-import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 public class SquatAnimation extends Animation {
     private boolean newState;
@@ -28,8 +29,7 @@ public class SquatAnimation extends Animation {
         else
             newSize = new Size(100, Math.min(100, entity.getSize().getHeight() + (80 / getFrames())));
 
-        Rectangle rect = entity.getRectangle();
-        rect.setSize((int) newSize.getWidth(), (int) newSize.getHeight());
+        Rectangle2D rect = Util.getRectangle(entity.getLocation(), newSize);
 
         for (Entity e : entity.getLocation().getWorld().getEntities())
             if (!e.equals(entity) && e.getRectangle().intersects(rect)) return false;

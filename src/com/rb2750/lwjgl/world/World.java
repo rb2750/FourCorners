@@ -6,6 +6,7 @@ import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class World {
     }
 
     private void handleFriction(Entity entity) {
-        float friction = entity.onGround() ? WorldSettings.frictionGround : WorldSettings.frictionAir;
+        double friction = entity.onGround() ? WorldSettings.frictionGround : WorldSettings.frictionAir;
         if (entity.getAcceleration().getX() > 0)
             entity.getAcceleration().setX(entity.getAcceleration().getX() - friction);
         if (entity.getAcceleration().getX() < 0)
@@ -42,12 +43,12 @@ public class World {
             handleFriction(entity);
 
             boolean skipY = false;
-            int x = (int) Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
-            int y = (int) Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
+            double x = Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
+            double y = Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
 
             Entity interactingWithX = null;
 
-            if (entity.getAcceleration().getX() != 0 && (intersects(entity, entity.getRectangle()) != null || (interactingWithX = intersects(entity, new Rectangle(x, (int) entity.getRectangle().getY(), (int) entity.getSize().getWidth(), (int) entity.getSize().getHeight()))) == null)) {
+            if (entity.getAcceleration().getX() != 0 && (intersects(entity, entity.getRectangle()) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
                 entity.getLocation().setX(x);
                 entity.setInteractingWithX(null);
             } else {
@@ -59,7 +60,7 @@ public class World {
                     skipY = true;
                 } else {
                     if (interactingWithX != null) {
-                        float pointX = Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
+                        double pointX = Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
                         if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.getSize().getWidth();
                         entity.getLocation().setX(pointX);
                     }
@@ -71,12 +72,12 @@ public class World {
             if (!skipY) {
                 Entity interactingWithY = null;
 
-                if (entity.getAcceleration().getY() != 0 && (interactingWithY = intersects(entity, new Rectangle((int) entity.getRectangle().getX(), y, (int) entity.getSize().getWidth(), (int) entity.getSize().getHeight()))) == null) {
+                if (entity.getAcceleration().getY() != 0 && (interactingWithY = intersects(entity, Util.getRectangle(entity.getRectangle().getX(), y, entity.getSize()))) == null) {
                     entity.getLocation().setY(y);
                     entity.setInteractingWithY(null);
                 } else {
                     if (interactingWithY != null) {
-                        float pointY = Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
+                        double pointY = Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
                         if (pointY == interactingWithY.getRectangle().getY()) pointY -= entity.getSize().getHeight();
                         entity.getLocation().setY(pointY);
                         if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());
@@ -94,7 +95,7 @@ public class World {
         entity.update();
     }
 
-    public Entity intersects(Entity e, Rectangle rect) {
+    public Entity intersects(Entity e, Rectangle2D rect) {
         for (Entity entity : getEntities()) {
             if (e == entity || !entity.isCanBeInteractedWith()) continue;
             if (entity.getRectangle().intersects(rect)) {

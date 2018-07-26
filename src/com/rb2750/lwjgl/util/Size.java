@@ -8,8 +8,8 @@ import lombok.Setter;
 public class Size {
     @Getter
     @Setter
-    private float width;
+    private double width;
     @Getter
     @Setter
-    private float height;
+    private double height;
 }

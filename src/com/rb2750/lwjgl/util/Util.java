@@ -2,7 +2,7 @@ package com.rb2750.lwjgl.util;
 
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -20,7 +20,7 @@ public class Util {
         glEnd();
     }
 
-    public static void drawCube(float x, float y, float z, float w, float h, float l) {
+    public static void drawCube(double x, double y, double z, double w, double h, double l) {
 //        glLoadIdentity();                 // Reset the model-view matrix
 //        glTranslatef(x, y, -150.0f);  // Move right and into the screen
         glEnable(GL_DEPTH_TEST);
@@ -29,25 +29,25 @@ public class Util {
         GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
         glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
         // Front face
-        glColor3f(0f, 0f, 1f);     // Green
-        glVertex3f(x, y, z);
-        glVertex3f(x + w, y, z);
-        glVertex3f(x + w, y + h, z);
-        glVertex3f(x, y + h, z);
+        glColor3d(0f, 0f, 1f);     // Green
+        glVertex3d(x, y, z);
+        glVertex3d(x + w, y, z);
+        glVertex3d(x + w, y + h, z);
+        glVertex3d(x, y + h, z);
 
         // Top face
-        glColor3f(1.0f, 0.5f, 0.0f);     // Orange
-        glVertex3f(x, y + h, z);
-        glVertex3f(x, y + h, z + l);
-        glVertex3f(x + w, y + h, z + l);
-        glVertex3f(x + w, y + h, z);
+        glColor3d(1.0f, 0.5f, 0.0f);     // Orange
+        glVertex3d(x, y + h, z);
+        glVertex3d(x, y + h, z + l);
+        glVertex3d(x + w, y + h, z + l);
+        glVertex3d(x + w, y + h, z);
 //
 //        // Right face
-        glColor3f(1.0f, 0.0f, 0.0f);     // Red
-        glVertex3f(x + w, y, z); // 2
-        glVertex3f(x + w, y, z + l); // 1
-        glVertex3f(x + w, y + h, z + l); // 4
-        glVertex3f(x + w, y + h, z); // 3
+        glColor3d(1.0f, 0.0f, 0.0f);     // Red
+        glVertex3d(x + w, y, z); // 2
+        glVertex3d(x + w, y, z + l); // 1
+        glVertex3d(x + w, y + h, z + l); // 4
+        glVertex3d(x + w, y + h, z); // 3
 //
 //        // Back face (z = -1.0f)
 //        glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
@@ -72,21 +72,36 @@ public class Util {
         glEnd();  // End of drawing color-cube
     }
 
+    public static long getTime() {
+        return System.nanoTime() / 1000000;
+    }
 
-    private static float clamp(float x, float lower, float upper) {
+    public static Rectangle2D getRectangle(Location location, Size size) {
+        return new Rectangle2D.Double(location.getX(), location.getY(), size.getWidth(), size.getHeight());
+    }
+
+    public static Rectangle2D getRectangle(Location location, double width, double height) {
+        return new Rectangle2D.Double(location.getX(), location.getY(), width, height);
+    }
+
+    public static Rectangle2D getRectangle(double x, double y, Size size) {
+        return new Rectangle2D.Double(x, y, size.getWidth(), size.getHeight());
+    }
+
+    private static double clamp(double x, double lower, double upper) {
         return Math.max(lower, Math.min(upper, x));
     }
 
-    public static Point getNearestPointInPerimeter(Rectangle rect, float x, float y) {
-        float l = (float) rect.getX(), t = (float) rect.getY(), w = (float) rect.getWidth(), h = (float) rect.getHeight();
+    public static Point getNearestPointInPerimeter(Rectangle2D rect, double x, double y) {
+        double l = (double) rect.getX(), t = (double) rect.getY(), w = (double) rect.getWidth(), h = (double) rect.getHeight();
 
-        float r = l + w, b = t + h;
+        double r = l + w, b = t + h;
 
         x = clamp(x, l, r);
         y = clamp(y, t, b);
 
-        float dl = Math.abs(x - l), dr = Math.abs(x - r), dt = Math.abs(y - t), db = Math.abs(y - b);
-        float m = Math.min(Math.min(Math.min(dl, dr), dt), db);
+        double dl = Math.abs(x - l), dr = Math.abs(x - r), dt = Math.abs(y - t), db = Math.abs(y - b);
+        double m = Math.min(Math.min(Math.min(dl, dr), dt), db);
 
         if (m == dt) return new Point(x, t);
         if (m == db) return new Point(x, b);

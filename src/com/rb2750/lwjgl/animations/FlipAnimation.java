@@ -12,8 +12,8 @@ public class FlipAnimation extends Animation {
 
     @Override
     public boolean doAnimation(Entity entity) {
-        if (entity.getFacing() == Direction.LEFT) entity.rotate(360f / (float) getFrames());
-        else if (entity.getFacing() == Direction.RIGHT) entity.rotate(-360f / (float) getFrames());
+        if (entity.getFacing() == Direction.LEFT) entity.rotate(360f / (double) getFrames());
+        else if (entity.getFacing() == Direction.RIGHT) entity.rotate(-360f / (double) getFrames());
         return true;
     }
 
