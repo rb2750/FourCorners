@@ -59,7 +59,7 @@ public abstract class Animation {
             entity.move(dLoc);
         }
         if(currFrame.rotation != 0 && nextFrame.rotation != 0){
-            double dRot = entity.getRotation()+(nextFrame.rotation - currFrame.rotation) * dTime;
+            double dRot = entity.getRotation()+(nextFrame.rotation - currFrame.rotation) * entity.getFacing() * dTime;
             entity.rotate(dRot);
         }
         if(currFrame.size != null && nextFrame.size != null){
