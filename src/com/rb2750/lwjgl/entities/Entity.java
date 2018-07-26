@@ -1,6 +1,12 @@
 package com.rb2750.lwjgl.entities;
 
 import com.rb2750.lwjgl.animations.Animation;
+import com.rb2750.lwjgl.graphics.Shader;
+import com.rb2750.lwjgl.graphics.Texture;
+import com.rb2750.lwjgl.graphics.VertexArray;
+import com.rb2750.lwjgl.maths.Matrix4;
+import com.rb2750.lwjgl.maths.Vector2;
+import com.rb2750.lwjgl.maths.Vector3;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -41,9 +47,16 @@ public abstract class Entity implements Cloneable {
     @Setter
     private boolean squat = false;
 
-    public Entity(Location location, Size size) {
+    protected VertexArray mesh;
+    protected Texture texture;
+    protected Shader shader;
+
+    protected double layer = 0.0;
+
+    public Entity(Location location, Size size, Shader shader) {
         this.location = location;
         this.size = size;
+        this.shader = shader;
     }
 
     public boolean move(Location location, boolean force) {
@@ -104,7 +117,7 @@ public abstract class Entity implements Cloneable {
         rotation %= 360;
     }
 
-    public void update() {
+    public void update(Camera camera) {
         if (getAcceleration().getX() < 0) setFacing(Direction.LEFT);
         if (getAcceleration().getX() > 0) setFacing(Direction.RIGHT);
 
@@ -115,7 +128,7 @@ public abstract class Entity implements Cloneable {
         glTranslated(translateX, translateY, 0);
         glRotated(rotation, 0, 0, 1);
         glTranslated(-translateX, -translateY, 0);
-        render();
+        render(camera);
         glPopMatrix();
     }
 
@@ -123,13 +136,24 @@ public abstract class Entity implements Cloneable {
         return location.getWorld();
     }
 
-    public void render() {
+    public void render(Camera camera) {
         handleAnimations();
 
-        renderEntity();
+        renderEntity(camera);
     }
 
-    public abstract void renderEntity();
+    public void renderEntity(Camera camera)
+    {
+        if (mesh == null || shader == null || camera == null || texture == null)
+            return;
+
+        shader.enable();
+        shader.setUniformMat4f("ml_matrix", Matrix4.transformation(new Vector3(location.getX(), location.getY(), layer), 0.0f, 0.0f, (float)rotation, new Vector3(size.getWidth(), size.getHeight(), size.getWidth())));
+        shader.setUniformMat4f("vw_matrix", Matrix4.view(camera));
+        texture.bind();
+        mesh.render();
+        shader.disable();
+    }
 
     public boolean animationExists(Class<? extends Animation> clazz) {
         for (Animation a : new ArrayList<>(animations)) {

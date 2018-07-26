@@ -1,10 +1,8 @@
 package com.rb2750.lwjgl.util;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@AllArgsConstructor
 public class Size implements Cloneable{
     @Getter
     @Setter
@@ -12,6 +10,19 @@ public class Size implements Cloneable{
     @Getter
     @Setter
     private double height;
+    @Getter
+    private double initialWidth;
+    @Getter
+    private double initialHeight;
+
+    public Size(double width, double height)
+    {
+        this.width = width;
+        this.initialWidth = width;
+
+        this.height = height;
+        this.initialHeight = height;
+    }
 
     public Size add(Size size) {
         this.width += size.width;

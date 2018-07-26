@@ -10,11 +10,15 @@ import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
 import com.rb2750.lwjgl.animations.FlipAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
+import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
+import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.gui.GUIManager;
 import com.rb2750.lwjgl.gui.SelectionGUI;
+import com.rb2750.lwjgl.maths.Matrix4;
+import com.rb2750.lwjgl.maths.Vector3;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.util.Sync;
@@ -25,7 +29,6 @@ import lombok.Getter;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 import se.albin.steamcontroller.SteamController;
 import se.albin.steamcontroller.SteamControllerListener;
@@ -36,6 +39,7 @@ import java.util.Stack;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -59,6 +63,9 @@ public class Main {
     private boolean xInputShowBox = false;
     @Getter
     private GUIManager guiManager = new GUIManager();
+
+    private int currentFPS;
+    private long lastFPS;
 
     /**
      * Rob Notes for Rob
@@ -124,6 +131,29 @@ public class Main {
         // Make the window visible
         glfwShowWindow(window);
 
+        GL.createCapabilities();
+
+//        glMatrixMode(GL_PROJECTION);
+//        glLoadIdentity();
+//        glOrtho(0, gameWidth, 0, gameHeight, 1, -1);
+//        glMatrixMode(GL_MODELVIEW);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+//
+//        glEnable(GL_DEPTH_TEST);
+//        glEnable(GL_DEPTH_BUFFER_BIT);
+//        glDepthFunc(GL11.GL_LEQUAL);
+//        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+//        glClearDepth(1f);
+
+        glEnable(GL_DEPTH_TEST);
+        glActiveTexture(GL_TEXTURE1);
+
+        Shader.loadAllShaders();
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
+        Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
+        Shader.GENERAL.setUniform1i("tex", 1);
+
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
     }
@@ -139,61 +169,50 @@ public class Main {
     private static long deltaTime;
 
     private void loop() {
-        GL.createCapabilities();
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, gameWidth, 0, gameHeight, 1, -1);
-        glMatrixMode(GL_MODELVIEW);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEPTH_BUFFER_BIT);
-        GL11.glDepthFunc(GL11.GL_LEQUAL);
-        GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
-        glClearDepth(1f);
-
         glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
                 gameWidth = width;
                 gameHeight = height;
-                glMatrixMode(GL_PROJECTION);
-                glLoadIdentity();
+//                glMatrixMode(GL_PROJECTION);
+//                glLoadIdentity();
                 glViewport(0, 0, width, height);
-                glScissor(0, 0, width, height);
-//                double fovY = 1;
-//                double zNear = 0.01;
-//                double zFar = 100.0;
+//                glScissor(0, 0, width, height);
+////                double fovY = 1;
+////                double zNear = 0.01;
+////                double zFar = 100.0;
+////
+////                double aspect = (double) gameWidth / (double) gameHeight;
+////
+////                double fH = Math.tan(fovY / 360 * Math.PI) * zNear;
+////                double fW = fH * aspect;
+////                glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+//                glOrtho(0, width, 0, height, 1, -1);
 //
-//                double aspect = (double) gameWidth / (double) gameHeight;
-//
-//                double fH = Math.tan(fovY / 360 * Math.PI) * zNear;
-//                double fW = fH * aspect;
-//                glFrustum(-fW, fW, -fH, fH, zNear, zFar);
-                glOrtho(0, width, 0, height, 1, -1);
-
-                glMatrixMode(GL_MODELVIEW);
+//                glMatrixMode(GL_MODELVIEW);
+                //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
+                //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
+                Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
             }
         });
 
         try
         {
             Input.Setup();
-
-            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
-            listener.open();
-            listener.addSubscriber((state, last) -> {
-                currentState = state;
-                lastState = last;
-                handleControls(currentState, lastState);
-                runOnUIThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        guiManager.handleInput(currentState, lastState);
-                    }
-                });
-            });
+//
+//            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
+//            listener.open();
+//            listener.addSubscriber((state, last) -> {
+//                currentState = state;
+//                lastState = last;
+//                handleControls(currentState, lastState);
+//                runOnUIThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        guiManager.handleInput(currentState, lastState);
+//                    }
+//                });
+//            });
         }
         catch (IndexOutOfBoundsException e)
         {
@@ -323,11 +342,14 @@ public class Main {
         });
 
         Sync sync = new Sync();
+        lastFPS = Util.getTime();
+
+        Camera camera = new Camera();
 
         while (!glfwWindowShouldClose(window)) {
             deltaTime = Util.getTime() - lastFrame;
             lastFrame = Util.getTime();
-            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (xInputDevice != null)
             {
@@ -370,7 +392,7 @@ public class Main {
             }
 
             while (!toRun.isEmpty()) toRun.pop().run();
-            world.update(player, selectyTile);
+            world.update(player, camera, selectyTile);
 
             if (xInputDevice != null)
             {
@@ -379,8 +401,22 @@ public class Main {
             }
 
             guiManager.update();
+
+            int error = glGetError();
+            if (error != GL_NO_ERROR)
+                System.err.println("OpenGL Error: " + error);
+
             glfwSwapBuffers(window);
             glfwPollEvents();
+
+            if (Util.getTime() - lastFPS >= 1000)
+            {
+                System.out.println("FPS: " + currentFPS);
+                currentFPS = 0;
+                lastFPS += 1000;
+            }
+
+            currentFPS++;
 
             sync.sync(120);
         }
@@ -431,16 +467,16 @@ public class Main {
 
         player.getAcceleration().setX((int) (speed * XInputState.axes.lx));
 
-        if (XInputState.isButtonPressed(XInputButton.A)) {
-            if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
-                doubleJump = true;
-                jumping = false;
-                player.addAnimation(new FlipAnimation());
-            } else if (!player.onGround()) return;
-            else jumping = true;
-
-            player.getAcceleration().setY(21);
-        }
+//        if (XInputState.isButtonPressed(XInputButton.A)) {
+//            if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
+//                doubleJump = true;
+//                jumping = false;
+//                player.addAnimation(new FlipAnimation());
+//            } else if (!player.onGround()) return;
+//            else jumping = true;
+//
+//            player.getAcceleration().setY(21);
+//        }
 
         if (XInputState.isButtonPressed(XInputButton.B)) {
             world.getEntities().clear();

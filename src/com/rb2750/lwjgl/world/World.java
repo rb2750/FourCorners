@@ -3,6 +3,7 @@ package com.rb2750.lwjgl.world;
 import com.rb2750.lwjgl.Input.Action;
 import com.rb2750.lwjgl.Input.Input;
 import com.rb2750.lwjgl.animations.SquashAnimation;
+import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
@@ -40,7 +41,7 @@ public class World {
             entity.getAcceleration().setX(entity.getAcceleration().getX() + friction);
     }
 
-    private void handleEntities() {
+    private void handleEntities(Camera camera) {
         for (Entity entity : entities) {
             handleGravity(entity);
             handleFriction(entity);
@@ -90,12 +91,12 @@ public class World {
                 }
             }
 
-            render(entity);
+            render(entity, camera);
         }
     }
 
-    private void render(Entity entity) {
-        entity.update();
+    private void render(Entity entity, Camera camera) {
+        entity.update(camera);
     }
 
     public Entity intersects(Entity e, Rectangle2D rect) {
@@ -108,8 +109,8 @@ public class World {
         return null;
     }
 
-    public void update(Player player, Tile protoTile) {
-        handleEntities();
+    public void update(Player player, Camera camera, Tile protoTile) {
+        handleEntities(camera);
 
         if(Input.ButtonMap.get(Action.Clear).state) {
             getEntities().clear();

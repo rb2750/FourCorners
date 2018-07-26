@@ -1,5 +1,7 @@
 package com.rb2750.lwjgl.util;
 
+import com.rb2750.lwjgl.entities.Entity;
+import com.rb2750.lwjgl.maths.Vector3;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.geom.Rectangle2D;
@@ -22,6 +24,10 @@ public class Util {
         glLoadIdentity();
     }
 
+    /**
+     * @deprecated Use draw(vec3, Size) instead to use shaders.
+     */
+    @Deprecated
     public static void drawCube(double x, double y, double z, double w, double h, double l) {
 //        glLoadIdentity();                 // Reset the model-view matrix
         glTranslated(x, y, 0);  // Move right and into the screen
@@ -73,6 +79,11 @@ public class Util {
 //        glVertex3f(100f, -100f, -100f);
         glEnd();  // End of drawing color-cube
         glLoadIdentity();
+    }
+
+    public static void draw(Entity entity)
+    {
+
     }
 
     public static long getTime() {
