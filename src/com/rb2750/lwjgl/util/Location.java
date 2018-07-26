@@ -56,7 +56,7 @@ public class Location implements Cloneable {
         return this;
     }
 
-    public Location multiply(float factor) {
+    public Location multiply(double factor) {
         this.x *= factor;
         this.y *= factor;
         return this;
