@@ -1,5 +1,6 @@
 package com.rb2750.lwjgl.animations;
 
+import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
@@ -9,18 +10,18 @@ import lombok.Setter;
 public abstract class Animation {
     @Getter
     @Setter
-    private int remainingTime;
-    private float timePerFrame;
+    private double remainingTime;
+    private double timePerFrame;
     private int currentFrame;
     private Entity original;
     private boolean paused;
-    private float timeOfCurrFrame;
+    private double timeOfCurrFrame;
 
 
-    Animation(int time) {
+    Animation(double time) {
         this.remainingTime = time;
         this.currentFrame = 0;
-        this.timePerFrame = (float)getKeyFrames().length / (float)time;
+        this.timePerFrame = (float)time / (float)getKeyFrames().length;
         this.paused = false;
         this.timeOfCurrFrame = 0;
 
@@ -50,21 +51,26 @@ public abstract class Animation {
 
         Keyframe currFrame = getKeyFrames()[currentFrame];
         Keyframe nextFrame = getKeyFrames()[currentFrame+1];
+        double dTime = (double)Main.getDeltaTime()/1000;
+        System.out.println("Delta time: " + dTime);
 
         if(currFrame.position != null && nextFrame.position != null){
-            Location dLoc = currFrame.position.clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(timeOfCurrFrame));
+            Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
             entity.move(dLoc);
         }
         if(currFrame.rotation != 0 && nextFrame.rotation != 0){
-            float dRot = currFrame.rotation+(nextFrame.rotation - currFrame.rotation) * timeOfCurrFrame;
+            double dRot = entity.getRotation()+(nextFrame.rotation - currFrame.rotation) * dTime;
             entity.rotate(dRot);
         }
         if(currFrame.size != null && nextFrame.size != null){
-            Size dSiz = currFrame.size.clone().add(nextFrame.size.clone().subtract(currFrame.size).multiply(timeOfCurrFrame));
-            entity.setSize(dSiz);
+            Size dSize = nextFrame.size.clone().subtract(currFrame.size).multiply(dTime);
+            entity.setSize(entity.getSize().clone().add(dSize));
+            Size halfSize = dSize.clone().multiply(0.5);
+            
+            entity.move(entity.getLocation().add(-halfSize.getWidth(),0));
         }
 
-        timeOfCurrFrame+=timePerFrame;
+        timeOfCurrFrame += dTime;
         if(timeOfCurrFrame > timePerFrame) {currentFrame++; timeOfCurrFrame = 0;}
         remainingTime--;
     }
