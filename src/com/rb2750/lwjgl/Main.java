@@ -7,7 +7,6 @@ import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
 import com.rb2750.lwjgl.animations.FlipAnimation;
-import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.entities.Player;
@@ -55,7 +54,7 @@ public class Main {
     private Location cursorLocation = new Location();
     private boolean usingXInput = false;
     private boolean usingXInput14 = false;
-    private boolean showBox = false;
+    private boolean xInputShowBox = false;
     @Getter
     private GUIManager guiManager = new GUIManager();
 
@@ -182,12 +181,17 @@ public class Main {
         try
         {
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
-
             listener.open();
             listener.addSubscriber((state, last) -> {
                 currentState = state;
                 lastState = last;
                 handleControls(currentState, lastState);
+                runOnUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        guiManager.handleInput(currentState, lastState);
+                    }
+                });
             });
         }
         catch (IndexOutOfBoundsException e)
@@ -295,31 +299,18 @@ public class Main {
         }
 
         glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback()
+        {
+            @Override
+            public void invoke(long window, boolean focused)
+            {
+                if (xInputDevice != null)
                 {
-                    @Override
-                    public void invoke(long window, boolean focused)
+                    if (xInputDevice instanceof XInputDevice14)
                     {
-                        if (xInputDevice != null)
-                        {
-                            if (xInputDevice instanceof XInputDevice14)
-                            {
-                                XInputDevice14.setEnabled(focused);
-                            }
-                        }
+                        XInputDevice14.setEnabled(focused);
                     }
-                });
-        SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
-        listener.open();
-        listener.addSubscriber((state, last) -> {
-            currentState = state;
-            lastState = last;
-            handleControls(currentState, lastState);
-            runOnUIThread(new Runnable() {
-                @Override
-                public void run() {
-                    guiManager.handleInput(currentState, lastState);
                 }
-            });
+            }
         });
 
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
@@ -522,18 +513,17 @@ public class Main {
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
-        boolean wasSquatting = player.isSquat();
-        if (player.animationExists(SquatAnimation.class)) {
-            if (!player.isSquat() && XInputState.isButtonUp(XInputButton.X)) {
-                player.removeAnimation(SquatAnimation.class);
-                wasSquatting = true;
-            }
-        }
+
         if (!player.animationExists(SquatAnimation.class)) {
-            if (XInputState.isButtonDown(XInputButton.X) && !wasSquatting) {
-                player.addAnimation(new SquatAnimation(true));
-            } else if (XInputState.isButtonUp(XInputButton.X) && wasSquatting) {
-                player.addAnimation(new SquatAnimation(false));
+            if (XInputState.isButtonPressed(XInputButton.X)) {
+                player.addAnimation(new SquatAnimation());
+            }
+        } else {
+            if (XInputState.isButtonUp(XInputButton.X)) {
+                player.getAnimation(SquatAnimation.class).Pause();
+            }
+            if (XInputState.isButtonDown(XInputButton.X)) {
+                player.getAnimation(SquatAnimation.class).Unpause();
             }
         }
 
@@ -546,11 +536,18 @@ public class Main {
         Size size = new Size(100f * (float) Math.max(1 - XInputState.axes.lt, 0.3), 100f * (float) Math.max(1 - XInputState.axes.rt, 0.3));
 
         selectyTile.setSize(size);
+
+        runOnUIThread(() -> {
+            if (XInputState.isButtonDown(XInputButton.LEFT_THUMBSTICK)) {
+                guiManager.displayGUI(new SelectionGUI());
+            } else guiManager.hideGUI(SelectionGUI.class);
+        });
+
         selectyTile.move(new Location(world, (int) tileX, (int) tileY), true);
 
-        if (XInputState.isButtonPressed(XInputButton.RIGHT_THUMBSTICK)) showBox = !showBox;
+        if (XInputState.isButtonPressed(XInputButton.RIGHT_THUMBSTICK)) xInputShowBox = !xInputShowBox;
 
-        if (!showBox)
+        if (!xInputShowBox)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         runOnUIThread(() -> {
             if (XInputState.isButtonPressed(XInputButton.RIGHT_SHOULDER)/* && !last.isLeftPadPressed()*/) {
