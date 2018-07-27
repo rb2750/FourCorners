@@ -8,7 +8,6 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
-import com.rb2750.lwjgl.animations.FlipAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
@@ -18,12 +17,11 @@ import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.gui.GUIManager;
 import com.rb2750.lwjgl.gui.SelectionGUI;
 import com.rb2750.lwjgl.maths.Matrix4;
-import com.rb2750.lwjgl.maths.Vector3;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.util.Sync;
 import com.rb2750.lwjgl.util.Util;
-import com.rb2750.lwjgl.util.XInputState;
+import com.rb2750.lwjgl.Input.XInputState;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import org.lwjgl.Version;
@@ -135,26 +133,26 @@ public class Main {
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
 
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, gameWidth, 0, gameHeight, 1, -1);
-        glMatrixMode(GL_MODELVIEW);
+//        glMatrixMode(GL_PROJECTION);
+//        glLoadIdentity();
+//        glOrtho(0, gameWidth, 0, gameHeight, 1, -1);
+//        glMatrixMode(GL_MODELVIEW);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 //
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEPTH_BUFFER_BIT);
-        glDepthFunc(GL_LEQUAL);
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-        glClearDepth(1f);
+        //glEnable(GL_DEPTH_BUFFER_BIT);
+//        glDepthFunc(GL_LEQUAL);
+//        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+//        glClearDepth(1f);
 
-        glEnable(GL_DEPTH_TEST);
+//        glEnable(GL_DEPTH_TEST);
         glActiveTexture(GL_TEXTURE1);
 
-        //Shader.loadAllShaders();
+        Shader.loadAllShaders();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
+        Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
-        //Shader.GENERAL.setUniform1i("tex", 1);
+        Shader.GENERAL.setUniform1i("tex", 1);
 
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
@@ -176,10 +174,10 @@ public class Main {
             public void invoke(long window, int width, int height) {
                 gameWidth = width;
                 gameHeight = height;
-                glMatrixMode(GL_PROJECTION);
-                glLoadIdentity();
-                glViewport(0, 0, width, height);
-                glScissor(0, 0, width, height);
+//                glMatrixMode(GL_PROJECTION);
+//                glLoadIdentity();
+//                glViewport(0, 0, width, height);
+//                glScissor(0, 0, width, height);
 ////                double fovY = 1;
 ////                double zNear = 0.01;
 ////                double zFar = 100.0;
@@ -189,12 +187,12 @@ public class Main {
 ////                double fH = Math.tan(fovY / 360 * Math.PI) * zNear;
 ////                double fW = fH * aspect;
 ////                glFrustum(-fW, fW, -fH, fH, zNear, zFar);
-                glOrtho(0, width, 0, height, 1, -1);
+//                glOrtho(0, width, 0, height, 1, -1);
 //
-                glMatrixMode(GL_MODELVIEW);
+//                glMatrixMode(GL_MODELVIEW);
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
+                Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
             }
         });
 
@@ -406,6 +404,7 @@ public class Main {
 
             if (xInputDevice != null)
             {
+                Input.updateXInputController();
                 handleXInputControls();
                 XInputState.update();
             }
@@ -432,6 +431,25 @@ public class Main {
 
 
     public Tile selectyTile;
+
+    private void controlsHandleUI(double tileX, double tileY, Size tileSize)
+    {
+        runOnUIThread(() -> {
+            if (Input.ButtonMap.get(Action.PlaceBlock).state) {
+                Tile newTile = new Tile(new Location(world, tileX, tileY));
+                newTile.setSize(tileSize);
+
+                for (Entity entity : world.getEntities())
+                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
+                world.addEntity(newTile);
+            }
+
+            if (Input.ButtonMap.get(Action.ShowGUI).state) {
+                guiManager.displayGUI(new SelectionGUI());
+            } else guiManager.hideGUI(SelectionGUI.class);
+        });
+    }
+
     public void handleControls(SteamController state, SteamController last) {
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
@@ -452,55 +470,12 @@ public class Main {
         else
             selectyTile.move(new Location(world, tileX, tileY), true);
 
-        runOnUIThread(() -> {
-            if (Input.ButtonMap.get(Action.PlaceBlock).state) {
-                Tile newTile = new Tile(new Location(world, tileX, tileY));
-                newTile.setSize(size);
-
-                for (Entity entity : world.getEntities())
-                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-                world.addEntity(newTile);
-            }
-
-            if (Input.ButtonMap.get(Action.ShowGUI).state) {
-                guiManager.displayGUI(new SelectionGUI());
-            } else guiManager.hideGUI(SelectionGUI.class);
-        });
+        controlsHandleUI(tileX, tileY, size);
     }
 
     public void handleXInputControls() {
-        int speed = 8;
-
-        if (XInputState.isButtonDown(XInputButton.LEFT_SHOULDER)) speed *= 2;
-
-        player.getAcceleration().setX((int) (speed * XInputState.axes.lx));
-
-//        if (XInputState.isButtonPressed(XInputButton.A)) {
-//            if (!doubleJump && jumping && !player.onGround()/* && player.getAcceleration().getY() < 0*/) {
-//                doubleJump = true;
-//                jumping = false;
-//                player.addAnimation(new FlipAnimation());
-//            } else if (!player.onGround()) return;
-//            else jumping = true;
-//
-//            player.getAcceleration().setY(21);
-//        }
-
-        if (XInputState.isButtonPressed(XInputButton.B)) {
-            world.getEntities().clear();
-
-            world.addEntity(player);
-            world.addEntity(selectyTile);
-        }
-
-        if (player.onGround()) doubleJump = false;
-
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
-
-        /**
-         * X = halfGameWidth * controller.x + halfGameWidth
-         */
 
         double tileX = halfGameWidth * XInputState.axes.rx + halfGameWidth;
         double tileY = halfGameHeight * XInputState.axes.ry + halfGameHeight;
@@ -510,50 +485,15 @@ public class Main {
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
 
-        if (!player.animationExists(SquatAnimation.class)) {
-            if (XInputState.isButtonPressed(XInputButton.X)) {
-                player.addAnimation(new SquatAnimation());
-            }
-        } else {
-            if (XInputState.isButtonUp(XInputButton.X)) {
-                player.getAnimation(SquatAnimation.class).Pause();
-            }
-            if (XInputState.isButtonDown(XInputButton.X)) {
-                player.getAnimation(SquatAnimation.class).Unpause();
-            }
-        }
-
-        if (XInputState.isButtonDown(XInputButton.START)) {
-            player.setSize(new Size(player.getSize().getWidth() + 1, player.getSize().getHeight()));
-        }
-        //System.out.println(player.getLocation().toString());
-
-        //System.out.println(XInputState.axes.lt + ", " + XInputState.axes.rt);
         Size size = new Size(100f * (float) Math.max(1 - XInputState.axes.lt, 0.3), 100f * (float) Math.max(1 - XInputState.axes.rt, 0.3));
 
         selectyTile.setSize(size);
 
-        runOnUIThread(() -> {
-            if (XInputState.isButtonDown(XInputButton.LEFT_THUMBSTICK)) {
-                guiManager.displayGUI(new SelectionGUI());
-            } else guiManager.hideGUI(SelectionGUI.class);
-        });
-
-        selectyTile.move(new Location(world, (int) tileX, (int) tileY), true);
-
-        if (XInputState.isButtonPressed(XInputButton.RIGHT_THUMBSTICK)) xInputShowBox = !xInputShowBox;
-
-        if (!xInputShowBox)
+        if (!Input.ButtonMap.get(Action.ShowBlock).state || XInputState.axes.rx == 0 && XInputState.axes.ry == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
-        runOnUIThread(() -> {
-            if (XInputState.isButtonPressed(XInputButton.RIGHT_SHOULDER)/* && !last.isLeftPadPressed()*/) {
-                Tile newTile = new Tile(new Location(world, (int) tileX, (int) tileY));
-                newTile.setSize(size);
+        else
+            selectyTile.move(new Location(world, tileX, tileY), true);
 
-                for (Entity entity : world.getEntities())
-                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-                world.addEntity(newTile);
-            }
-        });
+        controlsHandleUI(tileX, tileY, size);
     }
 }

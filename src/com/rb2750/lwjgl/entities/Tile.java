@@ -14,10 +14,10 @@ public class Tile extends Entity {
         super(location, new Size(100, 100), Shader.GENERAL);
 
         float[] vertices = new float[] {
-                -1.0f, -1.0f, 0.0f,
-                -1.0f,  1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f,
+                0.0f,  1.0f, 0.0f,
                 1.0f,  1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f
+                1.0f, 0.0f, 0.0f
         };
 
         byte[] indices = new byte[] {
@@ -37,8 +37,8 @@ public class Tile extends Entity {
         texture = new Texture("res/textures/red.png");
     }
 
-    @Override
-    public void renderEntity(Camera camera) {
-        drawSquare(getLocation().getX(), getLocation().getY(), getSize().getWidth(), getSize().getHeight());
-    }
+//    @Override
+//    public void renderEntity(Camera camera) {
+//        drawSquare(getLocation().getX(), getLocation().getY(), getSize().getWidth(), getSize().getHeight());
+//    }
 }

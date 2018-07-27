@@ -1,4 +1,4 @@
-package com.rb2750.lwjgl.util;
+package com.rb2750.lwjgl.Input;
 
 import com.ivan.xinput.XInputAxes;
 import com.ivan.xinput.enums.XInputButton;
@@ -20,6 +20,16 @@ public class XInputState
         {
             prevButtons[i] = buttons[i];
         }
+    }
+
+    public static boolean getFromCurrent(XInputButton button)
+    {
+        return buttons[button.ordinal()];
+    }
+
+    public static boolean getFromPrevious(XInputButton button)
+    {
+        return buttons[button.ordinal()];
     }
 
     public static boolean isButtonDown(XInputButton button)

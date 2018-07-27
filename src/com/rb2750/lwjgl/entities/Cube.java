@@ -14,10 +14,10 @@ public class Cube extends Entity {
         super(location,new Size(100, 100), Shader.GENERAL);
 
         float[] vertices = new float[] {
-                -1.0f, -1.0f, 0.0f,
-                -1.0f,  1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f,
+                0.0f,  1.0f, 0.0f,
                 1.0f,  1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f
+                1.0f, 0.0f, 0.0f
         };
 
         byte[] indices = new byte[] {
@@ -37,9 +37,9 @@ public class Cube extends Entity {
         texture = new Texture("res/textures/red.png");
     }
 
-    @Override
-    public void renderEntity(Camera camera) {
-//        rotate(5);
-        drawCube(getLocation().getX(), getLocation().getY(), 500, getSize().getWidth(), getSize().getHeight(), getSize().getHeight());
-    }
+//    @Override
+//    public void renderEntity(Camera camera) {
+////        rotate(5);
+//        drawCube(getLocation().getX(), getLocation().getY(), 500, getSize().getWidth(), getSize().getHeight(), getSize().getHeight());
+//    }
 }

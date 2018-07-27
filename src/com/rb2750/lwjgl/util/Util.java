@@ -32,7 +32,7 @@ public class Util {
 //        glLoadIdentity();                 // Reset the model-view matrix
         glTranslated(x, y, 0);  // Move right and into the screen
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEPTH_BUFFER_BIT);
+//        glEnable(GL_DEPTH_BUFFER_BIT);
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
         glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads

@@ -9,11 +9,6 @@ import com.rb2750.lwjgl.graphics.Texture;
 import com.rb2750.lwjgl.graphics.VertexArray;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
-import lombok.Getter;
-import lombok.Setter;
-import org.lwjgl.system.CallbackI;
-
-import static com.rb2750.lwjgl.util.Util.drawCube;
 
 public class Player extends Entity {
     float speed = 8f;
@@ -25,10 +20,10 @@ public class Player extends Entity {
         setGravity(true);
 
         float[] vertices = new float[] {
-                -1.0f, -1.0f, 0.0f,
-                -1.0f,  1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f,
+                0.0f,  1.0f, 0.0f,
                 1.0f,  1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f
+                1.0f, 0.0f, 0.0f
         };
 
         byte[] indices = new byte[] {
@@ -48,10 +43,10 @@ public class Player extends Entity {
         texture = new Texture("res/textures/blue.png");
     }
 
-    @Override
-    public void renderEntity(Camera camera) {
-        drawCube(getLocation().getX(), getLocation().getY(), 0.5f, getSize().getWidth(), getSize().getHeight(), getSize().getWidth());
-    }
+//    @Override
+//    public void renderEntity(Camera camera) {
+//        drawCube(getLocation().getX(), getLocation().getY(), 0.5f, getSize().getWidth(), getSize().getHeight(), getSize().getWidth());
+//    }
 
     @Override
     public void update(Camera camera) {
@@ -69,7 +64,7 @@ public class Player extends Entity {
 
         if (onGround()) doubleJump = false;
 
-        getAcceleration().setX((speed * Input.Analog_Stick.getX()));
+        getAcceleration().setX((speed * Input.Left_Analog_Stick.getX()));
 
         Button squat = Input.ButtonMap.get(Action.Squat);
 
