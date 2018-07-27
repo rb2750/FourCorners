@@ -359,7 +359,7 @@ public class Main {
                 XInputState.update();
             }
 
-            Input.updateKeyboard();
+            //Input.updateKeyboard();
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update(player, camera, selectyTile);
