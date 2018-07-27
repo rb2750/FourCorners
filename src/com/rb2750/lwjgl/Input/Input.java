@@ -5,6 +5,8 @@ import com.ivan.xinput.enums.XInputButton;
 import com.rb2750.lwjgl.util.Location;
 import se.albin.steamcontroller.SteamController;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 import java.util.HashMap;
 
 public class Input {
@@ -58,5 +60,15 @@ public class Input {
         ButtonMap.get(Action.ShowBlock).Set(XInputState.getFromCurrent(XInputButton.RIGHT_THUMBSTICK), XInputState.getFromPrevious(XInputButton.RIGHT_THUMBSTICK));
         ButtonMap.get(Action.Home).Set(XInputState.getFromCurrent(XInputButton.START), XInputState.getFromPrevious(XInputButton.START));
         ButtonMap.get(Action.ShowGUI).Set(XInputState.getFromCurrent(XInputButton.LEFT_THUMBSTICK), XInputState.getFromPrevious(XInputButton.LEFT_THUMBSTICK));
+    }
+
+    public static void updateKeyboard()
+    {
+        // I don't know if you want XInput to use the same button map and analog stick variables,
+        // so I've get them together for now.
+
+        ButtonMap.get(Action.Jump).Set(KeyboardHandler.isKeyDown(GLFW_KEY_SPACE));
+        ButtonMap.get(Action.Clear).Set(KeyboardHandler.isKeyDown(GLFW_KEY_C));
+        ButtonMap.get(Action.Squat).Set(KeyboardHandler.isKeyDown(GLFW_KEY_LEFT_SHIFT));
     }
 }

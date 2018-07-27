@@ -11,5 +11,10 @@ public class Button {
         this.state = state;
         this.last = last;
     }
+
+    public void Set(Button input) {
+        this.state = input.state;
+        this.last = input.last;
+    }
 }
 

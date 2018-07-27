@@ -5,6 +5,7 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.Input.*;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
@@ -43,9 +44,13 @@ public class Main {
     private Player player;
     private World world = new World();
     private Location cursorLocation = new Location();
+
+    //Input
     private boolean usingXInput = false;
     private boolean usingXInput14 = false;
     private boolean xInputShowBox = false;
+    private GLFWKeyCallback keyCallback;
+
     @Getter
     private GUIManager guiManager = new GUIManager();
 
@@ -118,6 +123,8 @@ public class Main {
         glfwSwapInterval(1);
         // Make the window visible
         glfwShowWindow(window);
+        glfwSetKeyCallback(window, keyCallback = new KeyboardHandler());
+
 
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
@@ -142,9 +149,12 @@ public class Main {
         Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
+        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
+
+        Input.Setup();
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
