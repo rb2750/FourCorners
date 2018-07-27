@@ -34,11 +34,6 @@ public class Cube extends Entity {
 
     @Override
     public void update(Camera camera) {
-        //if (mesh != null) return;
-        if(mesh == null) {
-
-        }
-
         super.update(camera);
     }
 

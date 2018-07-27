@@ -45,9 +45,6 @@ public class Player extends Entity {
 
     @Override
     public void update(Camera camera) {
-        if (mesh == null) {
-
-        }
         super.update(camera);
 
         if (Input.ButtonMap.get(Action.Jump).state) {
