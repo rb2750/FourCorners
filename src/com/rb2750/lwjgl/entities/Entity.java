@@ -1,5 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
+import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.maths.*;
@@ -16,6 +17,7 @@ import java.util.List;
 public abstract class Entity implements Cloneable {
     @Getter
     private Location location;
+    protected String texturePath;
     @Getter
     private Vector2 acceleration = new Vector2(0, 0);
     @Getter
@@ -46,12 +48,23 @@ public abstract class Entity implements Cloneable {
     protected Texture texture;
     protected Shader shader;
 
-    protected float layer = 0.0f;
+    protected float[] vertices;
+    protected byte[] indices;
+    protected float[] tcs;
+
+    protected double layer = 0.0;
 
     public Entity(Location location, Size size, Shader shader) {
         this.location = location;
         this.size = size;
         this.shader = shader;
+    }
+
+    public void createMesh() {
+        Main.instance.runOnUIThread(() -> {
+            mesh = new VertexArray(vertices, indices, tcs);
+            texture = new Texture(texturePath);
+        });
     }
 
     public boolean move(Location location, boolean force) {

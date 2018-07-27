@@ -33,6 +33,8 @@ import java.nio.IntBuffer;
 import java.util.Stack;
 
 public class Main {
+    public static Main instance;
+
     boolean doubleJump = false;
     // The window handle
     private long window;
@@ -70,6 +72,7 @@ public class Main {
     }
 
     public void run() {
+        instance = this;
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
         init();
@@ -201,10 +204,9 @@ public class Main {
                 Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
             }
         });
+        Input.updateKeyboard();
 
         try {
-            Input.Setup();
-
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
             listener.open();
             listener.addSubscriber((state, last) -> {
@@ -362,7 +364,7 @@ public class Main {
                 XInputState.update();
             }
 
-            //Input.updateKeyboard();
+
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update(player, camera, selectyTile);
