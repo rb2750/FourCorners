@@ -1,50 +1,36 @@
 package com.rb2750.lwjgl;
 
-import com.rb2750.lwjgl.Input.Action;
-import com.rb2750.lwjgl.Input.Input;
-import com.ivan.xinput.XInputButtons;
-import com.ivan.xinput.XInputComponents;
+import com.ivan.xinput.*;
 import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
-import com.rb2750.lwjgl.Input.KeyboardHandler;
 import com.rb2750.lwjgl.animations.SquatAnimation;
-import com.rb2750.lwjgl.entities.Camera;
-import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.entities.Player;
-import com.rb2750.lwjgl.entities.Tile;
+import com.rb2750.lwjgl.Input.*;
+import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.gui.GUIManager;
 import com.rb2750.lwjgl.gui.SelectionGUI;
 import com.rb2750.lwjgl.maths.Matrix4;
-import com.rb2750.lwjgl.util.Location;
-import com.rb2750.lwjgl.util.Size;
-import com.rb2750.lwjgl.util.Sync;
-import com.rb2750.lwjgl.util.Util;
-import com.rb2750.lwjgl.Input.XInputState;
+import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import org.lwjgl.Version;
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.NULL;
 import se.albin.steamcontroller.SteamController;
 import se.albin.steamcontroller.SteamControllerListener;
 
 import java.nio.IntBuffer;
 import java.util.Stack;
-
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.NULL;
-
-import com.ivan.xinput.XInputDevice; // Class for XInput 1.3. Legacy for Win7.
-import com.ivan.xinput.XInputDevice14; // Class for XInput 1.4. Includes 1.3 API.
 
 public class Main {
     boolean doubleJump = false;
@@ -105,6 +91,9 @@ public class Main {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         // Create the window
         window = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
 
@@ -164,7 +153,11 @@ public class Main {
 
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
+
         Input.Setup();
+
+        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
+
     }
 
     private Stack<Runnable> toRun = new Stack<>();
@@ -201,12 +194,12 @@ public class Main {
 //                glMatrixMode(GL_MODELVIEW);
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
+                
                 Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
             }
         });
 
-        try
-        {
+        try {
             Input.Setup();
 
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
@@ -214,62 +207,43 @@ public class Main {
             listener.addSubscriber((state, last) -> {
                 handleControls(state, last);
                 Input.updateSteamController(state, last);
-                runOnUIThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        guiManager.handleInput(state, last);
-                    }
-                });
+                runOnUIThread(() -> guiManager.handleInput(state, last));
             });
-        }
-        catch (IndexOutOfBoundsException e)
-        {
+        } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
             System.err.println("Failed to find Steam Controller.");
         }
 
-        try
-        {
+        try {
             // check if XInput 1.3 is available
-            if (XInputDevice.isAvailable())
-            {
+            if (XInputDevice.isAvailable()) {
                 System.out.println("XInput 1.3 is available on this platform.");
                 usingXInput = true;
             }
 
             // check if XInput 1.4 is available
-            if (XInputDevice14.isAvailable())
-            {
+            if (XInputDevice14.isAvailable()) {
                 System.out.println("XInput 1.4 is available on this platform.");
                 usingXInput14 = true;
             }
-        }
-        catch (UnsatisfiedLinkError e)
-        {
-            e.printStackTrace();
+        } catch (UnsatisfiedLinkError e) {
+//            e.printStackTrace();
             System.err.println("Failed to load XInput. Missing library or unsupported platform.");
         }
 
         Object xInputDevice;
 
-        if (usingXInput || usingXInput14)
-        {
+        if (usingXInput || usingXInput14) {
             boolean notLoaded = false;
             Object[] devices;
 
-            try
-            {
-                if (usingXInput && !usingXInput14)
-                {
+            try {
+                if (usingXInput && !usingXInput14) {
                     devices = XInputDevice.getAllDevices();
-                }
-                else
-                {
+                } else {
                     devices = XInputDevice14.getAllDevices();
                 }
-            }
-            catch (XInputNotLoadedException e)
-            {
+            } catch (XInputNotLoadedException e) {
                 e.printStackTrace();
                 System.err.println("XInput is not loaded.");
                 usingXInput = false;
@@ -278,34 +252,26 @@ public class Main {
                 devices = null;
             }
 
-            if (!notLoaded)
-            {
+            if (!notLoaded) {
                 xInputDevice = devices[0];
 
-                XInputDeviceListener listener = new SimpleXInputDeviceListener()
-                {
+                XInputDeviceListener listener = new SimpleXInputDeviceListener() {
                     @Override
-                    public void connected()
-                    {
+                    public void connected() {
                         System.out.println("XInput device connected.");
                     }
 
                     @Override
-                    public void disconnected()
-                    {
+                    public void disconnected() {
                         System.out.println("XInput device disconnected.");
                     }
 
                     @Override
-                    public void buttonChanged(final XInputButton button, final boolean pressed)
-                    {
+                    public void buttonChanged(final XInputButton button, final boolean pressed) {
                         // the given button was just pressed (if pressed == true) or released (pressed == false)
-                        if (pressed)
-                        {
+                        if (pressed) {
                             System.out.println("XInput button pressed: " + button.name());
-                        }
-                        else
-                        {
+                        } else {
                             System.out.println("XInput button released: " + button.name());
                         }
 
@@ -313,35 +279,24 @@ public class Main {
                     }
                 };
 
-                if (xInputDevice instanceof XInputDevice14)
-                {
+                if (xInputDevice instanceof XInputDevice14) {
                     ((XInputDevice14) xInputDevice).addListener(listener);
-                }
-                else
-                {
+                } else {
                     ((XInputDevice) xInputDevice).addListener(listener);
                 }
-            }
-            else
-            {
+            } else {
                 xInputDevice = null;
             }
-        }
-        else
-        {
+        } else {
             System.err.println("Not using XInput.");
             xInputDevice = null;
         }
 
-        glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback()
-        {
+        glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback() {
             @Override
-            public void invoke(long window, boolean focused)
-            {
-                if (xInputDevice != null)
-                {
-                    if (xInputDevice instanceof XInputDevice14)
-                    {
+            public void invoke(long window, boolean focused) {
+                if (xInputDevice != null) {
+                    if (xInputDevice instanceof XInputDevice14) {
                         XInputDevice14.setEnabled(focused);
                     }
                 }
@@ -366,38 +321,32 @@ public class Main {
             lastFrame = Util.getTime();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (xInputDevice != null)
-            {
-                if (xInputDevice instanceof XInputDevice14)
-                {
-                    if (XInputState.axes == null) XInputState.axes = ((XInputDevice14) xInputDevice).getComponents().getAxes();
+            if (xInputDevice != null) {
+                if (xInputDevice instanceof XInputDevice14) {
+                    if (XInputState.axes == null)
+                        XInputState.axes = ((XInputDevice14) xInputDevice).getComponents().getAxes();
 
-                    if(((XInputDevice14) xInputDevice).poll())
-                    {
+                    if (((XInputDevice14) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice14) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
                         XInputState.axes = components.getAxes();
 
-                        if (XInputDevice14.isGuideButtonSupported())
-                        {
+                        if (XInputDevice14.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
                         }
                     }
 
                     //((XInputDevice14) xInputDevice).setVibration(20000, 20000);
-                }
-                else
-                {
-                    if (XInputState.axes == null) XInputState.axes = ((XInputDevice) xInputDevice).getComponents().getAxes();
+                } else {
+                    if (XInputState.axes == null)
+                        XInputState.axes = ((XInputDevice) xInputDevice).getComponents().getAxes();
 
-                    if(((XInputDevice) xInputDevice).poll())
-                    {
+                    if (((XInputDevice) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
                         XInputState.axes = components.getAxes();
 
-                        if (XInputDevice.isGuideButtonSupported())
-                        {
+                        if (XInputDevice.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
                         }
                     }
@@ -411,8 +360,7 @@ public class Main {
 
             guiManager.update();
 
-            if (xInputDevice != null)
-            {
+            if (xInputDevice != null) {
                 Input.updateXInputController();
                 handleXInputControls();
                 XInputState.update();
@@ -425,8 +373,7 @@ public class Main {
             glfwSwapBuffers(window);
             glfwPollEvents();
 
-            if (Util.getTime() - lastFPS >= 1000)
-            {
+            if (Util.getTime() - lastFPS >= 1000) {
                 System.out.println("FPS: " + currentFPS);
                 currentFPS = 0;
                 lastFPS += 1000;
@@ -441,8 +388,7 @@ public class Main {
 
     public Tile selectyTile;
 
-    private void controlsHandleUI(double tileX, double tileY, Size tileSize)
-    {
+    private void controlsHandleUI(double tileX, double tileY, Size tileSize) {
         runOnUIThread(() -> {
             if (Input.ButtonMap.get(Action.PlaceBlock).state) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
@@ -465,6 +411,7 @@ public class Main {
 
         double tileX = halfGameWidth * state.getRightTouchPosition().x() + halfGameWidth;
         double tileY = halfGameHeight * state.getRightTouchPosition().y() + halfGameHeight;
+
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
             selectyTile.setCanBeInteractedWith(false);
