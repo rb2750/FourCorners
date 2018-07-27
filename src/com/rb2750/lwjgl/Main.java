@@ -8,6 +8,7 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.Input.KeyboardHandler;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
@@ -57,9 +58,13 @@ public class Main {
     private Player player;
     private World world = new World();
     private Location cursorLocation = new Location();
+
+    //Input
     private boolean usingXInput = false;
     private boolean usingXInput14 = false;
     private boolean xInputShowBox = false;
+    private GLFWKeyCallback keyCallback;
+
     @Getter
     private GUIManager guiManager = new GUIManager();
 
@@ -129,6 +134,8 @@ public class Main {
         glfwSwapInterval(1);
         // Make the window visible
         glfwShowWindow(window);
+        glfwSetKeyCallback(window, keyCallback = new KeyboardHandler());
+
 
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
