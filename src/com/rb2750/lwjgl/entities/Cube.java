@@ -39,7 +39,6 @@ public class Cube extends Entity {
 
         }
 
-
         super.update(camera);
     }
 
