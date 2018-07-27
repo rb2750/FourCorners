@@ -1,22 +1,18 @@
 package com.rb2750.lwjgl.entities;
 
 import com.rb2750.lwjgl.animations.Animation;
-import com.rb2750.lwjgl.graphics.Shader;
-import com.rb2750.lwjgl.graphics.Texture;
-import com.rb2750.lwjgl.graphics.VertexArray;
-import com.rb2750.lwjgl.maths.Matrix4;
-import com.rb2750.lwjgl.maths.Vector2;
-import com.rb2750.lwjgl.maths.Vector3;
+import com.rb2750.lwjgl.graphics.*;
+import com.rb2750.lwjgl.maths.*;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
+import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.opengl.GL30;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.opengl.GL11.*;
 
 public abstract class Entity implements Cloneable {
     @Getter
@@ -120,17 +116,18 @@ public abstract class Entity implements Cloneable {
     public void update(Camera camera) {
         if (getAcceleration().getX() < 0) setFacing(Direction.LEFT);
         if (getAcceleration().getX() > 0) setFacing(Direction.RIGHT);
-
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
+//        glMatrixMode(GL_MODELVIEW);
+//        glPushMatrix();
         double translateX = getLocation().getX() + (getSize().getWidth() / 2);
         double translateY = getLocation().getY() + (getSize().getHeight() / 2);
-        glTranslated(translateX, translateY, 0);
-        glRotated(rotation, 0, 0, 1);
-        glTranslated(-translateX, -translateY, 0);
+//        glTranslated(translateX, translateY, 0);
+//        glRotated(rotation, 0, 0, 1);
+//        glTranslated(-translateX, -translateY, 0);
         render(camera);
-        glPopMatrix();
+//        glPopMatrix();
     }
+
+    int x = 0;
 
     public World getWorld() {
         return location.getWorld();
@@ -142,13 +139,12 @@ public abstract class Entity implements Cloneable {
         renderEntity(camera);
     }
 
-    public void renderEntity(Camera camera)
-    {
+    public void renderEntity(Camera camera) {
         if (mesh == null || shader == null || camera == null || texture == null)
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", Matrix4.transformation(new Vector3(location.getX(), location.getY(), layer), 0.0f, 0.0f, (float)rotation, new Vector3(size.getWidth(), size.getHeight(), size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", Matrix4.transformation(new Vector3(location.getX(), location.getY(), layer), 0, x++, (float) rotation, new Vector3(size.getWidth(), size.getHeight(), size.getWidth())));
         shader.setUniformMat4f("vw_matrix", Matrix4.view(camera));
         texture.bind();
         mesh.render();
