@@ -1,4 +1,4 @@
-package com.rb2750.lwjgl.Debug;
+package com.rb2750.lwjgl.debug;
 
 import java.util.HashMap;
 
