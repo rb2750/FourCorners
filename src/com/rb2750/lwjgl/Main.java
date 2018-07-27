@@ -33,6 +33,8 @@ import java.nio.IntBuffer;
 import java.util.Stack;
 
 public class Main {
+    public static Main instance;
+
     boolean doubleJump = false;
     // The window handle
     private long window;
@@ -70,6 +72,7 @@ public class Main {
     }
 
     public void run() {
+        instance = this;
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
         init();
