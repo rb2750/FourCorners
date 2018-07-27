@@ -1,9 +1,10 @@
 package com.rb2750.lwjgl.graphics;
 
-import com.rb2750.lwjgl.maths.Matrix4;
-import com.rb2750.lwjgl.maths.Vector2;
-import com.rb2750.lwjgl.maths.Vector3;
+import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.util.ShaderUtils;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,25 +67,25 @@ public class Shader
         glUniform1f(getUniform(name), value);
     }
 
-    public void setUniform2f(String name, Vector2 vector)
+    public void setUniform2f(String name, Vector2f vector)
     {
         if(!enabled) enable();
 
-        glUniform2f(getUniform(name), (float)vector.getX(), (float)vector.getY());
+        glUniform2f(getUniform(name), vector.x, vector.y);
     }
 
-    public void setUniform3f(String name, Vector3 vector)
+    public void setUniform3f(String name, Vector3f vector)
     {
         if(!enabled) enable();
 
-        glUniform3f(getUniform(name), (float)vector.getX(), (float)vector.getY(), (float)vector.getZ());
+        glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
     }
 
-    public void setUniformMat4f(String name, Matrix4 matrix)
+    public void setUniformMat4f(String name, Matrix4f matrix)
     {
         if(!enabled) enable();
 
-        glUniformMatrix4fv(getUniform(name), false, matrix.toFloatBuffer());
+        glUniformMatrix4fv(getUniform(name), false, MatrixUtil.toFloatBuffer(matrix));
     }
 
     public void enable()

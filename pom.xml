@@ -21,6 +21,12 @@
             <artifactId>jxinput</artifactId>
             <version>ca55984</version>    <!-- JXInput 0.8 -->
         </dependency>
+
+        <dependency>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>1.9.10</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

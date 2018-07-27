@@ -8,8 +8,7 @@ import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
-import static org.lwjgl.opengl.GL11.*;
-import org.lwjgl.opengl.GL30;
+import org.joml.Vector3f;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public abstract class Entity implements Cloneable {
     protected byte[] indices;
     protected float[] tcs;
 
-    protected double layer = 0.0;
+    protected float layer = 0.0f;
 
     public Entity(Location location, Size size, Shader shader) {
         this.location = location;
@@ -157,8 +156,8 @@ public abstract class Entity implements Cloneable {
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", Matrix4.transformation(new Vector3(location.getX(), location.getY(), layer), 0, 0, (float) rotation, new Vector3(size.getWidth(), size.getHeight(), size.getWidth())));
-        shader.setUniformMat4f("vw_matrix", Matrix4.view(camera));
+        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float)location.getX(), (float)location.getY(), layer), 0, 0, (float) rotation, new Vector3f((float)size.getWidth(), (float)size.getHeight(), (float)size.getWidth())));
+        shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         texture.bind();
         mesh.render();
         shader.disable();
