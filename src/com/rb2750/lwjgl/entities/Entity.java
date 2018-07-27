@@ -144,7 +144,7 @@ public abstract class Entity implements Cloneable {
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", Matrix4.transformation(new Vector3(location.getX(), location.getY(), layer), 0, x++, (float) rotation, new Vector3(size.getWidth(), size.getHeight(), size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", Matrix4.transformation(new Vector3(location.getX(), location.getY(), layer), 0, 0, (float) rotation, new Vector3(size.getWidth(), size.getHeight(), size.getWidth())));
         shader.setUniformMat4f("vw_matrix", Matrix4.view(camera));
         texture.bind();
         mesh.render();

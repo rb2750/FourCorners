@@ -353,22 +353,18 @@ public class Main {
 
                     //((XInputDevice) xInputDevice).setVibration(5000, 5000);
                 }
-            }
 
-            while (!toRun.isEmpty()) toRun.pop().run();
-            world.update(player, camera, selectyTile);
-
-            guiManager.update();
-
-            if (xInputDevice != null) {
                 Input.updateXInputController();
                 handleXInputControls();
                 XInputState.update();
             }
 
-            int error = glGetError();
-            if (error != GL_NO_ERROR)
-                System.err.println("OpenGL Error: " + error);
+            Input.updateKeyboard();
+
+            while (!toRun.isEmpty()) toRun.pop().run();
+            world.update(player, camera, selectyTile);
+
+            guiManager.update();
 
             glfwSwapBuffers(window);
             glfwPollEvents();
