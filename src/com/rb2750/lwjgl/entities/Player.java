@@ -14,7 +14,6 @@ public class Player extends Entity {
     public Player(Location location) {
         super(location, new Size(100, 100), Shader.GENERAL);
         setGravity(true);
-    }
 
         vertices = new float[]{
                 0.0f, 0.0f, 0.0f,

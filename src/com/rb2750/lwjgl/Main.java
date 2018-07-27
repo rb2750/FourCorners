@@ -326,6 +326,8 @@ public class Main {
             lastFrame = Util.getTime();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            Input.updateKeyboard();
+
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
                     if (XInputState.axes == null)
@@ -363,8 +365,6 @@ public class Main {
                 handleXInputControls();
                 XInputState.update();
             }
-
-
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update(player, camera, selectyTile);

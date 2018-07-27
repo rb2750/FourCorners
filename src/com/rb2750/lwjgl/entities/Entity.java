@@ -52,7 +52,7 @@ public abstract class Entity implements Cloneable {
     protected byte[] indices;
     protected float[] tcs;
 
-    protected double layer = 0.0;
+    protected float layer = 0.0f;
 
     public Entity(Location location, Size size, Shader shader) {
         this.location = location;
