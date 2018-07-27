@@ -12,7 +12,8 @@ public class Cube extends Entity {
 
     @Override
     public void update(Camera camera) {
-        if (mesh != null) return;
+        //if (mesh != null) return;
+        if(mesh == null) {
 
         float[] vertices = new float[]{
                 0.0f, 0.0f, 0.0f,
@@ -36,6 +37,7 @@ public class Cube extends Entity {
         mesh = new VertexArray(vertices, indices, tcs);
 
         texture = new Texture("res/textures/red.png");
+        }
 
 
         super.update(camera);
