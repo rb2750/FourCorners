@@ -201,10 +201,9 @@ public class Main {
                 Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
             }
         });
+        Input.updateKeyboard();
 
         try {
-            Input.Setup();
-
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
             listener.open();
             listener.addSubscriber((state, last) -> {
@@ -362,7 +361,7 @@ public class Main {
                 XInputState.update();
             }
 
-            //Input.updateKeyboard();
+
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update(player, camera, selectyTile);
