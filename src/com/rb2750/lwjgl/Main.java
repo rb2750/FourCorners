@@ -153,9 +153,11 @@ public class Main {
         Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
+        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
+        Input.Setup();
     }
 
     private Stack<Runnable> toRun = new Stack<>();
