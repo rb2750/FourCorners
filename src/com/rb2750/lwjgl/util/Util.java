@@ -1,7 +1,6 @@
 package com.rb2750.lwjgl.util;
 
 import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.maths.Vector3;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.geom.Rectangle2D;

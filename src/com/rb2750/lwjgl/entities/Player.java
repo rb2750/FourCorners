@@ -1,8 +1,12 @@
 package com.rb2750.lwjgl.entities;
 
-import com.rb2750.lwjgl.Input.*;
+import com.rb2750.lwjgl.graphics.Shader;
+import com.rb2750.lwjgl.Input.Action;
+import com.rb2750.lwjgl.Input.Button;
+import com.rb2750.lwjgl.Input.Input;
 import com.rb2750.lwjgl.animations.SquatAnimation;
-import com.rb2750.lwjgl.graphics.*;
+import com.rb2750.lwjgl.graphics.Texture;
+import com.rb2750.lwjgl.graphics.VertexArray;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 
@@ -14,6 +18,29 @@ public class Player extends Entity {
     public Player(Location location) {
         super(location, new Size(100, 100), Shader.GENERAL);
         setGravity(true);
+
+        float[] vertices = new float[] {
+                0.0f, 0.0f, 0.0f,
+                0.0f,  1.0f, 0.0f,
+                1.0f,  1.0f, 0.0f,
+                1.0f, 0.0f, 0.0f
+        };
+
+        byte[] indices = new byte[] {
+                0, 1, 2,
+                2, 3, 0
+        };
+
+        float[] tcs = new float[] {
+                0, 1,
+                0, 0,
+                1, 0,
+                1, 1
+        };
+
+        mesh = new VertexArray(vertices, indices, tcs);
+
+        texture = new Texture("res/textures/blue.png");
     }
 
 //    @Override
@@ -23,33 +50,10 @@ public class Player extends Entity {
 
     @Override
     public void update(Camera camera) {
-        if (mesh == null) {
-            float[] vertices = new float[]{
-                    0.0f, 0.0f, 0.0f,
-                    0.0f, 1.0f, 0.0f,
-                    1.0f, 1.0f, 0.0f,
-                    1.0f, 0.0f, 0.0f
-            };
-
-            byte[] indices = new byte[]{
-                    0, 1, 2,
-                    2, 3, 0
-            };
-
-            float[] tcs = new float[]{
-                    0, 1,
-                    0, 0,
-                    1, 0,
-                    1, 1
-            };
-
-            mesh = new VertexArray(vertices, indices, tcs);
-
-            texture = new Texture("res/textures/blue.png");
-        }
         super.update(camera);
 
-        if (Input.ButtonMap.get(Action.Jump).state) {
+
+        if(Input.ButtonMap.get(Action.Jump).state) {
             if (!doubleJump && jumping && !onGround() && !Input.ButtonMap.get(Action.Jump).last /* && player.getAcceleration().getY() < 0*/) {
                 doubleJump = true;
                 jumping = false;
@@ -67,7 +71,7 @@ public class Player extends Entity {
         if (!animationExists(SquatAnimation.class)) {
             if (squat.state && !squat.last) addAnimation(new SquatAnimation());
         } else {
-            if (!squat.state) getAnimation(SquatAnimation.class).Pause();
+            if (!squat.state ) getAnimation(SquatAnimation.class).Pause();
             else getAnimation(SquatAnimation.class).Unpause();
         }
 

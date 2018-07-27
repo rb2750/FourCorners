@@ -5,16 +5,16 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
-import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.Input.*;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.gui.GUIManager;
 import com.rb2750.lwjgl.gui.SelectionGUI;
-import com.rb2750.lwjgl.maths.Matrix4;
+import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
+import org.joml.Matrix4f;
 import org.lwjgl.Version;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -145,9 +145,11 @@ public class Main {
         glActiveTexture(GL_TEXTURE1);
 
         Shader.loadAllShaders();
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
-        Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
+        Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,gameWidth / gameHeight, 0.1f, 1000.0f));
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
@@ -192,10 +194,11 @@ public class Main {
 //                glOrtho(0, width, 0, height, 1, -1);
 //
 //                glMatrixMode(GL_MODELVIEW);
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
+                //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
+                //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
                 
-                Shader.GENERAL.setUniformMat4f("pr_matrix", Matrix4.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
+                //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
+                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
             }
         });
 

@@ -1,16 +1,16 @@
 package com.rb2750.lwjgl.entities;
 
-import com.rb2750.lwjgl.maths.Vector3;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.joml.Vector3f;
 
 @NoArgsConstructor
 public class Camera
 {
     @Getter
     @Setter
-    private Vector3 position = new Vector3();
+    private Vector3f position = new Vector3f();
     @Getter
     private float pitch;
     @Getter
