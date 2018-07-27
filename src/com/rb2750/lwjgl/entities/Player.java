@@ -48,10 +48,10 @@ public class Player extends Entity {
         texture = new Texture("res/textures/blue.png");
     }
 
-//    @Override
-//    public void renderEntity() {
-//        drawCube(getLocation().getX(), getLocation().getY(), 0.5f, getSize().getWidth(), getSize().getHeight(), getSize().getWidth());
-//    }
+    @Override
+    public void renderEntity(Camera camera) {
+        drawCube(getLocation().getX(), getLocation().getY(), 0.5f, getSize().getWidth(), getSize().getHeight(), getSize().getWidth());
+    }
 
     @Override
     public void update(Camera camera) {

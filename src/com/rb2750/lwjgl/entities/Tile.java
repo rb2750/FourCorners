@@ -37,8 +37,8 @@ public class Tile extends Entity {
         texture = new Texture("res/textures/red.png");
     }
 
-//    @Override
-//    public void renderEntity() {
-//        drawSquare(getLocation().getX(), getLocation().getY(), getSize().getWidth(), getSize().getHeight());
-//    }
+    @Override
+    public void renderEntity(Camera camera) {
+        drawSquare(getLocation().getX(), getLocation().getY(), getSize().getWidth(), getSize().getHeight());
+    }
 }
