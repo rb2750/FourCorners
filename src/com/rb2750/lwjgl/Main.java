@@ -416,12 +416,12 @@ public class Main {
         });
     }
 
-    public void handleControls(SteamController state, SteamController last) {
+    public void handleControls() {
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
 
-        double tileX = halfGameWidth * state.getRightTouchPosition().x() + halfGameWidth;
-        double tileY = halfGameHeight * state.getRightTouchPosition().y() + halfGameHeight;
+        double tileX = halfGameWidth * Input.Right_Analog_Stick.getX() + halfGameWidth;
+        double tileY = halfGameHeight * Input.Right_Analog_Stick.getY() + halfGameHeight;
 
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -429,10 +429,10 @@ public class Main {
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
 
-        Size size = new Size(100f * Math.max(1 - state.getLeftTrigger(), 0.3), 100f * Math.max(1 - state.getRightTrigger(), 0.3));
+        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
         selectyTile.setSize(size);
 
-        if (!Input.ButtonMap.get(Action.ShowBlock).state || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
+        if (!Input.ButtonMap.get(Action.ShowBlock).state || Input.Right_Analog_Stick.getX() == 0 && Input.Right_Analog_Stick.getY() == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         else
             selectyTile.move(new Location(world, tileX, tileY), true);

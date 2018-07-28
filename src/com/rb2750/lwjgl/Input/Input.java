@@ -16,6 +16,8 @@ public class Input {
     public static HashMap<Action, Button> ButtonMap;
     public static Location Left_Analog_Stick;
     public static Location Right_Analog_Stick;
+    public static double Left_Trigger;
+    public static double Right_Trigger;
 
     public static void Setup() {
         ButtonMap = new HashMap<>();
@@ -26,8 +28,9 @@ public class Input {
 
         Left_Analog_Stick = new Location( null, 0,0);
         Right_Analog_Stick = new Location(null, 0, 0);
+        Left_Trigger = 0.0f;
+        Right_Trigger = 0.0f;
     }
-
 
     public static void updateSteamController(SteamController state, SteamController last) {
         Input.state = state;
@@ -35,6 +38,8 @@ public class Input {
 
         Left_Analog_Stick.set(state.getAnalogStickPosition().x(),state.getAnalogStickPosition().y());
         Right_Analog_Stick.set(state.getRightTouchPosition().x(),state.getRightTouchPosition().y());
+        Left_Trigger = state.getLeftTrigger();
+        Right_Trigger = state.getRightTrigger();
 
         ButtonMap.get(Action.Jump).Set(state.isAHeld(), last.isAHeld());
         ButtonMap.get(Action.Clear).Set(state.isBHeld(), last.isBHeld());
@@ -47,11 +52,10 @@ public class Input {
 
     public static void updateXInputController()
     {
-        // I don't know if you want XInput to use the same button map and analog stick variables,
-        // so I've get them together for now.
-
         Left_Analog_Stick.set(XInputState.axes.lx, XInputState.axes.ly);
         Right_Analog_Stick.set(XInputState.axes.rx, XInputState.axes.ry);
+        Left_Trigger = XInputState.axes.lt;
+        Right_Trigger = XInputState.axes.rt;
 
         ButtonMap.get(Action.Jump).Set(XInputState.getFromCurrent(XInputButton.A), XInputState.getFromPrevious(XInputButton.A));
         ButtonMap.get(Action.Clear).Set(XInputState.getFromCurrent(XInputButton.B), XInputState.getFromPrevious(XInputButton.B));
