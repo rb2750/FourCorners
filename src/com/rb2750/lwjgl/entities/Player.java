@@ -126,7 +126,7 @@ public class Player extends Entity {
         if (!animationExists(SquatAnimation.class)) {
             if (squat.state && !squat.last) addAnimation(new SquatAnimation());
         } else {
-            if (!squat.state) getAnimation(SquatAnimation.class).Pause();
+            if (squat.state) getAnimation(SquatAnimation.class).Pause();
             else getAnimation(SquatAnimation.class).Unpause();
         }
 
