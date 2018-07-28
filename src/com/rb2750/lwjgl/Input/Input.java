@@ -4,7 +4,9 @@ import com.ivan.xinput.XInputDevice;
 import com.ivan.xinput.enums.XInputButton;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.util.Location;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 import se.albin.steamcontroller.SteamController;
+import se.albin.steamcontroller.SteamControllerListener;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -34,6 +36,32 @@ public class Input {
         Right_Analog_Stick = new Location(null, 0, 0);
         Left_Trigger = 0.0f;
         Right_Trigger = 0.0f;
+
+        //Mouse
+        glfwSetCursorPosCallback(Main.instance.window, new GLFWCursorPosCallback() {
+            @Override
+            public void invoke(long window, double xPos, double yPos) {
+            if(Input.inputMethod == InputMethod.Keyboard)
+                updateMouse(xPos, Main.getGameHeight() - yPos);
+            }
+        });
+
+        //Steam Controller
+        try {
+            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
+            listener.open();
+            listener.addSubscriber((state, last) -> {
+                if(Input.inputMethod == InputMethod.SteamController)
+                    updateSteamController(state, last);
+            });
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Failed to find Steam Controller.");
+        }
+    }
+
+    public void update() {
+        if(inputMethod == InputMethod.Keyboard)
+            Input.updateKeyboard();
     }
 
     public static void updateSteamController(SteamController state, SteamController last) {

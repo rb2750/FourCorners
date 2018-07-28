@@ -6,6 +6,7 @@ import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
 import com.rb2750.lwjgl.Input.*;
+import com.rb2750.lwjgl.debug.Timer;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.gui.GUIManager;
@@ -39,7 +40,7 @@ public class Main {
 
     boolean doubleJump = false;
     // The window handle
-    private long window;
+    public long window;
     private GLFWVidMode vidmode;
     @Getter
     private static int gameWidth = 1000;
@@ -161,7 +162,7 @@ public class Main {
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
 
-        Input.Setup();
+        Input.Setup(InputMethod.SteamController);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
@@ -207,18 +208,6 @@ public class Main {
             }
         });
         Input.updateKeyboard();
-
-        try {
-            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
-            listener.open();
-            listener.addSubscriber((state, last) -> {
-                Input.updateSteamController(state, last);
-                runOnUIThread(() -> guiManager.handleInput(state, last));
-            });
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
-            System.err.println("Failed to find Steam Controller.");
-        }
 
         try {
             // check if XInput 1.3 is available
@@ -275,13 +264,15 @@ public class Main {
                     @Override
                     public void buttonChanged(final XInputButton button, final boolean pressed) {
                         // the given button was just pressed (if pressed == true) or released (pressed == false)
-                        if (pressed) {
-                            System.out.println("XInput button pressed: " + button.name());
-                        } else {
-                            System.out.println("XInput button released: " + button.name());
-                        }
+                        if (Input.inputMethod == InputMethod.xInput) {
+                            if (pressed) {
+                                System.out.println("XInput button pressed: " + button.name());
+                            } else {
+                                System.out.println("XInput button released: " + button.name());
+                            }
 
-                        XInputState.setButton(button, pressed);
+                            XInputState.setButton(button, pressed);
+                        }
                     }
                 };
 
@@ -309,13 +300,7 @@ public class Main {
             }
         });
 
-        glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
-            @Override
-            public void invoke(long window, double xPos, double yPos) {
-                cursorLocation.setX((int) xPos);
-                cursorLocation.setY(gameHeight - (int) yPos);
-            }
-        });
+
 
         Sync sync = new Sync();
         lastFPS = Util.getTime();
@@ -331,8 +316,6 @@ public class Main {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            Input.updateKeyboard();
-            Input.updateMouse(cursorLocation.getX(), cursorLocation.getY());
             handleControls();
 
             if (xInputDevice != null) {
