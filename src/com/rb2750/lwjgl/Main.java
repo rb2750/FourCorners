@@ -311,9 +311,9 @@ public class Main {
 
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override
-            public void invoke(long window, double xpos, double ypos) {
-                cursorLocation.setX((int) xpos);
-                cursorLocation.setY(gameHeight - (int) ypos);
+            public void invoke(long window, double xPos, double yPos) {
+                cursorLocation.setX((int) xPos);
+                cursorLocation.setY(gameHeight - (int) yPos);
             }
         });
 
