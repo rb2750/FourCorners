@@ -59,7 +59,7 @@ public class Input {
         }
     }
 
-    public void update() {
+    public static void update() {
         if(inputMethod == InputMethod.Keyboard)
             Input.updateKeyboard();
     }
