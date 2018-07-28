@@ -15,4 +15,6 @@ public class Keyframe {
 
     @Getter
     Size size;
+
+    Boolean pauseFrame = false;
 }

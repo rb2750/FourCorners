@@ -28,7 +28,10 @@ public abstract class Animation {
 
     public void doAnimation(Entity entity) {
         if(original == null) original = entity.clone();
-        if(paused) return;
+        
+        if(paused && timeOfCurrFrame < 0.05) {
+            if(getKeyFrames()[currentFrame].pauseFrame) {return;}
+        }
 
         // Rob: you don't need the equals
         if(currentFrame >= getKeyFrames().length-1) {

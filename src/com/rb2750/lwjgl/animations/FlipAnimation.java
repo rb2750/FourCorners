@@ -8,10 +8,10 @@ public class FlipAnimation extends Animation {
     @Override
     public Keyframe[] getKeyFrames() {
         return new Keyframe[] {
-                new Keyframe(null, 90, null),
-                new Keyframe(null, 180, null),
-                new Keyframe(null, 270, null),
-                new Keyframe(null, 360, null)
+                new Keyframe(null, 90 , null, false),
+                new Keyframe(null, 180, null, false),
+                new Keyframe(null, 270, null, false),
+                new Keyframe(null, 360, null, false)
         };
     }
 }
