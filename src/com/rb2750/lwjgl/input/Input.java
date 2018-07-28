@@ -1,6 +1,5 @@
-package com.rb2750.lwjgl.Input;
+package com.rb2750.lwjgl.input;
 
-import com.ivan.xinput.XInputDevice;
 import com.ivan.xinput.enums.XInputButton;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.util.Location;

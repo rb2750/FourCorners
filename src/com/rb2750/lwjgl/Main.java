@@ -5,13 +5,11 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
-import com.rb2750.lwjgl.Input.*;
-import com.rb2750.lwjgl.debug.Timer;
+import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.gui.GUIManager;
 import com.rb2750.lwjgl.gui.SelectionGUI;
-import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -27,12 +25,8 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
-import se.albin.steamcontroller.SteamController;
-import se.albin.steamcontroller.SteamControllerListener;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 public class Main {
@@ -186,7 +180,7 @@ public class Main {
                 gameHeight = height;
 //                glMatrixMode(GL_PROJECTION);
 //                glLoadIdentity();
-//                glViewport(0, 0, width, height);
+                glViewport(0, 0, width, height);
 //                glScissor(0, 0, width, height);
 ////                double fovY = 1;
 ////                double zNear = 0.01;
@@ -202,7 +196,7 @@ public class Main {
 //                glMatrixMode(GL_MODELVIEW);
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
-                
+
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
                 Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
             }
@@ -301,7 +295,6 @@ public class Main {
         });
 
 
-
         Sync sync = new Sync();
         lastFPS = Util.getTime();
 
@@ -367,7 +360,7 @@ public class Main {
 
             if (Util.getTime() - lastFPS >= 1000) {
                 System.out.println("FPS: " + currentFPS);
-                System.out.println("Average deltaTime: " + (averageDeltaTime/frameCount));
+                System.out.println("Average deltaTime: " + (averageDeltaTime / frameCount));
                 averageDeltaTime = 0;
                 frameCount = 0;
 
