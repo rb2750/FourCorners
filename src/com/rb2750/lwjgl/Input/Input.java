@@ -2,6 +2,7 @@ package com.rb2750.lwjgl.Input;
 
 import com.ivan.xinput.XInputDevice;
 import com.ivan.xinput.enums.XInputButton;
+import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.util.Location;
 import se.albin.steamcontroller.SteamController;
 
@@ -74,5 +75,18 @@ public class Input {
         ButtonMap.get(Action.Jump).Set(KeyboardHandler.isKeyDown(GLFW_KEY_SPACE));
         ButtonMap.get(Action.Clear).Set(KeyboardHandler.isKeyDown(GLFW_KEY_C));
         ButtonMap.get(Action.Squat).Set(KeyboardHandler.isKeyDown(GLFW_KEY_LEFT_SHIFT));
+        ButtonMap.get(Action.ShowBlock).Set(KeyboardHandler.isKeyDown(GLFW_KEY_Q));
+        ButtonMap.get(Action.PlaceBlock).Set(KeyboardHandler.isKeyDown(GLFW_KEY_E));
+    }
+
+    private static float mouseSensitivity = 4f;
+    public static void updateMouse(double x, double y)
+    {
+        x -= Main.getGameWidth() / 2;
+        y -= Main.getGameHeight() / 2;
+        x /= Main.getGameWidth();
+        y /= Main.getGameHeight();
+
+        Right_Analog_Stick.set(x * mouseSensitivity, y * mouseSensitivity);
     }
 }

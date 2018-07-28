@@ -332,6 +332,7 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Input.updateKeyboard();
+            Input.updateMouse(cursorLocation.getX(), cursorLocation.getY());
             handleControls();
 
             if (xInputDevice != null) {
