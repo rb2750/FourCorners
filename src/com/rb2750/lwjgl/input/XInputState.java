@@ -79,7 +79,7 @@ public class XInputState
 
     public static boolean getFromPrevious(XInputButton button)
     {
-        return buttons[button.ordinal()];
+        return prevButtons[button.ordinal()];
     }
 
     public static boolean isButtonDown(XInputButton button)
