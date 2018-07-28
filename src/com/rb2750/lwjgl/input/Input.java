@@ -1,10 +1,12 @@
-package com.rb2750.lwjgl.Input;
+package com.rb2750.lwjgl.input;
 
+import com.ivan.xinput.XInputAxes;
 import com.ivan.xinput.enums.XInputButton;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.util.Location;
-import lombok.Getter;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 import se.albin.steamcontroller.SteamController;
+import se.albin.steamcontroller.SteamControllerListener;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -14,15 +16,16 @@ public class Input {
     public static SteamController state;
     public static SteamController last;
 
+    public static InputMode currentInputMode;
+
     public static HashMap<Action, Button> ButtonMap;
     public static Location Left_Analog_Stick;
     public static Location Right_Analog_Stick;
     public static double Left_Trigger;
     public static double Right_Trigger;
 
-    public static InputMode currentInputMode = InputMode.KEYBOARD;
-
-    public static void Setup() {
+    public static void Setup(InputMode inputMode) {
+        Input.currentInputMode = inputMode;
         ButtonMap = new HashMap<>();
 
         for (Action a : Action.values()) {
@@ -33,6 +36,32 @@ public class Input {
         Right_Analog_Stick = new Location(null, 0, 0);
         Left_Trigger = 0.0f;
         Right_Trigger = 0.0f;
+
+        //Mouse
+        glfwSetCursorPosCallback(Main.instance.window, new GLFWCursorPosCallback() {
+            @Override
+            public void invoke(long window, double xPos, double yPos) {
+                if(Input.currentInputMode == InputMode.KEYBOARD)
+                    updateMouse(xPos, Main.getGameHeight() - yPos);
+            }
+        });
+
+        //Steam Controller
+        try {
+            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
+            listener.open();
+            listener.addSubscriber((state, last) -> {
+                Input.currentInputMode = InputMode.STEAM_CONTROLLER;
+                updateSteamController(state, last);
+            });
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Failed to find Steam Controller.");
+        }
+    }
+
+    public static void update() {
+        if(currentInputMode == InputMode.KEYBOARD)
+            Input.updateKeyboard();
     }
 
     public static void updateSteamController(SteamController state, SteamController last) {
@@ -55,10 +84,12 @@ public class Input {
 
     public static void updateXInputController()
     {
-        Left_Analog_Stick.set(XInputState.getAxes().lx, XInputState.getAxes().ly);
-        Right_Analog_Stick.set(XInputState.getAxes().rx, XInputState.getAxes().ry);
-        Left_Trigger = XInputState.getAxes().lt;
-        Right_Trigger = XInputState.getAxes().rt;
+        XInputAxesCopy axes = XInputState.getAxes();
+
+        Left_Analog_Stick.set(axes.lx, axes.ly);
+        Right_Analog_Stick.set(axes.rx, axes.ry);
+        Left_Trigger = axes.lt;
+        Right_Trigger = axes.rt;
 
         ButtonMap.get(Action.Jump).Set(XInputState.getFromCurrent(XInputButton.A), XInputState.getFromPrevious(XInputButton.A));
         ButtonMap.get(Action.Clear).Set(XInputState.getFromCurrent(XInputButton.B), XInputState.getFromPrevious(XInputButton.B));

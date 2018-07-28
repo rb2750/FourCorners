@@ -1,4 +1,4 @@
-package com.rb2750.lwjgl.Input;
+package com.rb2750.lwjgl.input;
 
 public enum InputMode
 {

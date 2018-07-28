@@ -1,6 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
-import com.rb2750.lwjgl.Input.*;
+import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.util.Location;

@@ -1,7 +1,7 @@
 package com.rb2750.lwjgl.world;
 
-import com.rb2750.lwjgl.Input.Action;
-import com.rb2750.lwjgl.Input.Input;
+import com.rb2750.lwjgl.input.Action;
+import com.rb2750.lwjgl.input.Input;
 import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
