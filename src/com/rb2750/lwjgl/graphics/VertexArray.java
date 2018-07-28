@@ -13,7 +13,7 @@ public class VertexArray
     private int vao, vbo, ibo, tbo;
     private int count;
 
-    public VertexArray(float[] vertices, byte[] indices, float[] textureCoordinates)
+    public VertexArray(float[] vertices, int[] indices, float[] textureCoordinates)
     {
         count = indices.length;
 
@@ -34,7 +34,7 @@ public class VertexArray
 
         ibo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, BufferUtils.createByteBuffer(indices), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, BufferUtils.createIntBuffer(indices), GL_STATIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -55,7 +55,7 @@ public class VertexArray
 
     public void draw()
     {
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_BYTE, 0);
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
     }
 
     public void render()

@@ -16,7 +16,7 @@ public class Cube extends Entity {
                 1.0f, 0.0f, 0.0f
         };
 
-        indices = new byte[]{
+        indices = new int[]{
                 0, 1, 2,
                 2, 3, 0
         };

@@ -14,6 +14,7 @@ import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.Version;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -135,6 +136,7 @@ public class Main {
 //        glOrtho(0, gameWidth, 0, gameHeight, 1, -1);
 //        glMatrixMode(GL_MODELVIEW);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glEnable(GL_CULL_FACE);
 //
         glEnable(GL_DEPTH_TEST);
         //glEnable(GL_DEPTH_BUFFER_BIT);
@@ -148,8 +150,9 @@ public class Main {
         Shader.loadAllShaders();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
-        Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,gameWidth / gameHeight, 0.1f, 1000.0f));
+        //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
+        System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
+        Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, 0.1f, 1000.0f));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
@@ -177,6 +180,7 @@ public class Main {
         glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
+                System.out.println("RESIZE");
                 gameWidth = width;
                 gameHeight = height;
 //                glMatrixMode(GL_PROJECTION);
@@ -199,7 +203,9 @@ public class Main {
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
 
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
-                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
+                //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
+                System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
+                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, 0.1f, 1000.0f));
             }
         });
         Input.updateKeyboard();
@@ -324,6 +330,10 @@ public class Main {
             frameCount++;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
+            camera.setYaw(camera.getYaw() - 0.05f);
+            //System.out.println(camera.getPosition());
 
             Input.update();
 

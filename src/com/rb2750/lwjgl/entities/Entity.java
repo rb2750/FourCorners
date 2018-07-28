@@ -49,7 +49,7 @@ public abstract class Entity implements Cloneable {
     protected Shader shader;
 
     protected float[] vertices;
-    protected byte[] indices;
+    protected int[] indices;
     protected float[] tcs;
 
     protected float layer = 0.0f;
@@ -63,6 +63,13 @@ public abstract class Entity implements Cloneable {
     public void createMesh() {
         Main.instance.runOnUIThread(() -> {
             mesh = new VertexArray(vertices, indices, tcs);
+            texture = new Texture(texturePath);
+        });
+    }
+
+    public void createMesh(String filePath) {
+        Main.instance.runOnUIThread(() -> {
+            mesh = OBJLoader.loadOBJ(filePath);
             texture = new Texture(texturePath);
         });
     }

@@ -12,9 +12,12 @@ public class Camera
     @Setter
     private Vector3f position = new Vector3f();
     @Getter
+    @Setter
     private float pitch;
     @Getter
+    @Setter
     private float yaw;
     @Getter
+    @Setter
     private float roll;
 }

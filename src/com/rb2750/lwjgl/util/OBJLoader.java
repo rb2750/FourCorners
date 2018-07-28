@@ -21,12 +21,12 @@ public class OBJLoader
         List<Vector3f> vertices = new ArrayList<Vector3f>();
         List<Vector2f> textures = new ArrayList<Vector2f>();
         List<Vector3f> normals = new ArrayList<Vector3f>();
-        List<Byte> indices = new ArrayList<Byte>();
+        List<Integer> indices = new ArrayList<Integer>();
 
         float[] verticesArray = null;
         float[] normalsArray = null;
         float[] textureArray = null;
-        byte[] indicesArray = null;
+        int[] indicesArray = null;
 
         try
         {
@@ -59,7 +59,7 @@ public class OBJLoader
                 }
             }
 
-            while (line != null)
+            while (scanner.hasNextLine())
             {
                 if (!line.startsWith("f "))
                 {
@@ -70,8 +70,8 @@ public class OBJLoader
 
                 String[] currentLine = line.split(" ");
                 String[] vertex1 = currentLine[1].split("/");
-                String[] vertex2 = currentLine[1].split("/");
-                String[] vertex3 = currentLine[1].split("/");
+                String[] vertex2 = currentLine[2].split("/");
+                String[] vertex3 = currentLine[3].split("/");
 
                 processVertex(vertex1, indices, textures, normals, textureArray, normalsArray);
                 processVertex(vertex2, indices, textures, normals, textureArray, normalsArray);
@@ -88,7 +88,7 @@ public class OBJLoader
         }
 
         verticesArray = new float[vertices.size() * 3];
-        indicesArray = new byte[indices.size()];
+        indicesArray = new int[indices.size()];
 
         int vertexPointer = 0;
 
@@ -107,9 +107,9 @@ public class OBJLoader
         return new VertexArray(verticesArray, indicesArray, textureArray);
     }
 
-    private static void processVertex(String[] vertexData, List<Byte> indices, List<Vector2f> textures, List<Vector3f> normals, float[] textureArray, float[] normalsArray)
+    private static void processVertex(String[] vertexData, List<Integer> indices, List<Vector2f> textures, List<Vector3f> normals, float[] textureArray, float[] normalsArray)
     {
-        byte currentVertexPointer = (byte)(Byte.parseByte(vertexData[0]) - 1);
+        int currentVertexPointer = Integer.parseInt(vertexData[0]) - 1;
         indices.add(currentVertexPointer);
 
         Vector2f currentTex = textures.get(Integer.parseInt(vertexData[1]) - 1);
