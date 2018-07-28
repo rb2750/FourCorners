@@ -30,6 +30,8 @@ import se.albin.steamcontroller.SteamController;
 import se.albin.steamcontroller.SteamControllerListener;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class Main {
@@ -210,7 +212,6 @@ public class Main {
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
             listener.open();
             listener.addSubscriber((state, last) -> {
-                handleControls(state, last);
                 Input.updateSteamController(state, last);
                 runOnUIThread(() -> guiManager.handleInput(state, last));
             });
@@ -310,9 +311,9 @@ public class Main {
 
         glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override
-            public void invoke(long window, double xpos, double ypos) {
-                cursorLocation.setX((int) xpos);
-                cursorLocation.setY(gameHeight - (int) ypos);
+            public void invoke(long window, double xPos, double yPos) {
+                cursorLocation.setX((int) xPos);
+                cursorLocation.setY(gameHeight - (int) yPos);
             }
         });
 
@@ -320,13 +321,19 @@ public class Main {
         lastFPS = Util.getTime();
 
         Camera camera = new Camera();
-
+        long averageDeltaTime = 0;
+        int frameCount = 0;
         while (!glfwWindowShouldClose(window)) {
             deltaTime = Util.getTime() - lastFrame;
             lastFrame = Util.getTime();
+            averageDeltaTime += deltaTime;
+            frameCount++;
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Input.updateKeyboard();
+            Input.updateMouse(cursorLocation.getX(), cursorLocation.getY());
+            handleControls();
 
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
@@ -376,6 +383,10 @@ public class Main {
 
             if (Util.getTime() - lastFPS >= 1000) {
                 System.out.println("FPS: " + currentFPS);
+                System.out.println("Average deltaTime: " + (averageDeltaTime/frameCount));
+                averageDeltaTime = 0;
+                frameCount = 0;
+
                 currentFPS = 0;
                 lastFPS += 1000;
             }
@@ -406,12 +417,12 @@ public class Main {
         });
     }
 
-    public void handleControls(SteamController state, SteamController last) {
+    public void handleControls() {
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
 
-        double tileX = halfGameWidth * state.getRightTouchPosition().x() + halfGameWidth;
-        double tileY = halfGameHeight * state.getRightTouchPosition().y() + halfGameHeight;
+        double tileX = halfGameWidth * Input.Right_Analog_Stick.getX() + halfGameWidth;
+        double tileY = halfGameHeight * Input.Right_Analog_Stick.getY() + halfGameHeight;
 
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -419,10 +430,10 @@ public class Main {
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
 
-        Size size = new Size(100f * Math.max(1 - state.getLeftTrigger(), 0.3), 100f * Math.max(1 - state.getRightTrigger(), 0.3));
+        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
         selectyTile.setSize(size);
 
-        if (!Input.ButtonMap.get(Action.ShowBlock).state || state.getRightTouchPosition().x() == 0 && state.getRightTouchPosition().y() == 0)
+        if (!Input.ButtonMap.get(Action.ShowBlock).state || Input.Right_Analog_Stick.getX() == 0 && Input.Right_Analog_Stick.getY() == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         else
             selectyTile.move(new Location(world, tileX, tileY), true);
