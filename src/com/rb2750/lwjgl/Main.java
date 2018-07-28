@@ -212,6 +212,7 @@ public class Main {
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
             listener.open();
             listener.addSubscriber((state, last) -> {
+                Input.currentInputMode = InputMode.STEAM_CONTROLLER;
                 Input.updateSteamController(state, last);
                 runOnUIThread(() -> guiManager.handleInput(state, last));
             });
@@ -330,20 +331,24 @@ public class Main {
             frameCount++;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            if (Input.currentInputMode == InputMode.KEYBOARD)
+            {
+                Input.updateKeyboard();
+                Input.updateMouse(cursorLocation.getX(), cursorLocation.getY());
+            }
 
-            Input.updateKeyboard();
-            Input.updateMouse(cursorLocation.getX(), cursorLocation.getY());
             handleControls();
 
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
-                    if (XInputState.axes == null)
-                        XInputState.axes = ((XInputDevice14) xInputDevice).getComponents().getAxes();
+                    if (XInputState.getAxes() == null)
+                        XInputState.setAxes(((XInputDevice14) xInputDevice).getComponents().getAxes(), 0.23f, 0.23f);
 
                     if (((XInputDevice14) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice14) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
-                        XInputState.axes = components.getAxes();
+                        XInputState.setAxes(components.getAxes(), 0.23f, 0.23f);
 
                         if (XInputDevice14.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
@@ -352,13 +357,13 @@ public class Main {
 
                     //((XInputDevice14) xInputDevice).setVibration(20000, 20000);
                 } else {
-                    if (XInputState.axes == null)
-                        XInputState.axes = ((XInputDevice) xInputDevice).getComponents().getAxes();
+                    if (XInputState.getAxes() == null)
+                        XInputState.setAxes(((XInputDevice) xInputDevice).getComponents().getAxes(), 0.23f, 0.23f);
 
                     if (((XInputDevice) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
-                        XInputState.axes = components.getAxes();
+                        XInputState.setAxes(components.getAxes(), 0.23f, 0.23f);
 
                         if (XInputDevice.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
@@ -368,8 +373,12 @@ public class Main {
                     //((XInputDevice) xInputDevice).setVibration(5000, 5000);
                 }
 
-                Input.updateXInputController();
-                handleXInputControls();
+                if (Input.currentInputMode == InputMode.XINPUT_CONTROLLER)
+                {
+                    Input.updateXInputController();
+                    handleXInputControls();
+                }
+
                 XInputState.update();
             }
 
@@ -445,19 +454,19 @@ public class Main {
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
 
-        double tileX = halfGameWidth * XInputState.axes.rx + halfGameWidth;
-        double tileY = halfGameHeight * XInputState.axes.ry + halfGameHeight;
+        double tileX = halfGameWidth * XInputState.getAxes().rx + halfGameWidth;
+        double tileY = halfGameHeight * XInputState.getAxes().ry + halfGameHeight;
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
 
-        Size size = new Size(100f * (float) Math.max(1 - XInputState.axes.lt, 0.3), 100f * (float) Math.max(1 - XInputState.axes.rt, 0.3));
+        Size size = new Size(100f * (float) Math.max(1 - XInputState.getAxes().lt, 0.3), 100f * (float) Math.max(1 - XInputState.getAxes().rt, 0.3));
 
         selectyTile.setSize(size);
 
-        if (!Input.ButtonMap.get(Action.ShowBlock).state || XInputState.axes.rx == 0 && XInputState.axes.ry == 0)
+        if (!Input.ButtonMap.get(Action.ShowBlock).state || XInputState.getAxes().rx == 0 && XInputState.getAxes().ry == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         else
             selectyTile.move(new Location(world, tileX, tileY), true);

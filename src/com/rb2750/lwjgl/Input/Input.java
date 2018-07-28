@@ -1,9 +1,9 @@
 package com.rb2750.lwjgl.Input;
 
-import com.ivan.xinput.XInputDevice;
 import com.ivan.xinput.enums.XInputButton;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.util.Location;
+import lombok.Getter;
 import se.albin.steamcontroller.SteamController;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -19,6 +19,8 @@ public class Input {
     public static Location Right_Analog_Stick;
     public static double Left_Trigger;
     public static double Right_Trigger;
+
+    public static InputMode currentInputMode = InputMode.KEYBOARD;
 
     public static void Setup() {
         ButtonMap = new HashMap<>();
@@ -53,10 +55,10 @@ public class Input {
 
     public static void updateXInputController()
     {
-        Left_Analog_Stick.set(XInputState.axes.lx, XInputState.axes.ly);
-        Right_Analog_Stick.set(XInputState.axes.rx, XInputState.axes.ry);
-        Left_Trigger = XInputState.axes.lt;
-        Right_Trigger = XInputState.axes.rt;
+        Left_Analog_Stick.set(XInputState.getAxes().lx, XInputState.getAxes().ly);
+        Right_Analog_Stick.set(XInputState.getAxes().rx, XInputState.getAxes().ry);
+        Left_Trigger = XInputState.getAxes().lt;
+        Right_Trigger = XInputState.getAxes().rt;
 
         ButtonMap.get(Action.Jump).Set(XInputState.getFromCurrent(XInputButton.A), XInputState.getFromPrevious(XInputButton.A));
         ButtonMap.get(Action.Clear).Set(XInputState.getFromCurrent(XInputButton.B), XInputState.getFromPrevious(XInputButton.B));
@@ -69,9 +71,6 @@ public class Input {
 
     public static void updateKeyboard()
     {
-        // I don't know if you want XInput to use the same button map and analog stick variables,
-        // so I've get them together for now.
-
         ButtonMap.get(Action.Jump).Set(KeyboardHandler.isKeyDown(GLFW_KEY_SPACE));
         ButtonMap.get(Action.Clear).Set(KeyboardHandler.isKeyDown(GLFW_KEY_C));
         ButtonMap.get(Action.Squat).Set(KeyboardHandler.isKeyDown(GLFW_KEY_LEFT_SHIFT));
