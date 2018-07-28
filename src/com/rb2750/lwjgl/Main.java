@@ -30,6 +30,8 @@ import se.albin.steamcontroller.SteamController;
 import se.albin.steamcontroller.SteamControllerListener;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class Main {
@@ -320,10 +322,14 @@ public class Main {
         lastFPS = Util.getTime();
 
         Camera camera = new Camera();
-
+        long averageDeltaTime = 0;
+        int frameCount = 0;
         while (!glfwWindowShouldClose(window)) {
             deltaTime = Util.getTime() - lastFrame;
             lastFrame = Util.getTime();
+            averageDeltaTime += deltaTime;
+            frameCount++;
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Input.updateKeyboard();
@@ -376,6 +382,10 @@ public class Main {
 
             if (Util.getTime() - lastFPS >= 1000) {
                 System.out.println("FPS: " + currentFPS);
+                System.out.println("Average deltaTime: " + (averageDeltaTime/frameCount));
+                averageDeltaTime = 0;
+                frameCount = 0;
+
                 currentFPS = 0;
                 lastFPS += 1000;
             }
