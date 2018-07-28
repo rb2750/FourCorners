@@ -12,6 +12,7 @@ public class KeyboardHandler extends GLFWKeyCallback {
     //
     @Override
     public void invoke(long window, int key, int scancode, int action, int mods) {
+        Input.currentInputMode = InputMode.KEYBOARD;
         lastKeys[key] = keys[key];
         keys[key] = action != GLFW_RELEASE;
     }
