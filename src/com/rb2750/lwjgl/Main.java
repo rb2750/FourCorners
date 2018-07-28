@@ -212,7 +212,6 @@ public class Main {
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
             listener.open();
             listener.addSubscriber((state, last) -> {
-                handleControls(state, last);
                 Input.updateSteamController(state, last);
                 runOnUIThread(() -> guiManager.handleInput(state, last));
             });
@@ -333,6 +332,7 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Input.updateKeyboard();
+            handleControls();
 
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
