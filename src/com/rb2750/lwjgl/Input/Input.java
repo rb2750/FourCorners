@@ -14,13 +14,16 @@ public class Input {
     public static SteamController state;
     public static SteamController last;
 
+    public static InputMethod inputMethod;
+
     public static HashMap<Action, Button> ButtonMap;
     public static Location Left_Analog_Stick;
     public static Location Right_Analog_Stick;
     public static double Left_Trigger;
     public static double Right_Trigger;
 
-    public static void Setup() {
+    public static void Setup(InputMethod inputMethod) {
+        Input.inputMethod = inputMethod;
         ButtonMap = new HashMap<>();
 
         for (Action a : Action.values()) {
