@@ -23,6 +23,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
+
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -44,7 +45,7 @@ public class Main {
     private World world = new World();
     private Location cursorLocation = new Location();
 
-    //Input
+    //input
     private boolean usingXInput = false;
     private boolean usingXInput14 = false;
     private boolean xInputShowBox = false;
@@ -156,7 +157,7 @@ public class Main {
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
 
-        Input.Setup(InputMethod.SteamController);
+        Input.Setup(InputMode.KEYBOARD);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
@@ -203,6 +204,7 @@ public class Main {
         });
         Input.updateKeyboard();
 
+
         try {
             // check if XInput 1.3 is available
             if (XInputDevice.isAvailable()) {
@@ -222,17 +224,24 @@ public class Main {
 
         Object xInputDevice;
 
-        if (usingXInput || usingXInput14) {
+        if (usingXInput || usingXInput14)
+        {
             boolean notLoaded = false;
             Object[] devices;
 
-            try {
-                if (usingXInput && !usingXInput14) {
+            try
+            {
+                if (usingXInput && !usingXInput14)
+                {
                     devices = XInputDevice.getAllDevices();
-                } else {
+                }
+                else
+                {
                     devices = XInputDevice14.getAllDevices();
                 }
-            } catch (XInputNotLoadedException e) {
+            }
+            catch (XInputNotLoadedException e)
+            {
                 e.printStackTrace();
                 System.err.println("XInput is not loaded.");
                 usingXInput = false;
@@ -241,32 +250,38 @@ public class Main {
                 devices = null;
             }
 
-            if (!notLoaded) {
+            if (!notLoaded)
+            {
                 xInputDevice = devices[0];
 
-                XInputDeviceListener listener = new SimpleXInputDeviceListener() {
+                XInputDeviceListener listener = new SimpleXInputDeviceListener()
+                {
                     @Override
-                    public void connected() {
+                    public void connected()
+                    {
                         System.out.println("XInput device connected.");
                     }
 
                     @Override
-                    public void disconnected() {
+                    public void disconnected()
+                    {
                         System.out.println("XInput device disconnected.");
                     }
 
                     @Override
-                    public void buttonChanged(final XInputButton button, final boolean pressed) {
+                    public void buttonChanged(final XInputButton button, final boolean pressed)
+                    {
                         // the given button was just pressed (if pressed == true) or released (pressed == false)
-                        if (Input.inputMethod == InputMethod.xInput) {
-                            if (pressed) {
-                                System.out.println("XInput button pressed: " + button.name());
-                            } else {
-                                System.out.println("XInput button released: " + button.name());
-                            }
-
-                            XInputState.setButton(button, pressed);
+                        if (pressed)
+                        {
+                            System.out.println("XInput button pressed: " + button.name());
                         }
+                        else
+                        {
+                            System.out.println("XInput button released: " + button.name());
+                        }
+
+                        XInputState.setButton(button, pressed);
                     }
                 };
 
@@ -275,7 +290,8 @@ public class Main {
                 } else {
                     ((XInputDevice) xInputDevice).addListener(listener);
                 }
-            } else {
+            }
+            else {
                 xInputDevice = null;
             }
         } else {
@@ -310,17 +326,18 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Input.update();
+
             handleControls();
 
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
-                    if (XInputState.axes == null)
-                        XInputState.axes = ((XInputDevice14) xInputDevice).getComponents().getAxes();
+                    if (XInputState.getAxes() == null)
+                        XInputState.setAxes(((XInputDevice14) xInputDevice).getComponents().getAxes(), 0.23f, 0.23f);
 
                     if (((XInputDevice14) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice14) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
-                        XInputState.axes = components.getAxes();
+                        XInputState.setAxes(components.getAxes(), 0.23f, 0.23f);
 
                         if (XInputDevice14.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
@@ -329,13 +346,13 @@ public class Main {
 
                     //((XInputDevice14) xInputDevice).setVibration(20000, 20000);
                 } else {
-                    if (XInputState.axes == null)
-                        XInputState.axes = ((XInputDevice) xInputDevice).getComponents().getAxes();
+                    if (XInputState.getAxes() == null)
+                        XInputState.setAxes(((XInputDevice) xInputDevice).getComponents().getAxes(), 0.23f, 0.23f);
 
                     if (((XInputDevice) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
-                        XInputState.axes = components.getAxes();
+                        XInputState.setAxes(components.getAxes(), 0.23f, 0.23f);
 
                         if (XInputDevice.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
@@ -345,8 +362,12 @@ public class Main {
                     //((XInputDevice) xInputDevice).setVibration(5000, 5000);
                 }
 
-                Input.updateXInputController();
-                handleXInputControls();
+                if (Input.currentInputMode == InputMode.XINPUT_CONTROLLER)
+                {
+                    Input.updateXInputController();
+                    handleXInputControls();
+                }
+
                 XInputState.update();
             }
 
@@ -422,19 +443,19 @@ public class Main {
         double halfGameWidth = gameWidth / 2;
         double halfGameHeight = gameHeight / 2;
 
-        double tileX = halfGameWidth * XInputState.axes.rx + halfGameWidth;
-        double tileY = halfGameHeight * XInputState.axes.ry + halfGameHeight;
+        double tileX = halfGameWidth * XInputState.getAxes().rx + halfGameWidth;
+        double tileY = halfGameHeight * XInputState.getAxes().ry + halfGameHeight;
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
 
-        Size size = new Size(100f * (float) Math.max(1 - XInputState.axes.lt, 0.3), 100f * (float) Math.max(1 - XInputState.axes.rt, 0.3));
+        Size size = new Size(100f * (float) Math.max(1 - XInputState.getAxes().lt, 0.3), 100f * (float) Math.max(1 - XInputState.getAxes().rt, 0.3));
 
         selectyTile.setSize(size);
 
-        if (!Input.ButtonMap.get(Action.ShowBlock).state || XInputState.axes.rx == 0 && XInputState.axes.ry == 0)
+        if (!Input.ButtonMap.get(Action.ShowBlock).state || XInputState.getAxes().rx == 0 && XInputState.getAxes().ry == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         else
             selectyTile.move(new Location(world, tileX, tileY), true);
