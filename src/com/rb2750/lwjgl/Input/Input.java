@@ -77,6 +77,8 @@ public class Input {
         ButtonMap.get(Action.Squat).Set(KeyboardHandler.isKeyDown(GLFW_KEY_LEFT_SHIFT));
         ButtonMap.get(Action.ShowBlock).Set(KeyboardHandler.isKeyDown(GLFW_KEY_Q));
         ButtonMap.get(Action.PlaceBlock).Set(KeyboardHandler.isKeyDown(GLFW_KEY_E));
+
+        Left_Analog_Stick.set((KeyboardHandler.isKeyDown(GLFW_KEY_D).state?1:0) - (KeyboardHandler.isKeyDown(GLFW_KEY_A).state?1:0), 0);
     }
 
     private static float mouseSensitivity = 4f;
