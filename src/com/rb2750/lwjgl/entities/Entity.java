@@ -153,6 +153,13 @@ public abstract class Entity implements Cloneable {
 //        glTranslated(-translateX, -translateY, 0);
         handleAnimations();
 //        glPopMatrix();
+
+        if (interactingWithX != null) onInteract(interactingWithX);
+        if (interactingWithY != null) onInteract(interactingWithY);
+    }
+
+    public void onInteract(Entity other) {
+        //Empty stub
     }
 
     int x = 0;
