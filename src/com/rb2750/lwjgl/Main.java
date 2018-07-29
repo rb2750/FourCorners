@@ -101,10 +101,6 @@ public class Main {
 
         if (window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
-//        glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-//            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-//                glfwSetWindowShouldClose(window, true);
-//        });
 
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1);
@@ -127,34 +123,27 @@ public class Main {
         glfwShowWindow(window);
         glfwSetKeyCallback(window, keyCallback = new KeyboardHandler());
 
-
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
 
-//        glMatrixMode(GL_PROJECTION);
-//        glLoadIdentity();
-//        glOrtho(0, gameWidth, 0, gameHeight, 1, -1);
-//        glMatrixMode(GL_MODELVIEW);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glEnable(GL_CULL_FACE);
-//
-        glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_DEPTH_BUFFER_BIT);
-//        glDepthFunc(GL_LEQUAL);
-//        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-//        glClearDepth(1f);
+        glCullFace(GL_BACK);
 
-//        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
         glActiveTexture(GL_TEXTURE1);
 
         Shader.loadAllShaders();
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, -1, 1));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
         System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
         Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, 0.1f, 1000.0f));
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
+
+        Light light = new Light(new Vector3f(0, 200, -10), new Vector3f(1, 1, 1));
+        Shader.GENERAL.setUniform3f("lightPosition", light.getPosition());
+        Shader.GENERAL.setUniform3f("lightColour", light.getColour());
+
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
         player = new Player(new Location(world, 0, 0));
@@ -163,7 +152,6 @@ public class Main {
         Input.Setup(InputMode.KEYBOARD);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
-
     }
 
     private Stack<Runnable> toRun = new Stack<>();
@@ -183,26 +171,7 @@ public class Main {
                 System.out.println("RESIZE");
                 gameWidth = width;
                 gameHeight = height;
-//                glMatrixMode(GL_PROJECTION);
-//                glLoadIdentity();
                 glViewport(0, 0, width, height);
-//                glScissor(0, 0, width, height);
-////                double fovY = 1;
-////                double zNear = 0.01;
-////                double zFar = 100.0;
-////
-////                double aspect = (double) gameWidth / (double) gameHeight;
-////
-////                double fH = Math.tan(fovY / 360 * Math.PI) * zNear;
-////                double fW = fH * aspect;
-////                glFrustum(-fW, fW, -fH, fH, zNear, zFar);
-//                glOrtho(0, width, 0, height, 1, -1);
-//
-//                glMatrixMode(GL_MODELVIEW);
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f));
-
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.orthographic(0, gameWidth, 0, gameHeight, 1, -1));
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
                 System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
                 Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, 0.1f, 1000.0f));
@@ -331,9 +300,12 @@ public class Main {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
-            camera.setYaw(camera.getYaw() - 0.05f);
+            //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
+            camera.setPosition(new Vector3f(camera.getPosition().x, 250.0f,  300.0f));
+            //camera.setYaw(camera.getYaw() - 0.5f);
             //System.out.println(camera.getPosition());
+
+            player.setRotation(player.getRotation() + 1.0);
 
             Input.update();
 
@@ -375,7 +347,6 @@ public class Main {
                 if (Input.currentInputMode == InputMode.XINPUT_CONTROLLER)
                 {
                     Input.updateXInputController();
-                    handleXInputControls();
                 }
 
                 XInputState.update();
@@ -391,7 +362,7 @@ public class Main {
 
             if (Util.getTime() - lastFPS >= 1000) {
                 System.out.println("FPS: " + currentFPS);
-                System.out.println("Average deltaTime: " + (averageDeltaTime / frameCount));
+                System.out.println("Average deltaTime: " + ((float)averageDeltaTime / (float)frameCount));
                 averageDeltaTime = 0;
                 frameCount = 0;
 
@@ -405,25 +376,7 @@ public class Main {
         }
     }
 
-
     public Tile selectyTile;
-
-    private void controlsHandleUI(double tileX, double tileY, Size tileSize) {
-        runOnUIThread(() -> {
-            if (Input.ButtonMap.get(Action.PlaceBlock).state) {
-                Tile newTile = new Tile(new Location(world, tileX, tileY));
-                newTile.setSize(tileSize);
-
-                for (Entity entity : world.getEntities())
-                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-                world.addEntity(newTile);
-            }
-
-            if (Input.ButtonMap.get(Action.ShowGUI).state) {
-                guiManager.displayGUI(new SelectionGUI());
-            } else guiManager.hideGUI(SelectionGUI.class);
-        });
-    }
 
     public void handleControls() {
         double halfGameWidth = gameWidth / 2;
@@ -446,30 +399,19 @@ public class Main {
         else
             selectyTile.move(new Location(world, tileX, tileY), true);
 
-        controlsHandleUI(tileX, tileY, size);
-    }
+        runOnUIThread(() -> {
+            if (Input.ButtonMap.get(Action.PlaceBlock).state) {
+                Tile newTile = new Tile(new Location(world, tileX, tileY));
+                newTile.setSize(size);
 
-    public void handleXInputControls() {
-        double halfGameWidth = gameWidth / 2;
-        double halfGameHeight = gameHeight / 2;
+                for (Entity entity : world.getEntities())
+                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
+                world.addEntity(newTile);
+            }
 
-        double tileX = halfGameWidth * XInputState.getAxes().rx + halfGameWidth;
-        double tileY = halfGameHeight * XInputState.getAxes().ry + halfGameHeight;
-        if (selectyTile == null) {
-            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanBeInteractedWith(false);
-            runOnUIThread(() -> world.addEntity(selectyTile));
-        }
-
-        Size size = new Size(100f * (float) Math.max(1 - XInputState.getAxes().lt, 0.3), 100f * (float) Math.max(1 - XInputState.getAxes().rt, 0.3));
-
-        selectyTile.setSize(size);
-
-        if (!Input.ButtonMap.get(Action.ShowBlock).state || XInputState.getAxes().rx == 0 && XInputState.getAxes().ry == 0)
-            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
-        else
-            selectyTile.move(new Location(world, tileX, tileY), true);
-
-        controlsHandleUI(tileX, tileY, size);
+            if (Input.ButtonMap.get(Action.ShowGUI).state) {
+                guiManager.displayGUI(new SelectionGUI());
+            } else guiManager.hideGUI(SelectionGUI.class);
+        });
     }
 }

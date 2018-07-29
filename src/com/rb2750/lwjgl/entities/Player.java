@@ -93,10 +93,10 @@ public class Player extends Entity {
 
 
         };
-        texturePath = "res/textures/stallTexture.png";
+        texturePath = "res/textures/blue.png";
 
         //createMesh();
-        createMesh("res/models/stall.obj");
+        createMesh("res/models/Base Mesh sculpt 2.obj");
     }
 
 //    @Override

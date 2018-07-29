@@ -27,6 +27,13 @@ public class Cube extends Entity {
                 1, 0,
                 1, 1
         };
+
+        normals = new float[]{
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f
+        };
         texturePath = "res/textures/red.png";
 
         createMesh();

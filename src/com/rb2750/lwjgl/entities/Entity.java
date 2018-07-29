@@ -51,6 +51,7 @@ public abstract class Entity implements Cloneable {
     protected float[] vertices;
     protected int[] indices;
     protected float[] tcs;
+    protected float[] normals;
 
     protected float layer = 0.0f;
 
@@ -62,7 +63,7 @@ public abstract class Entity implements Cloneable {
 
     public void createMesh() {
         Main.instance.runOnUIThread(() -> {
-            mesh = new VertexArray(vertices, indices, tcs);
+            mesh = new VertexArray(vertices, indices, tcs, normals);
             texture = new Texture(texturePath);
         });
     }
@@ -71,6 +72,7 @@ public abstract class Entity implements Cloneable {
         Main.instance.runOnUIThread(() -> {
             mesh = OBJLoader.loadOBJ(filePath);
             texture = new Texture(texturePath);
+            texture.setReflectivity(0.5f);
         });
     }
 
@@ -163,8 +165,10 @@ public abstract class Entity implements Cloneable {
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float)location.getX(), (float)location.getY(), layer), 0, 0, (float) rotation, new Vector3f((float)size.getWidth(), (float)size.getHeight(), (float)size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float)location.getX(), (float)location.getY(), layer), 0, (float) rotation, 0, new Vector3f((float)size.getWidth(), (float)size.getHeight(), (float)size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
+        shader.setUniform1f("shineDamper", texture.getShineDamper());
+        shader.setUniform1f("reflectivity", texture.getReflectivity());
         texture.bind();
         mesh.render();
         shader.disable();

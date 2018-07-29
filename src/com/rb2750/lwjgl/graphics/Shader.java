@@ -15,6 +15,7 @@ public class Shader
 {
     public static final int VERTEX_ATTRIB = 0;
     public static final int TCOORD_ATTRIB = 1;
+    public static final int NORMAL_ATTRIB = 2;
 
     private boolean enabled = false;
 
@@ -65,6 +66,11 @@ public class Shader
     {
         if(!enabled) enable();
         glUniform1f(getUniform(name), value);
+    }
+
+    public void loadBoolean(String name, boolean value)
+    {
+        setUniform1f(name, value ? 1.0f : 0.0f);
     }
 
     public void setUniform2f(String name, Vector2f vector)

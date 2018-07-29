@@ -1,6 +1,8 @@
 package com.rb2750.lwjgl.graphics;
 
 import com.rb2750.lwjgl.util.BufferUtils;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -13,6 +15,13 @@ public class Texture
 {
     private int width, height;
     private int texture;
+
+    @Getter
+    @Setter
+    private float shineDamper = 1.0f;
+    @Getter
+    @Setter
+    private float reflectivity = 0.0f;
 
     public Texture(String path)
     {

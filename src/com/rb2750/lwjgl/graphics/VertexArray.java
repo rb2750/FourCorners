@@ -10,27 +10,19 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class VertexArray
 {
-    private int vao, vbo, ibo, tbo;
+    private int vao, vbo, ibo, tbo, nbo;
     private int count;
 
-    public VertexArray(float[] vertices, int[] indices, float[] textureCoordinates)
+    public VertexArray(float[] vertices, int[] indices, float[] textureCoordinates, float[] normals)
     {
         count = indices.length;
 
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
-        vbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, BufferUtils.createFloatBuffer(vertices), GL_STATIC_DRAW);
-        glVertexAttribPointer(Shader.VERTEX_ATTRIB, 3, GL_FLOAT, false, 0, 0);
-        glEnableVertexAttribArray(Shader.VERTEX_ATTRIB);
-
-        tbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, tbo);
-        glBufferData(GL_ARRAY_BUFFER, BufferUtils.createFloatBuffer(textureCoordinates), GL_STATIC_DRAW);
-        glVertexAttribPointer(Shader.TCOORD_ATTRIB, 2, GL_FLOAT, false, 0, 0);
-        glEnableVertexAttribArray(Shader.TCOORD_ATTRIB);
+        vbo = bindAttribute(Shader.VERTEX_ATTRIB, 3, vertices);
+        tbo = bindAttribute(Shader.TCOORD_ATTRIB, 2, textureCoordinates);
+        nbo = bindAttribute(Shader.NORMAL_ATTRIB, 3, normals);
 
         ibo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -39,6 +31,17 @@ public class VertexArray
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+    }
+
+    private int bindAttribute(int attributeNumber, int size, float[] data)
+    {
+        int attribID = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, attribID);
+        glBufferData(GL_ARRAY_BUFFER, BufferUtils.createFloatBuffer(data), GL_STATIC_DRAW);
+        glVertexAttribPointer(attributeNumber, size, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(attributeNumber);
+
+        return attribID;
     }
 
     public void bind()
