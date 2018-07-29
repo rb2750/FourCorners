@@ -54,18 +54,20 @@ public abstract class Animation {
 
         if (currFrame.position != null && nextFrame.position != null) {
             Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
-            entity.move(dLoc);
+            if (!entity.move(dLoc)) return;
+        }
+        if (currFrame.size != null && nextFrame.size != null) {
+            Size dSize = nextFrame.size.clone().subtract(currFrame.size).multiply(dTime);
+            if (entity.setSize(entity.getSize().clone().add(dSize))) {
+                Size halfSize = dSize.clone().multiply(0.5);
+
+                entity.move(entity.getLocation().clone().add(-halfSize.getWidth(), 0));
+            }
+            else return;
         }
         if (currFrame.rotation != null && nextFrame.rotation != null) {
             Vector3f dRot = (entity.getRotation().add((nextFrame.rotation.sub(currFrame.rotation)).mul((float)dTime)).mul((float)entity.getFacing()));
             entity.rotate(dRot);
-        }
-        if (currFrame.size != null && nextFrame.size != null) {
-            Size dSize = nextFrame.size.clone().subtract(currFrame.size).multiply(dTime);
-            entity.setSize(entity.getSize().clone().add(dSize));
-            Size halfSize = dSize.clone().multiply(0.5);
-
-            entity.move(entity.getLocation().clone().add(-halfSize.getWidth(), 0));
         }
 
         timeOfCurrFrame += dTime;

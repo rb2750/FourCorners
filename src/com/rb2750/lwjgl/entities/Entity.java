@@ -70,6 +70,7 @@ public abstract class Entity implements Cloneable {
         Main.instance.runOnUIThread(() -> {
             mesh = new VertexArray(vertices, indices, tcs, normals);
             texture = new Texture(texturePath);
+            texture.setReflectivity(0.5f);
         });
     }
 
@@ -95,7 +96,7 @@ public abstract class Entity implements Cloneable {
         return move(location, false);
     }
 
-    public void setSize(Size size) {
+    public boolean setSize(Size size) {
         Entity intersectsWith = location.getWorld().intersects(this, Util.getRectangle(getLocation(), size));
 
         if (intersectsWith != null) {
@@ -104,7 +105,7 @@ public abstract class Entity implements Cloneable {
             boolean top = intersectsWith.getLocation().getY() >= getLocation().getY();
 //            boolean bottom = intersectsWith.getLocation().getY() + intersectsWith.getSize().getHeight() > getLocation().getY();
 
-            if (top && !left && !right) return;
+            if (top && !left && !right) return false;
 //            if (bottom)
 //                if (!move(new Location(getWorld(), getLocation().getX(), getLocation().getY() + Math.abs(getSize().getHeight() - size.getHeight()))))
 //                    return;
@@ -118,11 +119,12 @@ public abstract class Entity implements Cloneable {
             if (moveTo != null) {
                 if (location.getWorld().intersects(this, Util.getRectangle(moveTo, size)) == null)
                     this.location = moveTo;
-                else return;
+                else return false;
             }
         }
 
         this.size = size;
+        return true;
     }
 
     public boolean onGround() {
