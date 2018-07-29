@@ -27,6 +27,7 @@ public class Shader
     public static Shader GENERAL;
     public static Shader WATER;
     public static Shader GUI;
+    public static Shader FONT;
 
     public Shader(String vertex, String fragment)
     {
@@ -38,6 +39,7 @@ public class Shader
         GENERAL = new Shader("res/shaders/general.vert", "res/shaders/general.frag");
         WATER = new Shader("res/shaders/water.vert", "res/shaders/water.frag");
         GUI = new Shader("res/shaders/gui.vert", "res/shaders/gui.frag");
+        FONT = new Shader("res/shaders/font.vert", "res/shaders/font.frag");
     }
 
     public int getUniform(String name)

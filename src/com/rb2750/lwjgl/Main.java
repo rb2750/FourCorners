@@ -5,10 +5,14 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.graphics.Texture;
 import com.rb2750.lwjgl.graphics.WaterFrameBuffers;
 import com.rb2750.lwjgl.graphics.WaterRenderer;
 import com.rb2750.lwjgl.gui.GUIRenderer;
 import com.rb2750.lwjgl.gui.GUITexture;
+import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
+import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
+import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
 import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
@@ -18,6 +22,7 @@ import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.Version;
@@ -34,6 +39,7 @@ import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import java.io.File;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,6 +182,11 @@ public class Main {
         world.addEntity(player);
 
         Input.Setup(InputMode.KEYBOARD);
+
+        TextMaster.init();
+
+        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+        GUIText text = new GUIText("The quick brown dog jumped over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1.0f, true);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
@@ -442,6 +453,7 @@ public class Main {
             guiManager.render();
 
             guiRenderer.render(guis);
+            TextMaster.render();
 
             glfwSwapBuffers(window);
             glfwPollEvents();

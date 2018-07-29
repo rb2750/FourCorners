@@ -28,6 +28,20 @@ public class VertexArray
         glBindVertexArray(0);
     }
 
+    public VertexArray(float[] vertices, float[] textureCoordinates, int vertexSize)
+    {
+        count = vertices.length / vertexSize;
+
+        vao = glGenVertexArrays();
+        glBindVertexArray(vao);
+
+        vbo = bindAttribute(Shader.VERTEX_ATTRIB, vertexSize, vertices);
+        tbo = bindAttribute(Shader.TCOORD_ATTRIB, 2, textureCoordinates);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
     public VertexArray(float[] vertices, int[] indices, float[] textureCoordinates, float[] normals)
     {
         count = indices.length;
@@ -85,5 +99,10 @@ public class VertexArray
         bind();
         draw();
         unbind();
+    }
+
+    public int getVAO()
+    {
+        return vao;
     }
 }
