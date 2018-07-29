@@ -451,7 +451,7 @@ public class Main implements InputListener {
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
-        double rot = state.getLeftTrigger() * 90;
+        Vector3f rot = new Vector3f((float)(state.getLeftTrigger() * 90), (float)(state.getLeftTrigger() * 90), 0);
 //        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
         Size size = new Size(100f, 100f);
 //        selectyTile.setSize(size);

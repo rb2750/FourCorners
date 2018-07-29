@@ -6,8 +6,11 @@ import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.input.InputListener;
 import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.input.controllers.*;
+import com.rb2750.lwjgl.maths.Vector3;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
+import org.joml.Vector3f;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Player extends Entity implements InputListener, Collidable {
@@ -165,7 +168,7 @@ public class Player extends Entity implements InputListener, Collidable {
 
         getAcceleration().setX(speed * state.getAnalogStick().x());
 
-        if (state.isHomeHeld()) rotate(2);
+        if (state.isHomeHeld()) rotate(new Vector3f(2,2,2));
 
         if (!animationExists(SquatAnimation.class)) {
             if (state.isXHeld() && !last.isXHeld()) addAnimation(new SquatAnimation());

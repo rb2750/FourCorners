@@ -13,10 +13,10 @@ public class SquashAnimation extends Animation {
     @Override
     public Keyframe[] getKeyFrames() {
         return new Keyframe[] {
-                new Keyframe(null, 0, new Size(100.0f,100.0f), false),
-                new Keyframe(null, 0, new Size(200.0f,050.0f), false),
-                new Keyframe(null, 0, new Size(070.0f,120.0f), false),
-                new Keyframe(null, 0, new Size(100.0f,100.0f), false)
+                new Keyframe(null, null, new Size(100.0f,100.0f), false),
+                new Keyframe(null, null, new Size(200.0f,050.0f), false),
+                new Keyframe(null, null, new Size(070.0f,120.0f), false),
+                new Keyframe(null, null, new Size(100.0f,100.0f), false)
         };
     }
 }

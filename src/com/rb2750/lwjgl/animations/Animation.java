@@ -6,6 +6,7 @@ import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.joml.Vector3f;
 
 public abstract class Animation {
     @Getter
@@ -55,8 +56,8 @@ public abstract class Animation {
             Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
             entity.move(dLoc);
         }
-        if (currFrame.rotation != 0 && nextFrame.rotation != 0) {
-            double dRot = (entity.getRotation() + ((nextFrame.rotation - currFrame.rotation) * dTime) * entity.getFacing());
+        if (currFrame.rotation != null && nextFrame.rotation != null) {
+            Vector3f dRot = (entity.getRotation().add((nextFrame.rotation.sub(currFrame.rotation)).mul((float)dTime)).mul((float)entity.getFacing()));
             entity.rotate(dRot);
         }
         if (currFrame.size != null && nextFrame.size != null) {
