@@ -443,8 +443,6 @@ public class Main implements InputListener {
         double halfGameWidth = gameWidth / 2f;
         double halfGameHeight = gameHeight / 2f;
 
-        System.out.println(state.getAnalogRight().x() + ":" + state.getAnalogRight().y() + ":" + state.isRightPadTouched());
-
         double tileX = halfGameWidth * state.getAnalogRight().x() + halfGameWidth;
         double tileY = halfGameHeight * state.getAnalogRight().y() + halfGameHeight;
 

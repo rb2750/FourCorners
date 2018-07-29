@@ -40,6 +40,7 @@ public abstract class Entity implements Cloneable {
     @Getter
     @Setter
     private int facing = Direction.RIGHT;
+    @Getter
     private java.util.List<Animation> animations = new ArrayList<>();
     private List<Animation> pendingAnimations = new ArrayList<>();
     @Getter
@@ -162,7 +163,7 @@ public abstract class Entity implements Cloneable {
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float)location.getX(), (float)location.getY(), layer), (float) rotation, (float) rotation, 0, new Vector3f((float)size.getWidth(), (float)size.getHeight(), (float)size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), (float) rotation, (float) rotation, 0, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         shader.setUniform1f("shineDamper", texture.getShineDamper());
         shader.setUniform1f("reflectivity", texture.getReflectivity());
@@ -191,18 +192,11 @@ public abstract class Entity implements Cloneable {
     }
 
     public void addAnimation(Animation animation) {
-        //Stop any issues with changing size while squatting
-        //if (squat && !(animation instanceof SquatAnimation) && (animation.getFlags() & AnimationFlag.SIZE) > 0) return;
-
         for (Animation a : new ArrayList<>(animations)) {
             if (a.getClass().equals(animation.getClass())) {
-//                pendingAnimations.add(animation);
                 return;
             }
         }
-
-        //Find conflicts (stop glitchy rendering)
-        //for (Animation a : animations) if ((a.getFlags() & animation.getFlags()) > 0) return;
 
         animations.add(animation);
     }
@@ -231,13 +225,13 @@ public abstract class Entity implements Cloneable {
             pendingAnimations.remove(pending);
             addAnimation(pending);
         }
+
         for (Animation animation : new ArrayList<>(animations)) {
             animation.doAnimation(this);
         }
     }
 
-    public void cleanUp()
-    {
+    public void cleanUp() {
         mesh.cleanUp();
         texture.cleanUp();
     }

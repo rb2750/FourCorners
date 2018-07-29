@@ -13,59 +13,71 @@ public abstract class Animation {
     private double remainingTime;
     private double timePerFrame;
     private int currentFrame;
+    @Getter
     private Entity original;
     private boolean paused;
     private double timeOfCurrFrame;
 
-
     Animation(double time) {
         this.remainingTime = time;
         this.currentFrame = 0;
-        this.timePerFrame = (float)time / (float)getKeyFrames().length;
+        this.timePerFrame = (float) time / (float) getKeyFrames().length;
         this.paused = false;
         this.timeOfCurrFrame = 0;
     }
 
     public void doAnimation(Entity entity) {
-        if(original == null) original = entity.clone();
-        
-        if(paused && timeOfCurrFrame < 0.05) {
-            if(getKeyFrames()[currentFrame].pauseFrame) {return;}
+        if (original == null) {
+            for (Animation animation : entity.getAnimations()) {
+                original = animation.getOriginal();
+                break;
+            }
+            if (original == null) original = entity.clone();
         }
 
-        // Rob: you don't need the equals
-        if(currentFrame >= getKeyFrames().length-1) {
+        if (paused && timeOfCurrFrame < 0.05) {
+            if (getKeyFrames()[currentFrame].pauseFrame) {
+                return;
+            }
+        }
+
+        if (currentFrame >= getKeyFrames().length - 1) {
             this.onFinish(entity);
             entity.removeAnimation(this);
             return;
         }
 
         Keyframe currFrame = getKeyFrames()[currentFrame];
-        Keyframe nextFrame = getKeyFrames()[currentFrame+1];
-        double dTime = (double)Main.getDeltaTime()/1000;
+        Keyframe nextFrame = getKeyFrames()[currentFrame + 1];
+        double dTime = (double) Main.getDeltaTime();
 
-        if(currFrame.position != null && nextFrame.position != null){
+        if (currFrame.position != null && nextFrame.position != null) {
             Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
             entity.move(dLoc);
         }
-        if(currFrame.rotation != 0 && nextFrame.rotation != 0){
-            double dRot = (entity.getRotation()+((nextFrame.rotation - currFrame.rotation) * dTime) * entity.getFacing());
+        if (currFrame.rotation != 0 && nextFrame.rotation != 0) {
+            double dRot = (entity.getRotation() + ((nextFrame.rotation - currFrame.rotation) * dTime) * entity.getFacing());
             entity.rotate(dRot);
         }
-        if(currFrame.size != null && nextFrame.size != null){
+        if (currFrame.size != null && nextFrame.size != null) {
             Size dSize = nextFrame.size.clone().subtract(currFrame.size).multiply(dTime);
             entity.setSize(entity.getSize().clone().add(dSize));
             Size halfSize = dSize.clone().multiply(0.5);
-            
-            entity.move(entity.getLocation().clone().add(-halfSize.getWidth(),0));
+
+            entity.move(entity.getLocation().clone().add(-halfSize.getWidth(), 0));
         }
 
         timeOfCurrFrame += dTime;
-        if(timeOfCurrFrame > timePerFrame) {currentFrame++; timeOfCurrFrame = 0;}
+        if (timeOfCurrFrame > timePerFrame) {
+            currentFrame++;
+            timeOfCurrFrame = 0;
+        }
         remainingTime--;
     }
 
     public void onFinish(Entity entity) {
+        if (entity.getAnimations().size() > 1) return;
+
         //entity.move(original.getLocation());
         entity.setRotation(original.getRotation());
         entity.setSize(original.getSize());
@@ -74,6 +86,7 @@ public abstract class Animation {
     public void Pause() {
         paused = true;
     }
+
     public void Unpause() {
         paused = false;
     }
