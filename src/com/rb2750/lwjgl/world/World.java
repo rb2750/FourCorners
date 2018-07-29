@@ -1,11 +1,7 @@
 package com.rb2750.lwjgl.world;
 
-import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.animations.SquashAnimation;
-import com.rb2750.lwjgl.entities.Camera;
-import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.entities.Player;
-import com.rb2750.lwjgl.entities.Tile;
+import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
 import org.joml.Vector4f;
@@ -59,8 +55,8 @@ public class World {
                 /*
                   Handle steps
                  */
-                if (interactingWithX != null && interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight() - entity.getLocation().getY() < 60 && entity.onGround()) {
-                    entity.getLocation().setY(interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight());
+
+                if (interactingWithX != null && interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight() - entity.getLocation().getY() < 60 && entity.onGround() && entity.move(entity.getLocation().clone().setY(interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight()))) {
                     skipY = true;
                 } else {
                     if (interactingWithX != null) {
@@ -95,10 +91,8 @@ public class World {
         }
     }
 
-    public void renderWorld(Camera camera, Vector4f clipPlane)
-    {
-        for (Entity entity : entities)
-        {
+    public void renderWorld(Camera camera, Vector4f clipPlane) {
+        for (Entity entity : entities) {
             renderEntity(entity, camera, clipPlane);
         }
     }

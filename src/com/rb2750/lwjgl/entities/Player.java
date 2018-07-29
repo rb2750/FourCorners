@@ -161,7 +161,7 @@ public class Player extends Entity implements InputListener {
             getAcceleration().setY(21);
         }
 
-        getAcceleration().setX((speed * state.getAnalogStick().x()));
+        getAcceleration().setX(speed * state.getAnalogStick().x());
 
         if (state.isHomeHeld()) rotate(2);
 
