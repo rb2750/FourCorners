@@ -357,12 +357,6 @@ public class Main {
 
         glEnable(GL_CLIP_DISTANCE0);
 
-        Player player2 = new Player(new Location(world, 45, -75));
-        world.addEntity(player2);
-
-        Player player3 = new Player(new Location(world, 30, -5));
-        world.addEntity(player3);
-
         // Used to reduce glitchy edges when water intersects geometry.
         float waterHeightIncrease = 0.5f;
 
@@ -373,17 +367,8 @@ public class Main {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
-            //camera.setPosition(new Vector3f(camera.getPosition().x + 0.1f, 100.0f,  0.0f));
-            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
-            //camera.setYaw(camera.getYaw() - 0.5f);
-            camera.setPitch(55.0f);
-            //System.out.println(camera.getPosition());
-
-            player.move(new Location(world, 75, -5), true);
-            player.setRotation(player.getRotation() + 1.0);
-            player2.setRotation(player2.getRotation() - 2.0);
-            player3.setRotation(player3.getRotation() + 3.5);
+            camera.Move(new Vector3f((float)Input.Right_Analog_Stick.getX(), (float)Input.Right_Analog_Stick.getY(), Input.ButtonMap.get(Action.Home).state?1:0));
+            camera.setPitch(0f);
 
             Input.update();
 

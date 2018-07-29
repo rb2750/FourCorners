@@ -25,4 +25,6 @@ public class Camera
     {
         this.pitch = -pitch;
     }
+
+    public void Move(Vector3f movementVector) {position.add(movementVector);}
 }

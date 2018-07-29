@@ -133,7 +133,7 @@ public class Player extends Entity {
         }
 
         if (Input.ButtonMap.get(Action.Home).state) {
-            setSize(new Size(getSize().getWidth() + 1, getSize().getHeight()));
+        //    setSize(new Size(getSize().getWidth() + 1, getSize().getHeight()));
         }
 
     }
