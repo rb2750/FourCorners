@@ -10,10 +10,10 @@ import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Player extends Entity implements InputListener {
-    private float speed = 8f;
-    private boolean jumping = false;
-    private boolean doubleJump = false;
+public class Player extends Entity implements InputListener, Collidable {
+    float speed = 8f;
+    boolean jumping = false;
+    boolean doubleJump = false;
 
     public Player(Location location) {
         super(location, new Size(100, 100), Shader.GENERAL);
@@ -200,6 +200,11 @@ public class Player extends Entity implements InputListener {
 
     @Override
     public void handleMouseInput(Mouse mouse) {
+
+    }
+
+    @Override
+    public void OnCollide(Entity e) {
 
     }
 }
