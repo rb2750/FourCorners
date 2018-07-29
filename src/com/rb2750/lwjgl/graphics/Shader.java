@@ -5,6 +5,7 @@ import com.rb2750.lwjgl.util.ShaderUtils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,8 @@ public class Shader
     private Map<String, Integer> locationCache = new HashMap<String, Integer>();
 
     public static Shader GENERAL;
+    public static Shader WATER;
+    public static Shader GUI;
 
     public Shader(String vertex, String fragment)
     {
@@ -33,6 +36,8 @@ public class Shader
     public static void loadAllShaders()
     {
         GENERAL = new Shader("res/shaders/general.vert", "res/shaders/general.frag");
+        WATER = new Shader("res/shaders/water.vert", "res/shaders/water.frag");
+        GUI = new Shader("res/shaders/gui.vert", "res/shaders/gui.frag");
     }
 
     public int getUniform(String name)
@@ -85,6 +90,13 @@ public class Shader
         if(!enabled) enable();
 
         glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
+    }
+
+    public void setUniform4f(String name, Vector4f vector)
+    {
+        if(!enabled) enable();
+
+        glUniform4f(getUniform(name), vector.x, vector.y, vector.z, vector.w);
     }
 
     public void setUniformMat4f(String name, Matrix4f matrix)

@@ -126,10 +126,6 @@ public class Tile extends Entity {
         createMesh();
     }
 
-    @Override
-    public void update(Camera camera) {
-        super.update(camera);
-    }
 //    @Override
 //    public void renderEntity(Camera camera) {
 //        drawSquare(getLocation().getX(), getLocation().getY(), getSize().getWidth(), getSize().getHeight());

@@ -20,4 +20,9 @@ public class Camera
     @Getter
     @Setter
     private float roll;
+
+    public void invertPitch()
+    {
+        this.pitch = -pitch;
+    }
 }

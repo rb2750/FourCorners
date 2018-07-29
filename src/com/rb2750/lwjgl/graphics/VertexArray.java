@@ -2,6 +2,7 @@ package com.rb2750.lwjgl.graphics;
 
 import com.rb2750.lwjgl.util.BufferUtils;
 
+import lombok.Getter;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -11,7 +12,21 @@ import static org.lwjgl.opengl.GL30.*;
 public class VertexArray
 {
     private int vao, vbo, ibo, tbo, nbo;
+    @Getter
     private int count;
+
+    public VertexArray(float[] vertices, int vertexSize)
+    {
+        count = vertices.length / vertexSize;
+
+        vao = glGenVertexArrays();
+        glBindVertexArray(vao);
+
+        vbo = bindAttribute(Shader.VERTEX_ATTRIB, vertexSize, vertices);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
 
     public VertexArray(float[] vertices, int[] indices, float[] textureCoordinates, float[] normals)
     {
@@ -47,12 +62,16 @@ public class VertexArray
     public void bind()
     {
         glBindVertexArray(vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+        if (ibo != 0)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     }
 
     public void unbind()
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        if (ibo != 0)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
         glBindVertexArray(0);
     }
 

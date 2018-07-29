@@ -39,11 +39,6 @@ public class Cube extends Entity {
         createMesh();
     }
 
-    @Override
-    public void update(Camera camera) {
-        super.update(camera);
-    }
-
     //    @Override
 //    public void renderEntity(Camera camera) {
 ////        rotate(5);

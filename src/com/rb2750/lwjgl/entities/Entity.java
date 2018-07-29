@@ -9,6 +9,7 @@ import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public abstract class Entity implements Cloneable {
     private boolean squat = false;
 
     protected VertexArray mesh;
+    @Getter
     protected Texture texture;
     protected Shader shader;
 
@@ -134,7 +136,7 @@ public abstract class Entity implements Cloneable {
         rotation %= 360;
     }
 
-    public void update(Camera camera) {
+    public void update() {
         if (getAcceleration().getX() < 0) setFacing(Direction.LEFT);
         if (getAcceleration().getX() > 0) setFacing(Direction.RIGHT);
 //        glMatrixMode(GL_MODELVIEW);
@@ -144,7 +146,7 @@ public abstract class Entity implements Cloneable {
 //        glTranslated(translateX, translateY, 0);
 //        glRotated(rotation, 0, 0, 1);
 //        glTranslated(-translateX, -translateY, 0);
-        render(camera);
+        handleAnimations();
 //        glPopMatrix();
     }
 
@@ -154,13 +156,7 @@ public abstract class Entity implements Cloneable {
         return location.getWorld();
     }
 
-    public void render(Camera camera) {
-        handleAnimations();
-
-        renderEntity(camera);
-    }
-
-    public void renderEntity(Camera camera) {
+    public void render(Camera camera, Vector4f clipPlane) {
         if (mesh == null || shader == null || camera == null || texture == null)
             return;
 
@@ -169,6 +165,7 @@ public abstract class Entity implements Cloneable {
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         shader.setUniform1f("shineDamper", texture.getShineDamper());
         shader.setUniform1f("reflectivity", texture.getReflectivity());
+        shader.setUniform4f("clipPlane", clipPlane);
         texture.bind();
         mesh.render();
         shader.disable();

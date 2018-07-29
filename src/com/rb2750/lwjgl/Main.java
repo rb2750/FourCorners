@@ -5,6 +5,10 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.graphics.WaterFrameBuffers;
+import com.rb2750.lwjgl.graphics.WaterRenderer;
+import com.rb2750.lwjgl.gui.GUIRenderer;
+import com.rb2750.lwjgl.gui.GUITexture;
 import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.Shader;
@@ -15,6 +19,7 @@ import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.Version;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -22,6 +27,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
@@ -29,10 +35,17 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class Main {
     public static Main instance;
+
+    public static final float ORTHO_NEAR_PLANE = -1.0f;
+    public static final float ORTHO_FAR_PLANE = 1.0f;
+    public static final float PERSP_NEAR_PLANE = 0.1f;
+    public static final float PERSP_FAR_PLANE = 1000.0f;
 
     boolean doubleJump = false;
     // The window handle
@@ -57,6 +70,10 @@ public class Main {
 
     private int currentFPS;
     private long lastFPS;
+
+    private Matrix4f currentProjMatrix;
+
+    private Light light;
 
     /**
      * Rob Notes for Rob
@@ -126,6 +143,8 @@ public class Main {
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
 
+        glViewport(0, 0, gameWidth, gameHeight);
+
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -136,11 +155,18 @@ public class Main {
         Shader.loadAllShaders();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
         System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
-        Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, 0.1f, 1000.0f));
+        currentProjMatrix = new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+        Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.GENERAL.disable();
+        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
+        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
+//        Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
+//        Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
+        Shader.WATER.disable();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
 
-        Light light = new Light(new Vector3f(0, 200, -10), new Vector3f(1, 1, 1));
+        light = new Light(new Vector3f(80, 10, -30), new Vector3f(1, 1, 1));
         Shader.GENERAL.setUniform3f("lightPosition", light.getPosition());
         Shader.GENERAL.setUniform3f("lightColour", light.getColour());
 
@@ -162,7 +188,7 @@ public class Main {
 
     private static long lastFrame;
     @Getter
-    private static long deltaTime;
+    private static float deltaTime;
 
     private void loop() {
         glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
@@ -174,7 +200,15 @@ public class Main {
                 glViewport(0, 0, width, height);
                 //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
                 System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
-                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, 0.1f, 1000.0f));
+                currentProjMatrix = new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.GENERAL.disable();
+                Shader.WATER.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
+                Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
+//                Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
+//                Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
+                Shader.WATER.disable();
             }
         });
         Input.updateKeyboard();
@@ -285,27 +319,60 @@ public class Main {
             }
         });
 
-
         Sync sync = new Sync();
         lastFPS = Util.getTime();
 
         Camera camera = new Camera();
-        long averageDeltaTime = 0;
-        int frameCount = 0;
+        float averageDeltaTime = 0.0f;
+
+        Shader.GENERAL.disable();
+
+        List<Water> waters = new ArrayList<Water>();
+        Water water = new Water(-10, 75, -75);
+        waters.add(water);
+
+        WaterFrameBuffers fbos = new WaterFrameBuffers();
+
+        WaterRenderer waterRenderer = new WaterRenderer(currentProjMatrix, fbos);
+
+        List<GUITexture> guis = new ArrayList<GUITexture>();
+
+//        GUITexture reflectGUI = new GUITexture(fbos.getReflectionTexture(), new Vector2f(-0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
+//        GUITexture refractGUI = new GUITexture(fbos.getRefractionTexture(), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
+//        guis.add(reflectGUI);
+//        guis.add(refractGUI);
+
+        GUIRenderer guiRenderer = new GUIRenderer();
+
+        glEnable(GL_CLIP_DISTANCE0);
+
+        Player player2 = new Player(new Location(world, 45, -75));
+        world.addEntity(player2);
+
+        Player player3 = new Player(new Location(world, 30, -5));
+        world.addEntity(player3);
+
+        // Used to reduce glitchy edges when water intersects geometry.
+        float waterHeightIncrease = 0.5f;
+
         while (!glfwWindowShouldClose(window)) {
-            deltaTime = Util.getTime() - lastFrame;
+            deltaTime = (float)(Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
-            frameCount++;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
-            camera.setPosition(new Vector3f(camera.getPosition().x, 250.0f,  300.0f));
+            //camera.setPosition(new Vector3f(camera.getPosition().x + 0.1f, 100.0f,  0.0f));
+            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
             //camera.setYaw(camera.getYaw() - 0.5f);
+            camera.setPitch(55.0f);
             //System.out.println(camera.getPosition());
 
+            player.move(new Location(world, 75, -5), true);
             player.setRotation(player.getRotation() + 1.0);
+            player2.setRotation(player2.getRotation() - 2.0);
+            player3.setRotation(player3.getRotation() + 3.5);
 
             Input.update();
 
@@ -353,18 +420,36 @@ public class Main {
             }
 
             while (!toRun.isEmpty()) toRun.pop().run();
-            world.update(player, camera, selectyTile);
+            world.update(player, selectyTile);
 
-            guiManager.update();
+            fbos.bindReflectionFrameBuffer();
+            float distance = 2 * (camera.getPosition().y - water.getHeight());
+            camera.getPosition().y -= distance;
+            camera.invertPitch();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            world.renderWorld(camera, new Vector4f(0, 1, 0, -water.getHeight() + waterHeightIncrease));
+            camera.getPosition().y += distance;
+            camera.invertPitch();
+
+            fbos.bindRefractionFrameBuffer();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
+            fbos.unbindFrameBuffer();
+
+            world.renderWorld(camera, new Vector4f(0, 0, 0, 0));
+            waterRenderer.render(waters, camera, light, deltaTime);
+
+            guiManager.render();
+
+            guiRenderer.render(guis);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
 
             if (Util.getTime() - lastFPS >= 1000) {
                 System.out.println("FPS: " + currentFPS);
-                System.out.println("Average deltaTime: " + ((float)averageDeltaTime / (float)frameCount));
+                System.out.println("Average deltaTime: " + (averageDeltaTime / currentFPS));
                 averageDeltaTime = 0;
-                frameCount = 0;
 
                 currentFPS = 0;
                 lastFPS += 1000;

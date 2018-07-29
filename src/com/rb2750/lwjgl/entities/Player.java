@@ -12,7 +12,7 @@ public class Player extends Entity {
     boolean doubleJump = false;
 
     public Player(Location location) {
-        super(location, new Size(100, 100), Shader.GENERAL);
+        super(location, new Size(10, 10), Shader.GENERAL);
         setGravity(true);
 
         vertices = new float[]{
@@ -93,6 +93,8 @@ public class Player extends Entity {
 
 
         };
+
+        layer = -45.0f;
         texturePath = "res/textures/blue.png";
 
         //createMesh();
@@ -105,8 +107,8 @@ public class Player extends Entity {
 //    }
 
     @Override
-    public void update(Camera camera) {
-        super.update(camera);
+    public void update() {
+        super.update();
 
         if (Input.ButtonMap.get(Action.Jump).state) {
             if (!doubleJump && jumping && !onGround() && !Input.ButtonMap.get(Action.Jump).last /* && player.getAcceleration().getY() < 0*/) {

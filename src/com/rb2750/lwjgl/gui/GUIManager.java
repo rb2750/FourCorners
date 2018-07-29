@@ -22,7 +22,7 @@ public class GUIManager {
         }
     }
 
-    public void update() {
+    public void render() {
         for (GUI gui : displayedGUIs) {
             gui.draw();
         }

@@ -8,6 +8,7 @@ uniform mat4 pr_matrix = mat4(1.0);
 uniform mat4 vw_matrix = mat4(1.0);
 uniform mat4 ml_matrix = mat4(1.0);
 uniform vec3 lightPosition;
+uniform vec4 clipPlane;
 
 out DATA
 {
@@ -19,6 +20,8 @@ out DATA
 
 void main() {
     vec4 worldPosition = ml_matrix * position;
+
+    gl_ClipDistance[0] = dot(worldPosition, clipPlane);
 
 	gl_Position = pr_matrix * vw_matrix * worldPosition;
 	vs_out.tc = tc;

@@ -9,6 +9,7 @@ import com.rb2750.lwjgl.entities.Player;
 import com.rb2750.lwjgl.entities.Tile;
 import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
+import org.joml.Vector4f;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class World {
             entity.getAcceleration().setX(entity.getAcceleration().getX() + friction);
     }
 
-    private void handleEntities(Camera camera) {
+    private void handleEntities() {
         for (Entity entity : entities) {
             handleGravity(entity);
             handleFriction(entity);
@@ -91,12 +92,20 @@ public class World {
                 }
             }
 
-            render(entity, camera);
+            entity.update();
         }
     }
 
-    private void render(Entity entity, Camera camera) {
-        entity.update(camera);
+    public void renderWorld(Camera camera, Vector4f clipPlane)
+    {
+        for (Entity entity : entities)
+        {
+            renderEntity(entity, camera, clipPlane);
+        }
+    }
+
+    private void renderEntity(Entity entity, Camera camera, Vector4f clipPlane) {
+        entity.render(camera, clipPlane);
     }
 
     public Entity intersects(Entity e, Rectangle2D rect) {
@@ -109,8 +118,8 @@ public class World {
         return null;
     }
 
-    public void update(Player player, Camera camera, Tile protoTile) {
-        handleEntities(camera);
+    public void update(Player player, Tile protoTile) {
+        handleEntities();
 
         if(Input.ButtonMap.get(Action.Clear).state) {
             getEntities().clear();
