@@ -111,7 +111,7 @@ public class World {
         return null;
     }
 
-    public void update(Player player, Tile protoTile) {
+    public void update() {
         handleEntities();
     }
 }

@@ -47,7 +47,6 @@ public class Main implements InputListener {
     private static int gameHeight = 1000;
     private Player player;
     private World world = new World();
-    private Location cursorLocation = new Location();
 
     //input
     private boolean usingXInput = false;
@@ -67,7 +66,7 @@ public class Main implements InputListener {
         new Main().run();
     }
 
-    public void run() {
+    private void run() {
         instance = this;
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
@@ -80,7 +79,7 @@ public class Main implements InputListener {
 
         // Terminate GLFW and free the error callback
         glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 
     private void init() {
@@ -107,6 +106,7 @@ public class Main implements InputListener {
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
             // Center the window
+            assert vidmode != null;
             glfwSetWindowPos(
                     window,
                     (vidmode.width() - pWidth.get(0)) / 2,
@@ -296,7 +296,7 @@ public class Main implements InputListener {
 
         Shader.GENERAL.disable();
 
-        List<Water> waters = new ArrayList<Water>();
+        List<Water> waters = new ArrayList<>();
         Water water = new Water(-10, 75, -75);
         waters.add(water);
 
@@ -304,7 +304,7 @@ public class Main implements InputListener {
 
         WaterRenderer waterRenderer = new WaterRenderer(currentProjMatrix, fbos);
 
-        List<GUITexture> guis = new ArrayList<GUITexture>();
+        List<GUITexture> guis = new ArrayList<>();
 
 //        GUITexture reflectGUI = new GUITexture(fbos.getReflectionTexture(), new Vector2f(-0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
 //        GUITexture refractGUI = new GUITexture(fbos.getRefractionTexture(), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
@@ -385,7 +385,7 @@ public class Main implements InputListener {
             inputManager.update();
 
             while (!toRun.isEmpty()) toRun.pop().run();
-            world.update(player, selectyTile);
+            world.update();
 
             fbos.bindReflectionFrameBuffer();
             float distance = 2 * (camera.getPosition().y - water.getHeight());
@@ -436,7 +436,7 @@ public class Main implements InputListener {
         }
     }
 
-    public Tile selectyTile;
+    private Tile selectyTile;
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {

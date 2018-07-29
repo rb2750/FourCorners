@@ -19,7 +19,7 @@ import java.util.List;
 public abstract class Entity implements Cloneable {
     @Getter
     private Location location;
-    protected String texturePath;
+    String texturePath;
     @Getter
     private Vector2 acceleration = new Vector2(0, 0);
     @Getter
@@ -47,25 +47,25 @@ public abstract class Entity implements Cloneable {
     @Setter
     private boolean squat = false;
 
-    protected VertexArray mesh;
+    private VertexArray mesh;
     @Getter
     protected Texture texture;
     protected Shader shader;
 
-    protected float[] vertices;
-    protected int[] indices;
-    protected float[] tcs;
-    protected float[] normals;
+    float[] vertices;
+    int[] indices;
+    float[] tcs;
+    float[] normals;
 
-    protected float layer = 0.0f;
+    float layer = 0.0f;
 
-    public Entity(Location location, Size size, Shader shader) {
+    Entity(Location location, Size size, Shader shader) {
         this.location = location;
         this.size = size;
         this.shader = shader;
     }
 
-    public void createMesh() {
+    void createMesh() {
         Main.instance.runOnUIThread(() -> {
             mesh = new VertexArray(vertices, indices, tcs, normals);
             texture = new Texture(texturePath);
@@ -80,7 +80,7 @@ public abstract class Entity implements Cloneable {
         });
     }
 
-    public boolean canMove(Location location) {
+    private boolean canMove(Location location) {
         return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() > 0 && location.getX() > 0;
     }
 
@@ -101,7 +101,7 @@ public abstract class Entity implements Cloneable {
             boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
             boolean right = intersectsWith.getLocation().getX() > getLocation().getX();
             boolean top = intersectsWith.getLocation().getY() >= getLocation().getY();
-            boolean bottom = intersectsWith.getLocation().getY() + intersectsWith.getSize().getHeight() > getLocation().getY();
+//            boolean bottom = intersectsWith.getLocation().getY() + intersectsWith.getSize().getHeight() > getLocation().getY();
 
             if (top && !left && !right) return;
 //            if (bottom)
@@ -144,25 +144,21 @@ public abstract class Entity implements Cloneable {
     public void update() {
         if (getAcceleration().getX() < 0) setFacing(Direction.LEFT);
         if (getAcceleration().getX() > 0) setFacing(Direction.RIGHT);
-//        glMatrixMode(GL_MODELVIEW);
-//        glPushMatrix();
-        double translateX = getLocation().getX() + (getSize().getWidth() / 2);
-        double translateY = getLocation().getY() + (getSize().getHeight() / 2);
-//        glTranslated(translateX, translateY, 0);
-//        glRotated(rotation, 0, 0, 1);
-//        glTranslated(-translateX, -translateY, 0);
         handleAnimations();
-//        glPopMatrix();
 
-        if (interactingWithX != null) onInteract(interactingWithX);
-        if (interactingWithY != null) onInteract(interactingWithY);
+        if (interactingWithX != null) {
+            onInteract(interactingWithX);
+            interactingWithX.onInteract(this);
+        }
+        if (interactingWithY != null) {
+            onInteract(interactingWithY);
+            interactingWithY.onInteract(this);
+        }
     }
 
     public void onInteract(Entity other) {
         //Empty stub
     }
-
-    int x = 0;
 
     public World getWorld() {
         return location.getWorld();
@@ -231,7 +227,6 @@ public abstract class Entity implements Cloneable {
                     continue pendingLoop;
                 }
             }
-//            animations.add(pending);
             pendingAnimations.remove(pending);
             addAnimation(pending);
         }

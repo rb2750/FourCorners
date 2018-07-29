@@ -1,10 +1,7 @@
 package com.rb2750.lwjgl.util;
 
 import com.rb2750.lwjgl.world.World;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 @NoArgsConstructor
@@ -42,6 +39,7 @@ public class Location implements Cloneable {
         this.y += y;
         return this;
     }
+
     public Location add(Location loc) {
         this.x += loc.x;
         this.y += loc.y;
@@ -56,6 +54,7 @@ public class Location implements Cloneable {
     public String toString() {
         return "X: " + x + ", " + "Y:" + y;
     }
+
     public Location subtract(Location loc) {
         this.x -= loc.x;
         this.y -= loc.y;
