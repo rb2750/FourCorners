@@ -1,5 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
+import com.rb2750.lwjgl.animations.FlipAnimation;
 import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.input.InputListener;
@@ -156,6 +157,7 @@ public class Player extends Entity implements InputListener {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;
+                addAnimation(new FlipAnimation());
             } else if (!onGround()) return;
             else jumping = true;
             getAcceleration().setY(21);
@@ -179,6 +181,7 @@ public class Player extends Entity implements InputListener {
             if (!doubleJump && jumping && !onGround() && !keyboard.wasKeyDown(GLFW_KEY_SPACE)) {
                 doubleJump = true;
                 jumping = false;
+                addAnimation(new FlipAnimation());
             } else if (!onGround()) return;
             else jumping = true;
             getAcceleration().setY(21);

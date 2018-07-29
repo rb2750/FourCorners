@@ -81,7 +81,7 @@ public abstract class Entity implements Cloneable {
     }
 
     private boolean canMove(Location location) {
-        return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() > 0 && location.getX() > 0;
+        return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() >= 0 && location.getX() >= 0;
     }
 
     public boolean move(Location location, boolean force) {
@@ -169,7 +169,7 @@ public abstract class Entity implements Cloneable {
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), (float) rotation, (float) rotation, 0, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), 0, 0, (float) rotation, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         shader.setUniform1f("shineDamper", texture.getShineDamper());
         shader.setUniform1f("reflectivity", texture.getReflectivity());
