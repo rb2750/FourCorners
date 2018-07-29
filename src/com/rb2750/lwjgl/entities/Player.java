@@ -168,5 +168,10 @@ public class Player extends Entity {
             if (squat.state) getAnimation(SquatAnimation.class).Pause();
             else getAnimation(SquatAnimation.class).Unpause();
         }
+
+        if (Input.ButtonMap.get(Action.Home).state) {
+        //    setSize(new Size(getSize().getWidth() + 1, getSize().getHeight()));
+        }
+
     }
 }
