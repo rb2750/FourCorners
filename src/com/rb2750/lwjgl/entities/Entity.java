@@ -3,7 +3,8 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.*;
-import com.rb2750.lwjgl.maths.*;
+import com.rb2750.lwjgl.maths.MatrixUtil;
+import com.rb2750.lwjgl.maths.Vector2;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -161,7 +162,7 @@ public abstract class Entity implements Cloneable {
             return;
 
         shader.enable();
-        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float)location.getX(), (float)location.getY(), layer), 0, (float) rotation, 0, new Vector3f((float)size.getWidth(), (float)size.getHeight(), (float)size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float)location.getX(), (float)location.getY(), layer), (float) rotation, (float) rotation, 0, new Vector3f((float)size.getWidth(), (float)size.getHeight(), (float)size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         shader.setUniform1f("shineDamper", texture.getShineDamper());
         shader.setUniform1f("reflectivity", texture.getReflectivity());

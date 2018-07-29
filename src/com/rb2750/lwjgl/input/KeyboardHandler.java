@@ -17,6 +17,11 @@ public class KeyboardHandler extends GLFWKeyCallback {
         keys[key] = action != GLFW_RELEASE;
     }
 
+    @Override
+    public void callback(long args) {
+
+    }
+
     // boolean method that returns true if a given key
     // is pressed.
     public static Button isKeyDown(int keycode) {

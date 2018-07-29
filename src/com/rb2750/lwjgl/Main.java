@@ -5,26 +5,17 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
-import com.rb2750.lwjgl.graphics.Texture;
-import com.rb2750.lwjgl.graphics.WaterFrameBuffers;
-import com.rb2750.lwjgl.graphics.WaterRenderer;
-import com.rb2750.lwjgl.gui.GUIRenderer;
-import com.rb2750.lwjgl.gui.GUITexture;
+import com.rb2750.lwjgl.entities.*;
+import com.rb2750.lwjgl.graphics.*;
+import com.rb2750.lwjgl.gui.*;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
 import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
 import com.rb2750.lwjgl.input.*;
-import com.rb2750.lwjgl.entities.*;
-import com.rb2750.lwjgl.graphics.Shader;
-import com.rb2750.lwjgl.gui.GUIManager;
-import com.rb2750.lwjgl.gui.SelectionGUI;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.Version;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -32,18 +23,15 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL30.GL_CLIP_DISTANCE0;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
-
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class Main {
     public static Main instance;
@@ -152,7 +140,7 @@ public class Main {
         glViewport(0, 0, gameWidth, gameHeight);
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_CULL_FACE);
+//        glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         glEnable(GL_DEPTH_TEST);
@@ -160,8 +148,8 @@ public class Main {
 
         Shader.loadAllShaders();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
-        System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
-        currentProjMatrix = new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+        System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
+        currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
         Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.GENERAL.disable();
         Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
@@ -209,17 +197,18 @@ public class Main {
                 gameWidth = width;
                 gameHeight = height;
                 glViewport(0, 0, width, height);
-                //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
-                System.out.println("AR: " + ((float)gameWidth / (float)gameHeight));
-                currentProjMatrix = new Matrix4f().perspective(70.0f,(float)gameWidth / (float)gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
-                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.GENERAL.disable();
+//                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
+//                System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
+////                currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+//                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
+//                Shader.GENERAL.disable();
                 Shader.WATER.setUniformMat4f("pr_matrix", currentProjMatrix);
                 Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
                 Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
-//                Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
-//                Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
+                Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
+                Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
                 Shader.WATER.disable();
+                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -100000, 100000));
             }
         });
         Input.updateKeyboard();
@@ -244,24 +233,17 @@ public class Main {
 
         Object xInputDevice;
 
-        if (usingXInput || usingXInput14)
-        {
+        if (usingXInput || usingXInput14) {
             boolean notLoaded = false;
             Object[] devices;
 
-            try
-            {
-                if (usingXInput && !usingXInput14)
-                {
+            try {
+                if (usingXInput && !usingXInput14) {
                     devices = XInputDevice.getAllDevices();
-                }
-                else
-                {
+                } else {
                     devices = XInputDevice14.getAllDevices();
                 }
-            }
-            catch (XInputNotLoadedException e)
-            {
+            } catch (XInputNotLoadedException e) {
                 e.printStackTrace();
                 System.err.println("XInput is not loaded.");
                 usingXInput = false;
@@ -270,34 +252,26 @@ public class Main {
                 devices = null;
             }
 
-            if (!notLoaded)
-            {
+            if (!notLoaded) {
                 xInputDevice = devices[0];
 
-                XInputDeviceListener listener = new SimpleXInputDeviceListener()
-                {
+                XInputDeviceListener listener = new SimpleXInputDeviceListener() {
                     @Override
-                    public void connected()
-                    {
+                    public void connected() {
                         System.out.println("XInput device connected.");
                     }
 
                     @Override
-                    public void disconnected()
-                    {
+                    public void disconnected() {
                         System.out.println("XInput device disconnected.");
                     }
 
                     @Override
-                    public void buttonChanged(final XInputButton button, final boolean pressed)
-                    {
+                    public void buttonChanged(final XInputButton button, final boolean pressed) {
                         // the given button was just pressed (if pressed == true) or released (pressed == false)
-                        if (pressed)
-                        {
+                        if (pressed) {
                             System.out.println("XInput button pressed: " + button.name());
-                        }
-                        else
-                        {
+                        } else {
                             System.out.println("XInput button released: " + button.name());
                         }
 
@@ -310,8 +284,7 @@ public class Main {
                 } else {
                     ((XInputDevice) xInputDevice).addListener(listener);
                 }
-            }
-            else {
+            } else {
                 xInputDevice = null;
             }
         } else {
@@ -357,33 +330,34 @@ public class Main {
 
         glEnable(GL_CLIP_DISTANCE0);
 
-        Player player2 = new Player(new Location(world, 45, -75));
-        world.addEntity(player2);
-
-        Player player3 = new Player(new Location(world, 30, -5));
-        world.addEntity(player3);
+//        Player player2 = new Player(new Location(world, 45, -75));
+//        world.addEntity(player2);
+//
+//        Player player3 = new Player(new Location(world, 30, -5));
+//        world.addEntity(player3);
 
         // Used to reduce glitchy edges when water intersects geometry.
         float waterHeightIncrease = 0.5f;
 
         while (!glfwWindowShouldClose(window)) {
-            deltaTime = (float)(Util.getTime() - lastFrame) / 1000.0f;
+            deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            camera.setPosition(new Vector3f(0, 0, 0));
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
             //camera.setPosition(new Vector3f(camera.getPosition().x + 0.1f, 100.0f,  0.0f));
-            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
+//            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
             //camera.setYaw(camera.getYaw() - 0.5f);
-            camera.setPitch(55.0f);
+//            camera.setPitch(55.0f);
             //System.out.println(camera.getPosition());
 
-            player.move(new Location(world, 75, -5), true);
-            player.setRotation(player.getRotation() + 1.0);
-            player2.setRotation(player2.getRotation() - 2.0);
-            player3.setRotation(player3.getRotation() + 3.5);
+//            player.move(new Location(world, 75, -5), true);
+//            player.setRotation(player.getRotation() + 1.0);
+//            player2.setRotation(player2.getRotation() - 2.0);
+//            player3.setRotation(player3.getRotation() + 3.5);
 
             Input.update();
 
@@ -422,8 +396,7 @@ public class Main {
                     //((XInputDevice) xInputDevice).setVibration(5000, 5000);
                 }
 
-                if (Input.currentInputMode == InputMode.XINPUT_CONTROLLER)
-                {
+                if (Input.currentInputMode == InputMode.XINPUT_CONTROLLER) {
                     Input.updateXInputController();
                 }
 
@@ -477,8 +450,7 @@ public class Main {
         waterRenderer.cleanUp();
         guiRenderer.cleanUp();
 
-        for (GUITexture guiTexture : guis)
-        {
+        for (GUITexture guiTexture : guis) {
             guiTexture.cleanUp();
         }
     }
@@ -497,9 +469,11 @@ public class Main {
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
-
-        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
-        selectyTile.setSize(size);
+        double rot = Input.Left_Trigger * 90;
+//        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
+        Size size = new Size(100f, 100f);
+//        selectyTile.setSize(size);
+        selectyTile.setRotation(rot);
 
         if (!Input.ButtonMap.get(Action.ShowBlock).state || Input.Right_Analog_Stick.getX() == 0 && Input.Right_Analog_Stick.getY() == 0)
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
@@ -510,6 +484,7 @@ public class Main {
             if (Input.ButtonMap.get(Action.PlaceBlock).state) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
                 newTile.setSize(size);
+                newTile.setRotation(rot);
 
                 for (Entity entity : world.getEntities())
                     if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
