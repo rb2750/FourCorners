@@ -96,9 +96,26 @@ public class VertexArray
 
     public void render()
     {
+        if (vao == 0 || vbo == 0)
+            return;
+
         bind();
         draw();
         unbind();
+    }
+
+    public void cleanUp()
+    {
+        glDeleteVertexArrays(vao);
+        glDeleteBuffers(vbo);
+
+        if (tbo != 0)
+            glDeleteBuffers(tbo);
+
+        if (ibo != 0)
+            glDeleteBuffers(ibo);
+
+        vao = vbo = tbo = ibo = 0;
     }
 
     public int getVAO()

@@ -119,4 +119,17 @@ public class Shader
         glUseProgram(0);
         enabled = false;
     }
+
+    public void cleanUp()
+    {
+        glDeleteProgram(ID);
+    }
+
+    public static void cleanUpAll()
+    {
+        Shader.GENERAL.cleanUp();
+        Shader.WATER.cleanUp();
+        Shader.FONT.cleanUp();
+        Shader.GUI.cleanUp();
+    }
 }

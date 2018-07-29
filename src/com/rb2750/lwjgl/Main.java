@@ -471,6 +471,16 @@ public class Main {
 
             sync.sync(120);
         }
+
+        Shader.cleanUpAll();
+        TextMaster.cleanUp();
+        waterRenderer.cleanUp();
+        guiRenderer.cleanUp();
+
+        for (GUITexture guiTexture : guis)
+        {
+            guiTexture.cleanUp();
+        }
     }
 
     public Tile selectyTile;

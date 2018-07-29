@@ -52,4 +52,15 @@ public class TextMaster
             texts.remove(text.getFont());
         }
     }
+
+    public static void cleanUp()
+    {
+        for (FontType font : texts.keySet())
+        {
+            for (GUIText text : texts.get(font))
+            {
+                text.getTextMesh().cleanUp();
+            }
+        }
+    }
 }

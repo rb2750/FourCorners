@@ -235,6 +235,12 @@ public abstract class Entity implements Cloneable {
         }
     }
 
+    public void cleanUp()
+    {
+        mesh.cleanUp();
+        texture.cleanUp();
+    }
+
     public Entity clone() {
         try {
             return (Entity) super.clone();

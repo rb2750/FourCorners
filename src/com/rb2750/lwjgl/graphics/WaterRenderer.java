@@ -25,8 +25,8 @@ public class WaterRenderer
     private float moveFactor = 0.0f;
     private long startTime;
 
-    private int dudvTexture;
-    private int normalMap;
+    private Texture dudvTexture;
+    private Texture normalMap;
 
     public WaterRenderer(Matrix4f projectionMatrix, WaterFrameBuffers fbos)
     {
@@ -34,8 +34,8 @@ public class WaterRenderer
 
         startTime = Util.getTime();
 
-        dudvTexture = new Texture(DUDV_MAP).getTexture();
-        normalMap = new Texture(NORMAL_MAP).getTexture();
+        dudvTexture = new Texture(DUDV_MAP);
+        normalMap = new Texture(NORMAL_MAP);
 
         Shader.WATER.setUniformMat4f("pr_matrix", projectionMatrix);
         Shader.WATER.setUniform1i("reflectionTex", 0);
@@ -65,9 +65,9 @@ public class WaterRenderer
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, fbos.getRefractionTexture());
         glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, dudvTexture);
+        glBindTexture(GL_TEXTURE_2D, dudvTexture.getTexture());
         glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, normalMap);
+        glBindTexture(GL_TEXTURE_2D, normalMap.getTexture());
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, fbos.getRefractionDepthTexture());
         glEnable(GL_BLEND);
@@ -83,6 +83,14 @@ public class WaterRenderer
         glDisable(GL_BLEND);
         mesh.unbind();
         Shader.WATER.disable();
+    }
+
+    public void cleanUp()
+    {
+        mesh.cleanUp();
+        fbos.cleanUp();
+        dudvTexture.cleanUp();
+        normalMap.cleanUp();
     }
 
     public void setProjectionMatrix(Matrix4f projectionMatrix)

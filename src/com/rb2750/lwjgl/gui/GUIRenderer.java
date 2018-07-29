@@ -38,4 +38,9 @@ public class GUIRenderer
         mesh.unbind();
         Shader.GUI.disable();
     }
+
+    public void cleanUp()
+    {
+        mesh.cleanUp();
+    }
 }
