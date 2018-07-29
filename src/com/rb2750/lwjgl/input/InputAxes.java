@@ -2,9 +2,9 @@ package com.rb2750.lwjgl.input;
 
 import com.ivan.xinput.XInputAxes;
 
-public class XInputAxesCopy extends XInputAxes
+public class InputAxes extends XInputAxes
 {
-    public XInputAxesCopy(XInputAxes copy)
+    public InputAxes(XInputAxes copy)
     {
         super();
 

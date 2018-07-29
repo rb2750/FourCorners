@@ -8,10 +8,9 @@ import com.ivan.xinput.listener.XInputDeviceListener;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.gui.*;
-import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
-import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
 import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
 import com.rb2750.lwjgl.input.*;
+import com.rb2750.lwjgl.input.controllers.*;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -29,22 +28,19 @@ import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import java.io.File;
 import java.nio.IntBuffer;
 import java.util.*;
 
-public class Main {
+public class Main implements InputListener {
     public static Main instance;
 
-    public static final float ORTHO_NEAR_PLANE = -1.0f;
-    public static final float ORTHO_FAR_PLANE = 1.0f;
-    public static final float PERSP_NEAR_PLANE = 0.1f;
-    public static final float PERSP_FAR_PLANE = 1000.0f;
+    private static final float ORTHO_NEAR_PLANE = -1.0f;
+    private static final float ORTHO_FAR_PLANE = 1.0f;
+    private static final float PERSP_NEAR_PLANE = 0.1f;
+    private static final float PERSP_FAR_PLANE = 1000.0f;
 
-    boolean doubleJump = false;
     // The window handle
     public long window;
-    private GLFWVidMode vidmode;
     @Getter
     private static int gameWidth = 1000;
     @Getter
@@ -56,26 +52,16 @@ public class Main {
     //input
     private boolean usingXInput = false;
     private boolean usingXInput14 = false;
-    private boolean xInputShowBox = false;
-    private GLFWKeyCallback keyCallback;
 
+    private InputManager inputManager = new InputManager();
     @Getter
     private GUIManager guiManager = new GUIManager();
 
     private int currentFPS;
-    private long lastFPS;
 
     private Matrix4f currentProjMatrix;
 
     private Light light;
-
-    /**
-     * Rob Notes for Rob
-     * I3 Commands:
-     * Mod+Control+Shift+Equals = PC Mode
-     * Mod+Control+Equals = Game Mode
-     * Mod+Control+Minus = Stop all (In case the controller says it's in use)
-     */
 
     public static void main(String[] args) {
         new Main().run();
@@ -118,7 +104,7 @@ public class Main {
             IntBuffer pHeight = stack.mallocInt(1);
             glfwGetWindowSize(window, pWidth, pHeight);
             // Get the resolution of the primary monitor
-            vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
             // Center the window
             glfwSetWindowPos(
@@ -132,7 +118,6 @@ public class Main {
         glfwSwapInterval(1);
         // Make the window visible
         glfwShowWindow(window);
-        glfwSetKeyCallback(window, keyCallback = new KeyboardHandler());
 
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
@@ -169,12 +154,14 @@ public class Main {
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
 
-        Input.Setup(InputMode.KEYBOARD);
+        InputManager.registerInputListener(this);
+        inputManager.Setup();
 
         TextMaster.init();
 
-        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
-        GUIText text = new GUIText("The quick brown dog jumped over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1.0f, true);
+//        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
+//        text.setColour(1, 1, 0);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
@@ -211,8 +198,6 @@ public class Main {
                 Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -100000, 100000));
             }
         });
-        Input.updateKeyboard();
-
 
         try {
             // check if XInput 1.3 is available
@@ -304,7 +289,7 @@ public class Main {
         });
 
         Sync sync = new Sync();
-        lastFPS = Util.getTime();
+        long lastFPS = Util.getTime();
 
         Camera camera = new Camera();
         float averageDeltaTime = 0.0f;
@@ -359,10 +344,6 @@ public class Main {
 //            player2.setRotation(player2.getRotation() - 2.0);
 //            player3.setRotation(player3.getRotation() + 3.5);
 
-            Input.update();
-
-            handleControls();
-
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
                     if (XInputState.getAxes() == null)
@@ -396,12 +377,12 @@ public class Main {
                     //((XInputDevice) xInputDevice).setVibration(5000, 5000);
                 }
 
-                if (Input.currentInputMode == InputMode.XINPUT_CONTROLLER) {
-                    Input.updateXInputController();
-                }
+                inputManager.updateXInputController();
 
                 XInputState.update();
             }
+
+            inputManager.update();
 
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update(player, selectyTile);
@@ -457,31 +438,34 @@ public class Main {
 
     public Tile selectyTile;
 
-    public void handleControls() {
-        double halfGameWidth = gameWidth / 2;
-        double halfGameHeight = gameHeight / 2;
+    @Override
+    public void handleControllerInput(Controller state, Controller last) {
+        double halfGameWidth = gameWidth / 2f;
+        double halfGameHeight = gameHeight / 2f;
 
-        double tileX = halfGameWidth * Input.Right_Analog_Stick.getX() + halfGameWidth;
-        double tileY = halfGameHeight * Input.Right_Analog_Stick.getY() + halfGameHeight;
+        System.out.println(state.getAnalogRight().x() + ":" + state.getAnalogRight().y() + ":" + state.isRightPadTouched());
+
+        double tileX = halfGameWidth * state.getAnalogRight().x() + halfGameWidth;
+        double tileY = halfGameHeight * state.getAnalogRight().y() + halfGameHeight;
 
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
-        double rot = Input.Left_Trigger * 90;
+        double rot = state.getLeftTrigger() * 90;
 //        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
         Size size = new Size(100f, 100f);
 //        selectyTile.setSize(size);
         selectyTile.setRotation(rot);
 
-        if (!Input.ButtonMap.get(Action.ShowBlock).state || Input.Right_Analog_Stick.getX() == 0 && Input.Right_Analog_Stick.getY() == 0)
+        if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
             selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
         else
             selectyTile.move(new Location(world, tileX, tileY), true);
 
         runOnUIThread(() -> {
-            if (Input.ButtonMap.get(Action.PlaceBlock).state) {
+            if (state.isRightPadPressed()) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
                 newTile.setSize(size);
                 newTile.setRotation(rot);
@@ -491,9 +475,26 @@ public class Main {
                 world.addEntity(newTile);
             }
 
-            if (Input.ButtonMap.get(Action.ShowGUI).state) {
+            if (state.isLeftPadTouched()) {
                 guiManager.displayGUI(new SelectionGUI());
             } else guiManager.hideGUI(SelectionGUI.class);
         });
+
+        if (state.isBHeld()) {
+            world.getEntities().clear();
+
+            world.addEntity(player);
+            world.addEntity(selectyTile);
+        }
+    }
+
+    @Override
+    public void handleKeyboardInput(Keyboard keyboard) {
+
+    }
+
+    @Override
+    public void handleMouseInput(Mouse mouse) {
+
     }
 }

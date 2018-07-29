@@ -10,16 +10,11 @@ public class XInputState
     private static boolean[] prevButtons = new boolean[XInputButton.values().length];
 
     @Getter
-    private static XInputAxesCopy axes;
-    private static XInputAxesCopy prevAxes;
+    private static InputAxes axes;
+    private static InputAxes prevAxes;
 
     public static void setButton(XInputButton button, boolean pressed)
     {
-        if (pressed)
-        {
-            Input.currentInputMode = InputMode.XINPUT_CONTROLLER;
-        }
-
         buttons[button.ordinal()] = pressed;
     }
 
@@ -36,8 +31,6 @@ public class XInputState
             prevAxes.ly = axes.ly;
             prevAxes.rx = axes.rx;
             prevAxes.ry = axes.ry;
-
-            Input.currentInputMode = InputMode.XINPUT_CONTROLLER;
         }
     }
 
@@ -45,8 +38,8 @@ public class XInputState
     {
         if (axes == null)
         {
-            axes = new XInputAxesCopy(newAxes);
-            prevAxes = new XInputAxesCopy(newAxes);
+            axes = new InputAxes(newAxes);
+            prevAxes = new InputAxes(newAxes);
         }
 
         if ((newAxes.lx > leftStickDeadzone || newAxes.lx < -leftStickDeadzone) || (newAxes.ly > leftStickDeadzone || newAxes.ly < -leftStickDeadzone))

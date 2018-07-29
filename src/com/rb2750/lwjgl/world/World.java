@@ -1,7 +1,6 @@
 package com.rb2750.lwjgl.world;
 
-import com.rb2750.lwjgl.input.Action;
-import com.rb2750.lwjgl.input.Input;
+import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
@@ -120,12 +119,5 @@ public class World {
 
     public void update(Player player, Tile protoTile) {
         handleEntities();
-
-        if(Input.ButtonMap.get(Action.Clear).state) {
-            getEntities().clear();
-
-            addEntity(player);
-            addEntity(protoTile);
-        }
     }
 }

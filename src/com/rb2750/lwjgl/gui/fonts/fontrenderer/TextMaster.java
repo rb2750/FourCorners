@@ -35,7 +35,7 @@ public class TextMaster
 
         if (textBatch == null)
         {
-            textBatch = new ArrayList<GUIText>();
+            textBatch = new ArrayList<>();
             texts.put(font, textBatch);
         }
 
