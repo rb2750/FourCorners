@@ -14,6 +14,7 @@ public abstract class Animation {
     private Entity original;
     private boolean paused;
     private double timeOfCurrFrame;
+    private Vector3f remainingRotation;
 
     Animation(double time) {
         this.currentFrame = 0;
@@ -60,9 +61,9 @@ public abstract class Animation {
             } else return;
         }
         if (currFrame.rotation != null && nextFrame.rotation != null) {
-            Vector3f dRot = new Vector3f(nextFrame.rotation).sub(currFrame.rotation).mul((float) (dTime))/*.mul((float) entity.getFacing())*/;
-            float multiplier = 0;
-
+            if(remainingRotation == null) remainingRotation = nextFrame.rotation;
+            Vector3f dRot = remainingRotation.sub(new Vector3f(currFrame.rotation).mul((float)dTime));
+            if(remainingRotation.x < 0 && remainingRotation.y < 0 && remainingRotation.z < 0) remainingRotation = null;
             entity.rotate(dRot);
             System.out.println(entity.getRotation().z + ":" + new Vector3f(nextFrame.rotation).sub(currFrame.rotation).z);
         }

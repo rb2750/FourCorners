@@ -47,6 +47,9 @@ public abstract class Entity implements Cloneable {
     @Setter
     private boolean squat = false;
 
+    private Size originalSize;
+    private Vector3f originalRotation;
+
     private VertexArray mesh;
     @Getter
     protected Texture texture;
@@ -63,6 +66,9 @@ public abstract class Entity implements Cloneable {
         this.location = location;
         this.size = size;
         this.shader = shader;
+
+        this.originalSize = size;
+        this.originalRotation = new Vector3f(0);
     }
 
     void createMesh() {
@@ -139,11 +145,10 @@ public abstract class Entity implements Cloneable {
     }
 
     public void rotate(Vector3f rotation) {
-        rotation = new Vector3f(rotation);
-        rotation.x %= 360;
-        rotation.y %= 360;
-        rotation.z %= 360;
         this.rotation.add(rotation);
+        this.rotation.x %= 360;
+        this.rotation.y %= 360;
+        this.rotation.z %= 360;
     }
 
     public void setRotation(Vector3f rotation) {
@@ -224,6 +229,11 @@ public abstract class Entity implements Cloneable {
 
     public void removeAnimation(Animation animation) {
         animations.remove(animation);
+
+        if(animations.size() == 0) {
+            this.setRotation(originalRotation);
+            this.setSize(originalSize);
+        }
     }
 
     public void removeAnimation(Class<? extends Animation> animation) {
