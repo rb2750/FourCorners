@@ -24,35 +24,35 @@ public class Player extends Entity implements InputListener, Collidable {
         InputManager.registerInputListener(this);
 
         vertices = new float[]{
-                -0.5f, 0.5f, -0.5f,
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
+                0f, 1f, 0f,
+                0f, 0f, 0f,
+                1f, 0f, 0f,
+                1f, 1f, 0f,
 
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, -0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
+                0f, 1f, 1f,
+                0f, 0f, 1f,
+                1f, 0f, 1f,
+                1f, 1f, 1f,
 
-                0.5f, 0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
+                1f, 1f, 0f,
+                1f, 0f, 0f,
+                1f, 0f, 1f,
+                1f, 1f, 1f,
 
-                -0.5f, 0.5f, -0.5f,
-                -0.5f, -0.5f, -0.5f,
-                -0.5f, -0.5f, 0.5f,
-                -0.5f, 0.5f, 0.5f,
+                0f, 1f, 0f,
+                0f, 0f, 0f,
+                0f, 0f, 1f,
+                0f, 1f, 1f,
 
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, 0.5f,
+                0f, 1f, 1f,
+                0f, 1f, 0f,
+                1f, 1f, 0f,
+                1f, 1f, 1f,
 
-                -0.5f, -0.5f, 0.5f,
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, 0.5f
+                0f, 0f, 1f,
+                0f, 0f, 0f,
+                1f, 0f, 0f,
+                1f, 0f, 1f
 
         };
 
@@ -160,6 +160,7 @@ public class Player extends Entity implements InputListener, Collidable {
                 doubleJump = true;
                 jumping = false;
                 addAnimation(new FlipAnimation());
+                System.out.println("hi");
             } else if (!onGround()) return;
             else jumping = true;
             getAcceleration().setY(21);

@@ -7,9 +7,9 @@ import lombok.Setter;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-public class GUIText
-{
-    private String textString;
+public class GUIText {
+    @Getter
+    private String text;
     private float fontSize;
 
     @Getter
@@ -31,55 +31,54 @@ public class GUIText
 
     private boolean centreText = false;
 
-    public GUIText(String text, float fontSize, FontType font, Vector2f position, float maxLineLength, boolean centred)
-    {
-        this.textString = text;
+    public GUIText(String text, float fontSize, FontType font, Vector2f position, float maxLineLength, boolean centred) {
         this.fontSize = fontSize;
         this.font = font;
         this.position = position;
         this.lineMaxSize = maxLineLength;
         this.centreText = centred;
+        setText(text);
         TextMaster.loadText(this);
     }
 
-    public void remove()
-    {
+    public void setText(String text) {
+        this.text = text;
+        FontType font = getFont();
+        TextMeshData data = font.loadText(this);
+        VertexArray mesh = new VertexArray(data.getVertexPositions(), data.getTextureCoords(), 2);
+        setMeshInfo(mesh, data.getVertexCount());
+    }
+
+    public void remove() {
         TextMaster.removeText(this);
     }
 
-    public void setColour(float r, float g, float b)
-    {
+    public void setColour(float r, float g, float b) {
         colour.set(r, g, b);
     }
 
-    public void setMeshInfo(VertexArray mesh, int vertexCount)
-    {
+    public void setMeshInfo(VertexArray mesh, int vertexCount) {
         this.textMesh = mesh;
         this.vertexCount = vertexCount;
     }
 
-    protected float getFontSize()
-    {
+    protected float getFontSize() {
         return fontSize;
     }
 
-    protected void setNumberOfLines(int number)
-    {
+    protected void setNumberOfLines(int number) {
         this.numberOfLines = number;
     }
 
-    protected boolean isCentred()
-    {
+    protected boolean isCentred() {
         return centreText;
     }
 
-    protected float getMaxLineSize()
-    {
+    protected float getMaxLineSize() {
         return lineMaxSize;
     }
 
-    protected String getTextString()
-    {
-        return textString;
+    protected String getText() {
+        return text;
     }
 }

@@ -8,6 +8,8 @@ import com.ivan.xinput.listener.XInputDeviceListener;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.gui.*;
+import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
+import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
 import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
 import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.input.controllers.*;
@@ -28,6 +30,7 @@ import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import java.io.File;
 import java.nio.IntBuffer;
 import java.util.*;
 
@@ -158,10 +161,6 @@ public class Main implements InputListener {
         inputManager.Setup();
 
         TextMaster.init();
-
-//        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
-//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
-//        text.setColour(1, 1, 0);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
@@ -324,6 +323,11 @@ public class Main implements InputListener {
         // Used to reduce glitchy edges when water intersects geometry.
         float waterHeightIncrease = 0.5f;
 
+        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
+//        text.setColour(1, 1, 0);
+        GUIText fpsText = new GUIText("", 2, font, new Vector2f(0.0f, 0.0f), 1f, false);
+
         while (!glfwWindowShouldClose(handle)) {
             deltaTime = Util.getTime() - lastFrame;
             lastFrame = Util.getTime();
@@ -331,7 +335,7 @@ public class Main implements InputListener {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            camera.setPosition(new Vector3f(0, -50f, 0));
+            camera.setPosition(new Vector3f(0, 0f, 0));
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
             //camera.setPosition(new Vector3f(camera.getPosition().x + 0.1f, 100.0f,  0.0f));
 //            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
@@ -413,8 +417,9 @@ public class Main implements InputListener {
             glfwPollEvents();
 
             if (Util.getTime() - lastFPS >= 1000) {
-                System.out.println("FPS: " + currentFPS);
-                System.out.println("Average deltaTime: " + (averageDeltaTime / currentFPS));
+//                System.out.println("FPS: " + currentFPS);
+//                System.out.println("Average deltaTime: " + (averageDeltaTime / currentFPS));
+                fpsText.setText("FPS: " + currentFPS);
                 averageDeltaTime = 0;
 
                 currentFPS = 0;

@@ -14,9 +14,7 @@ public class MatrixUtil {
     public static Matrix4f transformation(Vector2f translation, float angleX, float angleY, float angleZ, Vector2f scale) {
         Matrix4f result = new Matrix4f().identity()
                 .translate(translation.x, translation.y, 0.0f)
-                .rotate((float) Math.toRadians(angleX), 1.0f, 0.0f, 0.0f)
-                .rotate((float) Math.toRadians(angleY), 0.0f, 1.0f, 0.0f)
-                .rotate((float) Math.toRadians(angleZ), 0.0f, 0.0f, 1.0f)
+                .rotateAround(new Quaternionf((float) Math.toRadians(angleX), (float) Math.toRadians(angleY), (float) Math.toRadians(angleZ), 1), translation.x + scale.x / 2f, translation.y + scale.y / 2f, 0)
                 .scale(scale.x, scale.y, 1f);
 
         return result;
@@ -25,9 +23,7 @@ public class MatrixUtil {
     public static Matrix4f transformation(Vector3f translation, float angleX, float angleY, float angleZ, Vector3f scale) {
         Matrix4f result = new Matrix4f().identity()
                 .translate(translation)
-                .rotate((float) Math.toRadians(angleX), 1.0f, 0.0f, 0.0f)
-                .rotate((float) Math.toRadians(angleY), 0.0f, 1.0f, 0.0f)
-                .rotate((float) Math.toRadians(angleZ), 0.0f, 0.0f, 1.0f)
+                .rotateAround(new Quaternionf((float) Math.toRadians(angleX), (float) Math.toRadians(angleY), (float) Math.toRadians(angleZ), 1), translation.x + scale.x / 2f, translation.y + scale.y / 2f, translation.z + scale.z / 2f)
                 .scale(scale);
 
         return result;

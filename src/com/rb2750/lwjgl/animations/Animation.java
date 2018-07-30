@@ -5,13 +5,9 @@ import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import lombok.Getter;
-import lombok.Setter;
 import org.joml.Vector3f;
 
 public abstract class Animation {
-    @Getter
-    @Setter
-    private double remainingTime;
     private double timePerFrame;
     private int currentFrame;
     @Getter
@@ -20,7 +16,6 @@ public abstract class Animation {
     private double timeOfCurrFrame;
 
     Animation(double time) {
-        this.remainingTime = time;
         this.currentFrame = 0;
         this.timePerFrame = (float) time / (float) getKeyFrames().length;
         this.paused = false;
@@ -67,9 +62,9 @@ public abstract class Animation {
         if (currFrame.rotation != null && nextFrame.rotation != null) {
             Vector3f dRot = new Vector3f(nextFrame.rotation).sub(currFrame.rotation).mul((float) (dTime))/*.mul((float) entity.getFacing())*/;
             float multiplier = 0;
-            System.out.println(dRot);
 
             entity.rotate(dRot);
+            System.out.println(entity.getRotation().z + ":" + new Vector3f(nextFrame.rotation).sub(currFrame.rotation).z);
         }
 
         timeOfCurrFrame += dTime;
@@ -77,7 +72,6 @@ public abstract class Animation {
             currentFrame++;
             timeOfCurrFrame = 0;
         }
-        remainingTime--;
     }
 
     public void onFinish(Entity entity) {

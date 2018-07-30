@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 public class FlipAnimation extends Animation {
     public FlipAnimation() {
-        super(1f);
+        super(4f);
     }
 
     @Override
