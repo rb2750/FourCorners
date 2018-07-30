@@ -50,7 +50,7 @@ public abstract class Animation {
 
         Keyframe currFrame = getKeyFrames()[currentFrame];
         Keyframe nextFrame = getKeyFrames()[currentFrame + 1];
-        double dTime = (double) Main.getDeltaTime();
+        double dTime = (double) Main.getDeltaTime() / 1000D;
 
         if (currFrame.position != null && nextFrame.position != null) {
             Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
@@ -62,11 +62,13 @@ public abstract class Animation {
                 Size halfSize = dSize.clone().multiply(0.5);
 
                 entity.move(entity.getLocation().clone().add(-halfSize.getWidth(), 0));
-            }
-            else return;
+            } else return;
         }
         if (currFrame.rotation != null && nextFrame.rotation != null) {
-            Vector3f dRot = (entity.getRotation().add((nextFrame.rotation.sub(currFrame.rotation)).mul((float)dTime)).mul((float)entity.getFacing()));
+            Vector3f dRot = new Vector3f(nextFrame.rotation).sub(currFrame.rotation).mul((float) (dTime))/*.mul((float) entity.getFacing())*/;
+            float multiplier = 0;
+            System.out.println(dRot);
+
             entity.rotate(dRot);
         }
 

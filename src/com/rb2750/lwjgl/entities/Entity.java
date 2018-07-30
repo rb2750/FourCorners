@@ -5,7 +5,6 @@ import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.maths.Vector2;
-import com.rb2750.lwjgl.maths.Vector3;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -25,7 +24,7 @@ public abstract class Entity implements Cloneable {
     private Vector2 acceleration = new Vector2(0, 0);
     @Getter
     @Setter
-    private Vector3f rotation = new Vector3f(0,0,0);
+    private Vector3f rotation = new Vector3f(0, 0, 0);
     @Getter
     @Setter
     private boolean gravity = false;
@@ -140,10 +139,19 @@ public abstract class Entity implements Cloneable {
     }
 
     public void rotate(Vector3f rotation) {
-        rotation.add(rotation);
+        rotation = new Vector3f(rotation);
         rotation.x %= 360;
         rotation.y %= 360;
         rotation.z %= 360;
+        this.rotation.add(rotation);
+    }
+
+    public void setRotation(Vector3f rotation) {
+        rotation = new Vector3f(rotation);
+        rotation.x %= 360;
+        rotation.y %= 360;
+        rotation.z %= 360;
+        this.rotation = rotation;
     }
 
     public void update() {
@@ -173,8 +181,10 @@ public abstract class Entity implements Cloneable {
         if (mesh == null || shader == null || camera == null || texture == null)
             return;
 
+//        System.out.println(rotation);
         shader.enable();
         shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
+//        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         shader.setUniform1f("shineDamper", texture.getShineDamper());
         shader.setUniform1f("reflectivity", texture.getReflectivity());

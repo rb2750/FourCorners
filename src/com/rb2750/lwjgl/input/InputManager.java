@@ -17,7 +17,7 @@ public class InputManager {
     private Queue<SteamQueuedEvent> queue = new ArrayDeque<>();
 
     public void Setup() {
-        glfwSetKeyCallback(Main.instance.window, new GLFWKeyCallbackI() {
+        glfwSetKeyCallback(Main.instance.handle, new GLFWKeyCallbackI() {
             private Keyboard state = new Keyboard();
 
             @Override
@@ -31,7 +31,7 @@ public class InputManager {
         });
 
         //Mouse
-        glfwSetCursorPosCallback(Main.instance.window, new GLFWCursorPosCallback() {
+        glfwSetCursorPosCallback(Main.instance.handle, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xPos, double yPos) {
                 Mouse mouse = new Mouse(((float) xPos - Main.getGameWidth() / 2f) / Main.getGameWidth(), ((float) yPos - Main.getGameHeight() / 2f) / Main.getGameHeight());

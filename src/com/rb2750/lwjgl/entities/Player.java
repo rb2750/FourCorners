@@ -6,12 +6,11 @@ import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.input.InputListener;
 import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.input.controllers.*;
-import com.rb2750.lwjgl.maths.Vector3;
-import com.rb2750.lwjgl.util.Location;
-import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.*;
 import org.joml.Vector3f;
-
 import static org.lwjgl.glfw.GLFW.*;
+
+import java.awt.geom.Rectangle2D;
 
 public class Player extends Entity implements InputListener, Collidable {
     float speed = 8f;
@@ -25,35 +24,35 @@ public class Player extends Entity implements InputListener, Collidable {
         InputManager.registerInputListener(this);
 
         vertices = new float[]{
-                0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f,
+                -0.5f, 0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, 0.5f, -0.5f,
 
-                0.0f, 1.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-                1.0f, 0.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f, -0.5f, 0.5f,
+                0.5f, -0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
 
-                1.0f, 1.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,
+                0.5f, 0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, 0.5f,
+                0.5f, 0.5f, 0.5f,
 
-                0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f,
-                0.0f, 1.0f, 1.0f,
+                -0.5f, 0.5f, -0.5f,
+                -0.5f, -0.5f, -0.5f,
+                -0.5f, -0.5f, 0.5f,
+                -0.5f, 0.5f, 0.5f,
 
-                0.0f, 1.0f, 1.0f,
-                0.0f, 1.0f, 0.0f,
-                1.0f, 1.0f, 0.0f,
-                1.0f, 1.0f, 1.0f,
+                -0.5f, 0.5f, 0.5f,
+                -0.5f, 0.5f, -0.5f,
+                0.5f, 0.5f, -0.5f,
+                0.5f, 0.5f, 0.5f,
 
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 1.0f
+                -0.5f, -0.5f, 0.5f,
+                -0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, -0.5f,
+                0.5f, -0.5f, 0.5f
 
         };
 
@@ -168,7 +167,7 @@ public class Player extends Entity implements InputListener, Collidable {
 
         getAcceleration().setX(speed * state.getAnalogStick().x());
 
-        if (state.isHomeHeld()) rotate(new Vector3f(2,2,2));
+        if (state.isHomeHeld()) rotate(new Vector3f(2, 2, 2));
 
         if (!animationExists(SquatAnimation.class)) {
             if (state.isXHeld() && !last.isXHeld()) addAnimation(new SquatAnimation());

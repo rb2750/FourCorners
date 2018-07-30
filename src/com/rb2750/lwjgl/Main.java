@@ -39,8 +39,8 @@ public class Main implements InputListener {
     private static final float PERSP_NEAR_PLANE = 0.1f;
     private static final float PERSP_FAR_PLANE = 1000.0f;
 
-    // The window handle
-    public long window;
+    // The handle handle
+   public static  long handle;
     @Getter
     private static int gameWidth = 1000;
     @Getter
@@ -73,9 +73,9 @@ public class Main implements InputListener {
         init();
         loop();
 
-        // Free the window callbacks and destroy the window
-        glfwFreeCallbacks(window);
-        glfwDestroyWindow(window);
+        // Free the handle callbacks and destroy the handle
+        glfwFreeCallbacks(handle);
+        glfwDestroyWindow(handle);
 
         // Terminate GLFW and free the error callback
         glfwTerminate();
@@ -92,32 +92,32 @@ public class Main implements InputListener {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        // Create the window
-        window = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
+        // Create the handle
+        handle = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
 
-        if (window == NULL)
-            throw new RuntimeException("Failed to create the GLFW window");
+        if (handle == NULL)
+            throw new RuntimeException("Failed to create the GLFW handle");
 
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1);
             IntBuffer pHeight = stack.mallocInt(1);
-            glfwGetWindowSize(window, pWidth, pHeight);
+            glfwGetWindowSize(handle, pWidth, pHeight);
             // Get the resolution of the primary monitor
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            // Center the window
+            // Center the handle
             assert vidmode != null;
             glfwSetWindowPos(
-                    window,
+                    handle,
                     (vidmode.width() - pWidth.get(0)) / 2,
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         }
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(handle);
         // Enable v-sync
         glfwSwapInterval(1);
-        // Make the window visible
-        glfwShowWindow(window);
+        // Make the handle visible
+        glfwShowWindow(handle);
 
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
@@ -177,7 +177,7 @@ public class Main implements InputListener {
     private static float deltaTime;
 
     private void loop() {
-        glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
+        glfwSetWindowSizeCallback(handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
                 System.out.println("RESIZE");
@@ -277,7 +277,7 @@ public class Main implements InputListener {
             xInputDevice = null;
         }
 
-        glfwSetWindowFocusCallback(window, new GLFWWindowFocusCallback() {
+        glfwSetWindowFocusCallback(handle, new GLFWWindowFocusCallback() {
             @Override
             public void invoke(long window, boolean focused) {
                 if (xInputDevice != null) {
@@ -324,14 +324,14 @@ public class Main implements InputListener {
         // Used to reduce glitchy edges when water intersects geometry.
         float waterHeightIncrease = 0.5f;
 
-        while (!glfwWindowShouldClose(window)) {
-            deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;
+        while (!glfwWindowShouldClose(handle)) {
+            deltaTime = Util.getTime() - lastFrame;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            camera.setPosition(new Vector3f(0, 0, 0));
+            camera.setPosition(new Vector3f(0, -50f, 0));
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
             //camera.setPosition(new Vector3f(camera.getPosition().x + 0.1f, 100.0f,  0.0f));
 //            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
@@ -409,7 +409,7 @@ public class Main implements InputListener {
             guiRenderer.render(guis);
             TextMaster.render();
 
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(handle);
             glfwPollEvents();
 
             if (Util.getTime() - lastFPS >= 1000) {

@@ -46,9 +46,10 @@ public class Location implements Cloneable {
         return this;
     }
 
-    public void subtract(double x, double y) {
+    public Location subtract(double x, double y) {
         this.x -= x;
         this.y -= y;
+        return this;
     }
 
     public String toString() {
