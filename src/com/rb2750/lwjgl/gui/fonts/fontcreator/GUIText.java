@@ -43,6 +43,13 @@ public class GUIText {
 
     public void setText(String text) {
         this.text = text;
+
+        if (textMesh != null)
+        {
+            textMesh.cleanUp();
+            textMesh = null;
+        }
+
         FontType font = getFont();
         TextMeshData data = font.loadText(this);
         VertexArray mesh = new VertexArray(data.getVertexPositions(), data.getTextureCoords(), 2);
