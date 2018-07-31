@@ -43,7 +43,7 @@ public class Main implements InputListener {
     private static final float PERSP_FAR_PLANE = 1000.0f;
 
     // The handle handle
-   public static  long handle;
+    public static long handle;
     @Getter
     private static int gameWidth = 1000;
     @Getter
@@ -118,7 +118,7 @@ public class Main implements InputListener {
         }
         glfwMakeContextCurrent(handle);
         // Enable v-sync
-        glfwSwapInterval(1);
+        glfwSwapInterval(0);
         // Make the handle visible
         glfwShowWindow(handle);
 
@@ -428,7 +428,7 @@ public class Main implements InputListener {
 
             currentFPS++;
 
-            sync.sync(120);
+            sync.sync(60);
         }
 
         Shader.cleanUpAll();
@@ -456,7 +456,7 @@ public class Main implements InputListener {
             selectyTile.setCanBeInteractedWith(false);
             runOnUIThread(() -> world.addEntity(selectyTile));
         }
-        Vector3f rot = new Vector3f((float)(state.getLeftTrigger() * 90), (float)(state.getLeftTrigger() * 90), 0);
+        Vector3f rot = new Vector3f((float) (state.getLeftTrigger() * 90), (float) (state.getLeftTrigger() * 90), 0);
 //        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
         Size size = new Size(100f, 100f);
 //        selectyTile.setSize(size);
@@ -498,6 +498,28 @@ public class Main implements InputListener {
 
     @Override
     public void handleMouseInput(Mouse mouse) {
+        if (selectyTile == null) {
+            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectyTile.setCanBeInteractedWith(false);
+            runOnUIThread(() -> world.addEntity(selectyTile));
+        }
 
+        float tileX = (float) (mouse.getX() - selectyTile.getSize().getWidth() / 2);
+        float tileY = (float) (mouse.getY() - selectyTile.getSize().getHeight() / 2);
+
+        if (System.currentTimeMillis() - mouse.getLastUsed() > 500)
+            selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        else
+            selectyTile.teleport(new Location(world, tileX, tileY));
+
+        if (mouse.isLeftMouseDown()) {
+            Tile newTile = new Tile(new Location(world, tileX, tileY));
+            newTile.setSize(new Size(100, 100));
+            newTile.setRotation(new Vector3f(0, 0, 0));
+
+            for (Entity entity : world.getEntities())
+                if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
+            world.addEntity(newTile);
+        }
     }
 }

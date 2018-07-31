@@ -1,9 +1,13 @@
 package com.rb2750.lwjgl.input.controllers;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 
 public class Keyboard {
+    @Getter
     private HashMap<Integer, Boolean> state = new HashMap<>();
+    @Getter
     private HashMap<Integer, Boolean> last = new HashMap<>();
 
     public boolean isKeyDown(int key) {
@@ -15,12 +19,12 @@ public class Keyboard {
     }
 
     public void handleKeyPress(int key) {
-        last.put(key, false);
+        if (state.getOrDefault(key, false)) last.put(key, true);
         state.put(key, true);
     }
 
     public void handleKeyRelease(int key) {
-        last.put(key, true);
+        last.put(key, false);
         state.put(key, false);
     }
 }

@@ -6,11 +6,10 @@ import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.input.InputListener;
 import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.input.controllers.*;
-import com.rb2750.lwjgl.util.*;
+import com.rb2750.lwjgl.util.Location;
+import com.rb2750.lwjgl.util.Size;
 import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
-
-import java.awt.geom.Rectangle2D;
 
 public class Player extends Entity implements InputListener, Collidable {
     float speed = 8f;
@@ -155,12 +154,13 @@ public class Player extends Entity implements InputListener, Collidable {
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
+        System.out.println(state.isAHeld() + ":" + last.isAHeld());
+
         if (state.isAHeld()) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;
                 addAnimation(new FlipAnimation());
-                System.out.println("hi");
             } else if (!onGround()) return;
             else jumping = true;
             getAcceleration().setY(21);
