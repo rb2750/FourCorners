@@ -46,7 +46,7 @@ public abstract class Animation {
 
         Keyframe currFrame = getKeyFrames()[currentFrame];
         Keyframe nextFrame = getKeyFrames()[currentFrame + 1];
-        double dTime = (double) Main.getDeltaTime() / 1000D;
+        double dTime = (double) Main.getDeltaTime();
 
         if (currFrame.position != null && nextFrame.position != null) {
             Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));

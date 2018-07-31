@@ -346,7 +346,7 @@ public class Main implements InputListener {
         GUIText fpsText = new GUIText("", 2, font, new Vector2f(0.0f, 0.0f), 1f, false);
 
         while (!glfwWindowShouldClose(handle)) {
-            deltaTime = Util.getTime() - lastFrame;
+            deltaTime = (float)(Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
 
@@ -408,19 +408,19 @@ public class Main implements InputListener {
             while (!toRun.isEmpty()) toRun.pop().run();
             world.update();
 
-            fbos.bindReflectionFrameBuffer();
-            float distance = 2 * (camera.getPosition().y - water.getHeight());
-            camera.getPosition().y -= distance;
-            camera.invertPitch();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            world.renderWorld(camera, new Vector4f(0, 1, 0, -water.getHeight() + waterHeightIncrease));
-            camera.getPosition().y += distance;
-            camera.invertPitch();
-
-            fbos.bindRefractionFrameBuffer();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
-            fbos.unbindFrameBuffer();
+//            fbos.bindReflectionFrameBuffer();
+//            float distance = 2 * (camera.getPosition().y - water.getHeight());
+//            camera.getPosition().y -= distance;
+//            camera.invertPitch();
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//            world.renderWorld(camera, new Vector4f(0, 1, 0, -water.getHeight() + waterHeightIncrease));
+//            camera.getPosition().y += distance;
+//            camera.invertPitch();
+//
+//            fbos.bindRefractionFrameBuffer();
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
+//            fbos.unbindFrameBuffer();
 
             world.renderWorld(camera, new Vector4f(0, 0, 0, 0));
             waterRenderer.render(waters, camera, light, deltaTime);
@@ -435,7 +435,8 @@ public class Main implements InputListener {
 
             if (Util.getTime() - lastFPS >= 1000) {
                 fpsText.setText("FPS: " + currentFPS);
-                averageDeltaTime = 0;
+                System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
+                averageDeltaTime = 0.0f;
 
                 currentFPS = 0;
                 lastFPS += 1000;
