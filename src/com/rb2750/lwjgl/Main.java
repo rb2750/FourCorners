@@ -5,6 +5,7 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.debug.Timer;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.gui.*;
@@ -41,8 +42,9 @@ public class Main implements InputListener {
     private static final float ORTHO_FAR_PLANE = 100000.0f;
     private static final float PERSP_NEAR_PLANE = 0.1f;
     private static final float PERSP_FAR_PLANE = 1000.0f;
+    private static final boolean USE_TIMERS = false;
 
-    // The handle handle
+    // The handle
     public static long handle;
     @Getter
     private static int gameWidth = 1000;
@@ -339,6 +341,24 @@ public class Main implements InputListener {
 
         // Used to reduce glitchy edges when water intersects geometry.
         float waterHeightIncrease = 0.5f;
+        Timer updateTimer;
+        Timer renderTimer;
+        Timer sleepTimer;
+
+        if (USE_TIMERS)
+        {
+            updateTimer = new Timer("update");
+            updateTimer.addTimer("input");
+            updateTimer.addTimer("tasks");
+            updateTimer.addTimer("world");
+
+            renderTimer = new Timer("render");
+            renderTimer.addTimer("water");
+            renderTimer.addTimer("world");
+            renderTimer.addTimer("gui");
+
+            sleepTimer = new Timer("sleep");
+        }
 
         FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
 //        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
@@ -349,6 +369,9 @@ public class Main implements InputListener {
             deltaTime = (float)(Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
+
+            if (USE_TIMERS)
+                updateTimer.startTimer();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -364,6 +387,9 @@ public class Main implements InputListener {
 //            player.setRotation(player.getRotation() + 1.0);
 //            player2.setRotation(player2.getRotation() - 2.0);
 //            player3.setRotation(player3.getRotation() + 3.5);
+
+            if (USE_TIMERS)
+                updateTimer.startSubTimer("input");
 
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
@@ -405,8 +431,31 @@ public class Main implements InputListener {
 
             inputManager.update();
 
+            if (USE_TIMERS)
+            {
+                updateTimer.stopSubTimer("input");
+                updateTimer.startSubTimer("tasks");
+            }
+
             while (!toRun.isEmpty()) toRun.pop().run();
+
+            if (USE_TIMERS)
+            {
+                updateTimer.stopSubTimer("tasks");
+                updateTimer.startSubTimer("world");
+            }
+
             world.update();
+
+            if (USE_TIMERS)
+            {
+                updateTimer.stopSubTimer("world");
+
+                updateTimer.stopTimer();
+
+                renderTimer.startTimer();
+                renderTimer.startSubTimer("water");
+            }
 
 //            fbos.bindReflectionFrameBuffer();
 //            float distance = 2 * (camera.getPosition().y - water.getHeight());
@@ -422,19 +471,51 @@ public class Main implements InputListener {
 //            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
 //            fbos.unbindFrameBuffer();
 
+            if (USE_TIMERS)
+            {
+                renderTimer.pauseSubTimer("water");
+                renderTimer.startSubTimer("world");
+            }
+
             world.renderWorld(camera, new Vector4f(0, 0, 0, 0));
+
+            if (USE_TIMERS)
+            {
+                renderTimer.stopSubTimer("world");
+                renderTimer.resumeSubTimer("water");
+            }
+
             waterRenderer.render(waters, camera, light, deltaTime);
+
+            if (USE_TIMERS)
+            {
+                renderTimer.stopSubTimer("water");
+                renderTimer.startSubTimer("gui");
+            }
 
             guiManager.render();
 
             guiRenderer.render(guis);
             TextMaster.render();
 
+            if (USE_TIMERS)
+                renderTimer.pauseSubTimer("gui");
+
             glfwSwapBuffers(handle);
             glfwPollEvents();
 
+            if (USE_TIMERS)
+                renderTimer.stopTimer();
+
             if (Util.getTime() - lastFPS >= 1000) {
+                if (USE_TIMERS)
+                    renderTimer.resumeSubTimer("gui");
+
                 fpsText.setText("FPS: " + currentFPS);
+
+                if (USE_TIMERS)
+                    renderTimer.stopSubTimer("gui");
+
                 System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
                 averageDeltaTime = 0.0f;
 
@@ -444,7 +525,19 @@ public class Main implements InputListener {
 
             currentFPS++;
 
+            if (USE_TIMERS)
+                sleepTimer.startTimer();
+
             sync.sync(60);
+
+            if (USE_TIMERS)
+            {
+                sleepTimer.stopTimer();
+
+                updateTimer.timerInfomation();
+                renderTimer.timerInfomation();
+                sleepTimer.timerInfomation();
+            }
         }
 
         Shader.cleanUpAll();
