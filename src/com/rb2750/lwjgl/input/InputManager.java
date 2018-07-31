@@ -18,11 +18,17 @@ public class InputManager {
     private Keyboard keyboard = new Keyboard();
     private Mouse mouse = new Mouse(0, 0);
     private HashMap<Integer, Boolean> keyState = new HashMap<>();
+    private InputMode mode;
 
     public void Setup() {
         glfwSetKeyCallback(Main.handle, (window, key, scancode, action, modifiers) -> {
-            if (action == GLFW_RELEASE) keyState.put(key, false);//keyboard.handleKeyRelease(key);
-            if (action == GLFW_PRESS || action == GLFW_REPEAT) keyState.put(key, true);//keyboard.handleKeyPress(key);
+            if (action == GLFW_RELEASE) {
+                keyState.put(key, false);
+            }
+            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                keyState.put(key, true);
+                mode = InputMode.KEYBOARD;
+            }
         });
 
         //Mouse
@@ -51,6 +57,7 @@ public class InputManager {
             SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
             listener.open();
             listener.addSubscriber((state, last) -> {
+                if (new Controller().updateSteam(state).isKeyDown()) mode = InputMode.STEAM_CONTROLLER;
                 queue.add(new SteamQueuedEvent(new Controller().updateSteam(state), new Controller().updateSteam(last)));
             });
         } catch (IndexOutOfBoundsException e) {
@@ -63,6 +70,8 @@ public class InputManager {
     }
 
     public void update() {
+        if (mode == InputMode.KEYBOARD) queue.clear();
+
         while (!queue.isEmpty()) {
             SteamQueuedEvent event = queue.remove();
 
@@ -75,8 +84,10 @@ public class InputManager {
         }
 
         for (InputListener listener : listeners) {
-            listener.handleKeyboardInput(keyboard);
             listener.handleMouseInput(mouse);
+            if (mode == null || mode == InputMode.KEYBOARD) {
+                listener.handleKeyboardInput(keyboard);
+            }
         }
     }
 

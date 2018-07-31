@@ -6,6 +6,8 @@ import com.rb2750.lwjgl.input.XInputState;
 import lombok.Getter;
 import se.albin.steamcontroller.SteamController;
 
+import java.lang.reflect.Field;
+
 public class Controller {
     @Getter
     private Analog2D analogLeft = new Analog2D();
@@ -80,6 +82,23 @@ public class Controller {
         rightTrigger = controller.getRightTrigger();
 
         return this;
+    }
+
+    public boolean isKeyDown() {
+        boolean keyDown = false;
+
+        for (Field f : getClass().getDeclaredFields()) {
+            if (f.getType().equals(boolean.class)) {
+                try {
+                    if ((boolean) f.get(this)) keyDown = true;
+                    break;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return keyDown || analogLeft.x() != 0 || analogLeft.y() != 0 || analogRight.x() != 0 || analogRight.y() != 0 || analogStick.x() != 0 || analogStick.y() != 0 || leftTrigger != 0 || rightTrigger != 0;
     }
 
     private Analog2D getDpad(int dpad) {

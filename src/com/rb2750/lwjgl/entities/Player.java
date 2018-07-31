@@ -154,8 +154,6 @@ public class Player extends Entity implements InputListener, Collidable {
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
-        System.out.println(state.isAHeld() + ":" + last.isAHeld());
-
         if (state.isAHeld()) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
