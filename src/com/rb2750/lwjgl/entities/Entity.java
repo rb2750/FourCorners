@@ -91,10 +91,14 @@ public abstract class Entity implements Cloneable {
         return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() >= 0 && location.getX() >= 0;
     }
 
-    public boolean move(Location location, boolean force) {
+    private boolean move(Location location, boolean force) {
         if (!force && !canMove(location)) return false;
         this.location = location;
         return true;
+    }
+
+    public boolean teleport(Location location) {
+        return move(location, true);
     }
 
     public boolean move(Location location) {

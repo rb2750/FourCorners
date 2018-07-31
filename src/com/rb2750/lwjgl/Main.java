@@ -463,10 +463,10 @@ public class Main implements InputListener {
         selectyTile.setRotation(rot);
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
-            selectyTile.move(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE), true);
+            selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
         else
-            selectyTile.move(new Location(world, tileX, tileY), true);
 
+            selectyTile.teleport(new Location(world, tileX, tileY));
         runOnUIThread(() -> {
             if (state.isRightPadPressed()) {
                 Tile newTile = new Tile(new Location(world, tileX, tileY));
