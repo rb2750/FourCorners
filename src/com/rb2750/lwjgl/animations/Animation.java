@@ -18,12 +18,14 @@ public abstract class Animation {
 
     Animation(double time) {
         this.currentFrame = 0;
-        this.timePerFrame = (float) time / (float) getKeyFrames().length;
+        this.timePerFrame = (float) time / (float) getKeyFrames(null).length;
         this.paused = false;
         this.timeOfCurrFrame = 0;
     }
 
     public void doAnimation(Entity entity) {
+        Keyframe[] frames=  getKeyFrames(entity);
+
         if (original == null) {
             for (Animation animation : entity.getAnimations()) {
                 original = animation.getOriginal();
@@ -33,19 +35,19 @@ public abstract class Animation {
         }
 
         if (paused && timeOfCurrFrame < 0.05) {
-            if (getKeyFrames()[currentFrame].pauseFrame) {
+            if (frames[currentFrame].pauseFrame) {
                 return;
             }
         }
 
-        if (currentFrame >= getKeyFrames().length - 1) {
+        if (currentFrame >= frames.length - 1) {
             this.onFinish(entity);
             entity.removeAnimation(this);
             return;
         }
 
-        Keyframe currFrame = getKeyFrames()[currentFrame];
-        Keyframe nextFrame = getKeyFrames()[currentFrame + 1];
+        Keyframe currFrame = frames[currentFrame];
+        Keyframe nextFrame = frames[currentFrame + 1];
         double dTime = (double) Main.getDeltaTime() / 1000D;
 
         if (currFrame.position != null && nextFrame.position != null) {
@@ -90,6 +92,6 @@ public abstract class Animation {
         paused = false;
     }
 
-    public abstract Keyframe[] getKeyFrames();
+    public abstract Keyframe[] getKeyFrames(Entity entity);
 }
 

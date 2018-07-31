@@ -1,5 +1,6 @@
 package com.rb2750.lwjgl.animations;
 
+import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.util.Size;
 
 public class SquatAnimation extends Animation {
@@ -12,7 +13,7 @@ public class SquatAnimation extends Animation {
     }
 
     @Override
-    public Keyframe[] getKeyFrames() {
+    public Keyframe[] getKeyFrames(Entity entity) {
         return new Keyframe[]{
                 new Keyframe(null, null, new Size(100, 100), false),
                 new Keyframe(null, null, new Size(200, -75), true), //TODO: No reason for this to be negative
