@@ -98,7 +98,15 @@ public class Controller {
             }
         }
 
-        return keyDown || analogLeft.x() != 0 || analogLeft.y() != 0 || analogRight.x() != 0 || analogRight.y() != 0 || analogStick.x() != 0 || analogStick.y() != 0 || leftTrigger != 0 || rightTrigger != 0;
+        return keyDown || isAnalogueTouched();
+    }
+
+    public boolean isPadTouched() {
+        return isLeftPadTouched() || isRightPadTouched();
+    }
+
+    public boolean isAnalogueTouched() {
+        return analogLeft.x() != 0 || analogLeft.y() != 0 || analogRight.x() != 0 || analogRight.y() != 0 || analogStick.x() != 0 || analogStick.y() != 0 || leftTrigger != 0 || rightTrigger != 0;
     }
 
     private Analog2D getDpad(int dpad) {

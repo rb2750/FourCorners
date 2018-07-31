@@ -179,7 +179,6 @@ public class Main implements InputListener {
         glfwSetWindowSizeCallback(handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
-                System.out.println("RESIZE");
                 gameWidth = width;
                 gameHeight = height;
                 glViewport(0, 0, width, height);
@@ -417,8 +416,6 @@ public class Main implements InputListener {
             glfwPollEvents();
 
             if (Util.getTime() - lastFPS >= 1000) {
-//                System.out.println("FPS: " + currentFPS);
-//                System.out.println("Average deltaTime: " + (averageDeltaTime / currentFPS));
                 fpsText.setText("FPS: " + currentFPS);
                 averageDeltaTime = 0;
 

@@ -19,6 +19,7 @@ public class InputManager {
     private Mouse mouse = new Mouse(0, 0);
     private HashMap<Integer, Boolean> keyState = new HashMap<>();
     private InputMode mode;
+    private Controller currentControllerState;
 
     public void Setup() {
         glfwSetKeyCallback(Main.handle, (window, key, scancode, action, modifiers) -> {
@@ -58,7 +59,7 @@ public class InputManager {
             listener.open();
             listener.addSubscriber((state, last) -> {
                 if (new Controller().updateSteam(state).isKeyDown()) mode = InputMode.STEAM_CONTROLLER;
-                queue.add(new SteamQueuedEvent(new Controller().updateSteam(state), new Controller().updateSteam(last)));
+                queue.add(new SteamQueuedEvent(currentControllerState = new Controller().updateSteam(state), new Controller().updateSteam(last)));
             });
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Failed to find Steam Controller.");
@@ -84,7 +85,8 @@ public class InputManager {
         }
 
         for (InputListener listener : listeners) {
-            listener.handleMouseInput(mouse);
+            if (currentControllerState == null || !currentControllerState.isPadTouched())
+                listener.handleMouseInput(mouse);
             if (mode == null || mode == InputMode.KEYBOARD) {
                 listener.handleKeyboardInput(keyboard);
             }
