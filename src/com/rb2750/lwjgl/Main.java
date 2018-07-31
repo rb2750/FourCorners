@@ -448,43 +448,50 @@ public class Main implements InputListener {
         double tileX = halfGameWidth * state.getAnalogRight().x() + halfGameWidth;
         double tileY = halfGameHeight * state.getAnalogRight().y() + halfGameHeight;
 
-        if (selectyTile == null) {
-            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanBeInteractedWith(false);
-            runOnUIThread(() -> world.addEntity(selectyTile));
-        }
+        tryCreateSelectyTile();
+
         Vector3f rot = new Vector3f((float) (state.getLeftTrigger() * 90), (float) (state.getLeftTrigger() * 90), 0);
-//        Size size = new Size(100f * Math.max(1 - Input.Left_Trigger, 0.3), 100f * Math.max(1 - Input.Right_Trigger, 0.3));
         Size size = new Size(100f, 100f);
-//        selectyTile.setSize(size);
+
         selectyTile.setRotation(rot);
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
             selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-        else
+        else selectyTile.teleport(new Location(world, tileX, tileY));
 
-            selectyTile.teleport(new Location(world, tileX, tileY));
         runOnUIThread(() -> {
-            if (state.isRightPadPressed()) {
-                Tile newTile = new Tile(new Location(world, tileX, tileY));
-                newTile.setSize(size);
-                newTile.setRotation(rot);
-
-                for (Entity entity : world.getEntities())
-                    if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-                world.addEntity(newTile);
-            }
+            if (state.isRightPadPressed()) tryPlaceTile(tileX, tileY, size, rot);
 
             if (state.isLeftPadTouched()) {
                 guiManager.displayGUI(new SelectionGUI());
             } else guiManager.hideGUI(SelectionGUI.class);
         });
 
-        if (state.isBHeld()) {
-            world.getEntities().clear();
+        if (state.isBHeld()) resetWorld();
+    }
 
-            world.addEntity(player);
-            world.addEntity(selectyTile);
+    private void tryPlaceTile(double tileX, double tileY, Size size, Vector3f rotation) {
+        Tile newTile = new Tile(new Location(world, tileX, tileY));
+        newTile.setSize(size);
+        newTile.setRotation(rotation);
+
+        for (Entity entity : world.getEntities())
+            if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
+        world.addEntity(newTile);
+    }
+
+    private void resetWorld() {
+        world.getEntities().clear();
+
+        world.addEntity(player);
+        world.addEntity(selectyTile);
+    }
+
+    private void tryCreateSelectyTile() {
+        if (selectyTile == null) {
+            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectyTile.setCanBeInteractedWith(false);
+            runOnUIThread(() -> world.addEntity(selectyTile));
         }
     }
 
@@ -495,11 +502,7 @@ public class Main implements InputListener {
 
     @Override
     public void handleMouseInput(Mouse mouse) {
-        if (selectyTile == null) {
-            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanBeInteractedWith(false);
-            runOnUIThread(() -> world.addEntity(selectyTile));
-        }
+        tryCreateSelectyTile();
 
         float tileX = (float) (mouse.getX() - selectyTile.getSize().getWidth() / 2);
         float tileY = (float) (mouse.getY() - selectyTile.getSize().getHeight() / 2);
@@ -510,13 +513,7 @@ public class Main implements InputListener {
             selectyTile.teleport(new Location(world, tileX, tileY));
 
         if (mouse.isLeftMouseDown()) {
-            Tile newTile = new Tile(new Location(world, tileX, tileY));
-            newTile.setSize(new Size(100, 100));
-            newTile.setRotation(new Vector3f(0, 0, 0));
-
-            for (Entity entity : world.getEntities())
-                if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-            world.addEntity(newTile);
+            tryPlaceTile(tileX, tileY, new Size(100, 100), new Vector3f(0, 0, 0));
         }
     }
 }
