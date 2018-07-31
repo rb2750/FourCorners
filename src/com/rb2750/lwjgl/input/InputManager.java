@@ -15,11 +15,11 @@ import java.util.*;
 public class InputManager {
     private static List<InputListener> listeners = new ArrayList<>();
     private Queue<SteamQueuedEvent> queue = new ArrayDeque<>();
-    private Keyboard keyboard = new Keyboard();
-    private Mouse mouse = new Mouse(0, 0);
+    @Getter private Keyboard keyboard = new Keyboard();
+    @Getter private Mouse mouse = new Mouse(0, 0);
     private HashMap<Integer, Boolean> keyState = new HashMap<>();
     private InputMode mode;
-    private Controller currentControllerState;
+    @Getter private Controller currentControllerState;
 
     public void Setup() {
         glfwSetKeyCallback(Main.handle, (window, key, scancode, action, modifiers) -> {
@@ -36,10 +36,8 @@ public class InputManager {
         glfwSetCursorPosCallback(Main.handle, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xPos, double yPos) {
-                mouse.setX((float) xPos/*((float) xPos - Main.getGameWidth() / 2f) / Main.getGameWidth()*/);
-                mouse.setY((float) (Main.getGameHeight() - yPos)/*((float) yPos - Main.getGameHeight() / 2f) / Main.getGameHeight()*/);
-
-                for (InputListener listener : listeners) listener.handleMouseInput(mouse);
+                mouse.setX((float) xPos);
+                mouse.setY((float) (Main.getGameHeight() - yPos));
             }
         });
         glfwSetMouseButtonCallback(Main.handle, new GLFWMouseButtonCallback() {
@@ -48,9 +46,11 @@ public class InputManager {
                 if (key == GLFW_MOUSE_BUTTON_LEFT) mouse.setLeftMouseDown(action == GLFW_PRESS);
                 if (key == GLFW_MOUSE_BUTTON_MIDDLE) mouse.setMiddleMouseDown(action == GLFW_PRESS);
                 if (key == GLFW_MOUSE_BUTTON_RIGHT) mouse.setRightMouseDown(action == GLFW_PRESS);
-
-                for (InputListener listener : listeners) listener.handleMouseInput(mouse);
             }
+        });
+        glfwSetScrollCallback(Main.handle, (window, dx, dy) -> {
+            mouse.setScrollDx(dx);
+            mouse.setScrollDy(dy);
         });
 
         //Steam Controller
@@ -91,6 +91,9 @@ public class InputManager {
                 listener.handleKeyboardInput(keyboard);
             }
         }
+
+        mouse.setScrollDx(0);
+        mouse.setScrollDy(0);
     }
 
     public void updateXInputController() {

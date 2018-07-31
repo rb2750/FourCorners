@@ -497,8 +497,13 @@ public class Main implements InputListener {
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
-
+        if (keyboard.isKeyDown(GLFW_KEY_R)) resetWorld();
     }
+
+    private float rotationX = 0;
+    private float rotationY = 0;
+    private float rotationZ = 0;
+    private Point resizePoint = new Point();
 
     @Override
     public void handleMouseInput(Mouse mouse) {
@@ -507,13 +512,32 @@ public class Main implements InputListener {
         float tileX = (float) (mouse.getX() - selectyTile.getSize().getWidth() / 2);
         float tileY = (float) (mouse.getY() - selectyTile.getSize().getHeight() / 2);
 
+        double rotateAmount = mouse.getScrollDy() * 360 / 20;
+
+        if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_SHIFT)) rotationX += rotateAmount;
+        else if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_CONTROL)) rotationY += rotateAmount;
+        else rotationZ += rotateAmount;
+
+        int size = 100;
+
+//        if (mouse.isRightMouseDown()) {
+//            if (resizePoint == null) resizePoint = new Point(tileX, tileY);
+//            size = (int) new Vector2f(mouse.getX(), mouse.getY()).distance((float) resizePoint.getX(), (float) resizePoint.getY());
+//        } else resizePoint = null;
+
+        Size s = new Size(size, size);
+
+        selectyTile.setSize(s);
+
         if (System.currentTimeMillis() - mouse.getLastUsed() > 500)
             selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-        else
-            selectyTile.teleport(new Location(world, tileX, tileY));
+        else {
+            selectyTile.teleport(new Location(world, resizePoint != null ? resizePoint.getX() : tileX, resizePoint != null ? resizePoint.getY() : tileY));
+            selectyTile.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
+        }
 
         if (mouse.isLeftMouseDown()) {
-            tryPlaceTile(tileX, tileY, new Size(100, 100), new Vector3f(0, 0, 0));
+            tryPlaceTile(tileX, tileY, s, new Vector3f(rotationX, rotationY, rotationZ));
         }
     }
 }

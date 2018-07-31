@@ -17,6 +17,10 @@ public class Mouse {
     private boolean rightMouseDown;
     @Getter
     private long lastUsed;
+    @Getter
+    private double scrollDx;
+    @Getter
+    private double scrollDy;
 
     public Mouse(float x, float y) {
         this.x = x;
@@ -46,5 +50,13 @@ public class Mouse {
     public void setRightMouseDown(boolean rightMouseDown) {
         this.rightMouseDown = rightMouseDown;
         lastUsed = System.currentTimeMillis();
+    }
+
+    public void setScrollDx(double scrollDx) {
+        this.scrollDx = scrollDx;
+    }
+
+    public void setScrollDy(double scrollDy) {
+        this.scrollDy = scrollDy;
     }
 }
