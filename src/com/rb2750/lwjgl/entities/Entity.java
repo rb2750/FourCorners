@@ -106,6 +106,7 @@ public abstract class Entity implements Cloneable {
      * @return Is the entity able to move
      */
     private boolean canMove(Location location) {
+        if(location == null) return false;
         return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() >= 0 && location.getX() >= 0;
     }
 
