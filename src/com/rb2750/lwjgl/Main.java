@@ -87,14 +87,17 @@ public class Main implements InputListener {
 
     private void init() {
         GLFWErrorCallback.createPrint(System.err).set();
+
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
+
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
         // Create the handle
         handle = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
 
@@ -116,9 +119,12 @@ public class Main implements InputListener {
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         }
+
         glfwMakeContextCurrent(handle);
+
         // Enable v-sync
         glfwSwapInterval(0);
+
         // Make the handle visible
         glfwShowWindow(handle);
 
@@ -129,26 +135,31 @@ public class Main implements InputListener {
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 //        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+//        glCullFace(GL_BACK);
 
         glEnable(GL_DEPTH_TEST);
+
         glActiveTexture(GL_TEXTURE1);
 
         Shader.loadAllShaders();
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
-        System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
+
         currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
         //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+
         Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.GENERAL.disable();
+
 //        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
 //        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
         Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
         Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
+
         Shader.WATER.disable();
+
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
         Shader.GENERAL.disable();
+
         Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.BASIC.setUniform1i("tex", 1);
 

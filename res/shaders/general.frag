@@ -15,6 +15,39 @@ uniform vec3 lightColour;
 uniform float shineDamper;
 uniform float reflectivity;
 
+struct BaseLight
+{
+    vec3 colour;
+    float intensity;
+};
+
+struct DirectionalLight
+{
+    BaseLight base;
+    vec3 direction;
+};
+
+vec4 calcLight(BaseLight base, vec3 direction, vec3 normal)
+{
+    float diffuseFactor = dot(-direction, normal);
+
+    vec4 diffuseColor = vec4(0, 0, 0, 0);
+
+    if (diffuseFactor > 0)
+    {
+        diffuseColor = vec4(base.colour, 1.0) * base.intensity * diffuseFactor;
+    }
+
+    return diffuseColor;
+}
+
+vec4 calcDirectionalLight(DirectionalLight dirLight, vec3 normal)
+{
+    return calcLight(dirLight.base, dirLight.direction, normal);
+}
+
+
+
 void main() {
     vec3 unitNormal = normalize(fs_in.normal);
     vec3 unitLightVector = normalize(fs_in.toLightVector);

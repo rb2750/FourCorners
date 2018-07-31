@@ -100,37 +100,7 @@ public class Player extends Entity implements InputListener, Collidable {
         };
 
 
-        normals = new float[]{
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f
-        };
+        normals = calcNormals();
 
         layer = -45.0f;
         texturePath = "res/textures/blue.png";

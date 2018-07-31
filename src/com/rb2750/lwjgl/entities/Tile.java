@@ -84,37 +84,7 @@ public class Tile extends Entity {
                 1, 0
         };
 
-        normals = new float[]{
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f
-        };
+        normals = calcNormals();
 
         this.texturePath = "res/textures/red.png";
         createMesh();
