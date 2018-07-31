@@ -532,7 +532,7 @@ public class Main implements InputListener {
         if (System.currentTimeMillis() - mouse.getLastUsed() > 500)
             selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
         else {
-            selectyTile.teleport(new Location(world, resizePoint != null ? resizePoint.getX() : tileX, resizePoint != null ? resizePoint.getY() : tileY));
+            selectyTile.teleport(new Location(world, /*resizePoint != null ? resizePoint.getX() : */tileX, /*resizePoint != null ? resizePoint.getY() : */tileY));
             selectyTile.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
         }
 
