@@ -37,8 +37,8 @@ import java.util.*;
 public class Main implements InputListener {
     public static Main instance;
 
-    private static final float ORTHO_NEAR_PLANE = -1.0f;
-    private static final float ORTHO_FAR_PLANE = 1.0f;
+    private static final float ORTHO_NEAR_PLANE = -100000.0f;
+    private static final float ORTHO_FAR_PLANE = 100000.0f;
     private static final float PERSP_NEAR_PLANE = 0.1f;
     private static final float PERSP_FAR_PLANE = 1000.0f;
 
@@ -137,16 +137,20 @@ public class Main implements InputListener {
         Shader.loadAllShaders();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
         System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
-        currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+        currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
+        //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
         Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.GENERAL.disable();
-        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
-        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
-//        Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
-//        Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
+//        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
+//        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
+        Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
+        Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
         Shader.WATER.disable();
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
+        Shader.GENERAL.disable();
+        Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.BASIC.setUniform1i("tex", 1);
 
         light = new Light(new Vector3f(80, 10, -30), new Vector3f(1, 1, 1));
         Shader.GENERAL.setUniform3f("lightPosition", light.getPosition());
@@ -184,16 +188,19 @@ public class Main implements InputListener {
                 glViewport(0, 0, width, height);
 //                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
 //                System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
-////                currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+                currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
+                //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
 //                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
 //                Shader.GENERAL.disable();
                 Shader.WATER.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
-                Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
+//                Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
+//                Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
                 Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
                 Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
                 Shader.WATER.disable();
-                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -100000, 100000));
+                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.GENERAL.disable();
+                Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
             }
         });
 

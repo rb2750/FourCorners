@@ -24,10 +24,13 @@ public class Shader
 
     private Map<String, Integer> locationCache = new HashMap<String, Integer>();
 
+    public static Shader BASIC;
     public static Shader GENERAL;
     public static Shader WATER;
     public static Shader GUI;
     public static Shader FONT;
+
+    private static Shader activeShader;
 
     public Shader(String vertex, String fragment)
     {
@@ -36,6 +39,7 @@ public class Shader
 
     public static void loadAllShaders()
     {
+        BASIC = new Shader("res/shaders/basic.vert", "res/shaders/basic.frag");
         GENERAL = new Shader("res/shaders/general.vert", "res/shaders/general.frag");
         WATER = new Shader("res/shaders/water.vert", "res/shaders/water.frag");
         GUI = new Shader("res/shaders/gui.vert", "res/shaders/gui.frag");
@@ -65,59 +69,73 @@ public class Shader
 
     public void setUniform1i(String name, int value)
     {
-        if(!enabled) enable();
+        checkShader();
         glUniform1i(getUniform(name), value);
     }
 
     public void setUniform1f(String name, float value)
     {
-        if(!enabled) enable();
+        checkShader();
         glUniform1f(getUniform(name), value);
     }
 
     public void loadBoolean(String name, boolean value)
     {
+        checkShader();
         setUniform1f(name, value ? 1.0f : 0.0f);
     }
 
     public void setUniform2f(String name, Vector2f vector)
     {
-        if(!enabled) enable();
-
+        checkShader();
         glUniform2f(getUniform(name), vector.x, vector.y);
     }
 
     public void setUniform3f(String name, Vector3f vector)
     {
-        if(!enabled) enable();
-
+        checkShader();
         glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
     }
 
     public void setUniform4f(String name, Vector4f vector)
     {
-        if(!enabled) enable();
-
+        checkShader();
         glUniform4f(getUniform(name), vector.x, vector.y, vector.z, vector.w);
     }
 
     public void setUniformMat4f(String name, Matrix4f matrix)
     {
-        if(!enabled) enable();
-
+        checkShader();
         glUniformMatrix4fv(getUniform(name), false, MatrixUtil.toFloatBuffer(matrix));
+    }
+
+    private void checkShader()
+    {
+        disableOtherShader();
+        if(!enabled) enable();
+    }
+
+    private void disableOtherShader()
+    {
+        if (activeShader != this && activeShader != null)
+            activeShader.disable();
     }
 
     public void enable()
     {
+        if (activeShader != null)
+            activeShader.disable();
+
         glUseProgram(ID);
         enabled = true;
+        activeShader = this;
     }
 
     public void disable()
     {
         glUseProgram(0);
         enabled = false;
+        activeShader = null;
     }
 
     public void cleanUp()
@@ -127,6 +145,7 @@ public class Shader
 
     public static void cleanUpAll()
     {
+        Shader.BASIC.cleanUp();
         Shader.GENERAL.cleanUp();
         Shader.WATER.cleanUp();
         Shader.FONT.cleanUp();

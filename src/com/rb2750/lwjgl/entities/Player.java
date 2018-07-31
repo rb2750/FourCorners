@@ -17,7 +17,7 @@ public class Player extends Entity implements InputListener, Collidable {
     boolean doubleJump = false;
 
     public Player(Location location) {
-        super(location, new Size(100, 100), Shader.GENERAL);
+        super(location, new Size(100, 100), Shader.BASIC);
         setGravity(true);
 
         InputManager.registerInputListener(this);

@@ -7,7 +7,7 @@ import com.rb2750.lwjgl.util.Size;
 
 public class Cube extends Entity {
     public Cube(Location location) {
-        super(location, new Size(100, 100), Shader.GENERAL);
+        super(location, new Size(100, 100), Shader.BASIC);
 
         vertices = new float[]{
                 0.0f, 0.0f, 0.0f,
