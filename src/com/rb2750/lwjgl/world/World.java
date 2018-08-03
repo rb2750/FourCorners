@@ -16,6 +16,12 @@ import java.util.List;
 public class World {
     @Getter
     private List<Entity> entities = new ArrayList<>();
+    @Getter
+    private WorldSettings settings;
+
+    public World(WorldSettings settings) {
+        this.settings = settings;
+    }
 
     public static final int MAX_POINT_LIGHTS = 4;
     public static final int MAX_SPOT_LIGHTS = 4;
@@ -52,7 +58,7 @@ public class World {
         if (!entity.isGravity()) return;
 
         if (entity.getLocation().getY() > 0) {
-            entity.getAcceleration().setY(entity.getAcceleration().getY() - WorldSettings.GRAVITY);
+            entity.getAcceleration().setY(entity.getAcceleration().getY() - settings.getGravity());
         } else if (entity.getAcceleration().getY() < 0) {
             if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());
             entity.getAcceleration().setY(0);
@@ -60,7 +66,7 @@ public class World {
     }
 
     private void handleFriction(Entity entity) {
-        double friction = entity.onGround() ? WorldSettings.frictionGround : WorldSettings.frictionAir;
+        double friction = entity.onGround() ? settings.getFrictionGround() : settings.getFrictionAir();
         if (entity.getAcceleration().getX() > 0)
             entity.getAcceleration().setX(entity.getAcceleration().getX() - friction);
         if (entity.getAcceleration().getX() < 0)
@@ -72,15 +78,22 @@ public class World {
             handleGravity(entity);
             handleFriction(entity);
 
+            entity.update();
+
             boolean skipY = false;
-            double x = Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
-            double y = Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
+            float x = (float) Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
+            float y = (float) Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
 
             Entity interactingWithX = null;
+            Entity interact = null;
 
-            if (entity.getAcceleration().getX() != 0 && (intersects(entity, entity.getRectangle()) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
-                entity.getLocation().setX(x);
-                entity.setInteractingWithX(null);
+            if (entity.getAcceleration().getX() != 0 && ((interact = intersects(entity, entity.getRectangle())) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
+                if (interact != null && entity.getAcceleration().getX() >= 0) {
+                    entity.getLocation().setX((float) Util.getNearestPointInPerimeter(interact.getRectangle(), x, y).getX() - entity.getSize().getWidth());
+                } else {
+                    entity.getLocation().setX(x);
+                    entity.setInteractingWithX(null);
+                }
             } else {
                 /*
                   Handle steps
@@ -90,7 +103,7 @@ public class World {
                     skipY = true;
                 } else {
                     if (interactingWithX != null) {
-                        double pointX = Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
+                        float pointX = (float) Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
                         if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.getSize().getWidth();
                         entity.getLocation().setX(pointX);
                     }
@@ -107,7 +120,7 @@ public class World {
                     entity.setInteractingWithY(null);
                 } else {
                     if (interactingWithY != null) {
-                        double pointY = Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
+                        float pointY = (float) Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
                         if (pointY == interactingWithY.getRectangle().getY()) pointY -= entity.getSize().getHeight();
                         entity.getLocation().setY(pointY);
                         if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());
@@ -116,8 +129,6 @@ public class World {
                     if (interactingWithY != null) entity.setInteractingWithY(interactingWithY);
                 }
             }
-
-            entity.update();
         }
     }
 
@@ -207,7 +218,7 @@ public class World {
 
     public Entity intersects(Entity e, Rectangle2D rect) {
         for (Entity entity : getEntities()) {
-            if (e == entity || !entity.isCanBeInteractedWith()) continue;
+            if (e == entity || !entity.isCanInteract()) continue;
             if (entity.getRectangle().intersects(rect)) {
                 return entity;
             }

@@ -1,7 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
-import com.rb2750.lwjgl.animations.FlipAnimation;
-import com.rb2750.lwjgl.animations.SquatAnimation;
+import com.rb2750.lwjgl.animations.*;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.input.InputListener;
 import com.rb2750.lwjgl.input.InputManager;
@@ -12,7 +11,7 @@ import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Player extends Entity implements InputListener, Collidable {
-    float speed = 8f;
+    float speed = 12f;
     boolean jumping = false;
     boolean doubleJump = false;
 
@@ -124,7 +123,9 @@ public class Player extends Entity implements InputListener, Collidable {
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
-        if (state.isAHeld()) {
+        //Let's assume the squash animation 'sticks them to the ground' here.
+        //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
+        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class)) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;
@@ -148,7 +149,9 @@ public class Player extends Entity implements InputListener, Collidable {
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
-        if (keyboard.isKeyDown(GLFW_KEY_SPACE)) {
+        //Let's assume the squash animation 'sticks them to the ground' here.
+        //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
+        if (keyboard.isKeyDown(GLFW_KEY_SPACE) && !animationExists(SquashAnimation.class)&& !animationExists(SquatAnimation.class)) {
             if (!doubleJump && jumping && !onGround() && !keyboard.wasKeyDown(GLFW_KEY_SPACE)) {
                 doubleJump = true;
                 jumping = false;

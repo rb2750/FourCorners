@@ -6,16 +6,16 @@ import lombok.Setter;
 public class Size implements Cloneable{
     @Getter
     @Setter
-    private double width;
+    private float width;
     @Getter
     @Setter
-    private double height;
+    private float height;
     @Getter
-    private double initialWidth;
+    private float initialWidth;
     @Getter
-    private double initialHeight;
+    private float initialHeight;
 
-    public Size(double width, double height)
+    public Size(float width, float height)
     {
         this.width = width;
         this.initialWidth = width;
@@ -36,7 +36,7 @@ public class Size implements Cloneable{
         return this;
     }
 
-    public Size multiply(double factor) {
+    public Size multiply(float factor) {
         this.width *= factor;
         this.height *= factor;
         return this;

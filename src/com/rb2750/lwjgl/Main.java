@@ -5,6 +5,7 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.animations.TestAnimation;
 import com.rb2750.lwjgl.debug.Timer;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
@@ -16,6 +17,7 @@ import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.input.controllers.*;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
+import com.rb2750.lwjgl.world.WorldManager;
 import lombok.Getter;
 import org.joml.*;
 import org.lwjgl.Version;
@@ -32,6 +34,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
+import java.lang.Math;
 import java.nio.IntBuffer;
 import java.util.*;
 
@@ -51,7 +54,6 @@ public class Main implements InputListener {
     @Getter
     private static int gameHeight = 1000;
     private Player player;
-    private World world = new World();
 
     //input
     private boolean usingXInput = false;
@@ -178,6 +180,10 @@ public class Main implements InputListener {
                                            new Vector3f(2, 0, 7), 6.0f));
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
+
+        WorldManager.createDefaultWorld();
+
+        World world = WorldManager.getWorlds().get(0);
 
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
@@ -354,8 +360,7 @@ public class Main implements InputListener {
         Timer renderTimer;
         Timer sleepTimer;
 
-        if (USE_TIMERS)
-        {
+        if (USE_TIMERS) {
             updateTimer = new Timer("update");
             updateTimer.addTimer("input");
             updateTimer.addTimer("tasks");
@@ -372,10 +377,11 @@ public class Main implements InputListener {
         FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
 //        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
 //        text.setColour(1, 1, 0);
-        GUIText fpsText = new GUIText("", 2, font, new Vector2f(0.0f, 0.0f), 1f, false);
+        GUIText fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
+        GUIText posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
 
         while (!glfwWindowShouldClose(handle)) {
-            deltaTime = (float)(Util.getTime() - lastFrame) / 1000.0f;
+            deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
 
@@ -385,6 +391,9 @@ public class Main implements InputListener {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             camera.setPosition(new Vector3f(0, 0f, 0));
+
+            posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
+
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
             //camera.setPosition(new Vector3f(camera.getPosition().x + 0.1f, 100.0f,  0.0f));
 //            camera.setPosition(new Vector3f(45.0f, 100.0f, 0.0f));
@@ -440,24 +449,22 @@ public class Main implements InputListener {
 
             inputManager.update();
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 updateTimer.stopSubTimer("input");
                 updateTimer.startSubTimer("tasks");
             }
 
             while (!toRun.isEmpty()) toRun.pop().run();
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 updateTimer.stopSubTimer("tasks");
                 updateTimer.startSubTimer("world");
             }
 
-            world.update();
+            for (World world : WorldManager.getWorlds())
+                world.update();
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 updateTimer.stopSubTimer("world");
 
                 updateTimer.stopTimer();
@@ -480,24 +487,22 @@ public class Main implements InputListener {
 //            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
 //            fbos.unbindFrameBuffer();
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 renderTimer.pauseSubTimer("water");
                 renderTimer.startSubTimer("world");
             }
 
-            world.renderWorld(camera, new Vector4f(0, 0, 0, 0));
+            if (player.getWorld() != null)
+                player.getWorld().renderWorld(camera, new Vector4f(0, 0, 0, 0));
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 renderTimer.stopSubTimer("world");
                 renderTimer.resumeSubTimer("water");
             }
 
             waterRenderer.render(waters, camera, deltaTime);
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 renderTimer.stopSubTimer("water");
                 renderTimer.startSubTimer("gui");
             }
@@ -525,7 +530,7 @@ public class Main implements InputListener {
                 if (USE_TIMERS)
                     renderTimer.stopSubTimer("gui");
 
-                System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
+//                System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
                 averageDeltaTime = 0.0f;
 
                 currentFPS = 0;
@@ -539,8 +544,7 @@ public class Main implements InputListener {
 
             sync.sync(60);
 
-            if (USE_TIMERS)
-            {
+            if (USE_TIMERS) {
                 sleepTimer.stopTimer();
 
                 updateTimer.timerInfomation();
@@ -566,8 +570,8 @@ public class Main implements InputListener {
         double halfGameWidth = gameWidth / 2f;
         double halfGameHeight = gameHeight / 2f;
 
-        double tileX = halfGameWidth * state.getAnalogRight().x() + halfGameWidth;
-        double tileY = halfGameHeight * state.getAnalogRight().y() + halfGameHeight;
+        float tileX = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
+        float tileY = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
 
         tryCreateSelectyTile();
 
@@ -577,8 +581,8 @@ public class Main implements InputListener {
         selectyTile.setRotation(rot);
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
-            selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-        else selectyTile.teleport(new Location(world, tileX, tileY));
+            selectyTile.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+        else selectyTile.teleport(new Location(player.getWorld(), tileX, tileY));
 
         runOnUIThread(() -> {
             if (state.isRightPadPressed()) tryPlaceTile(tileX, tileY, size, rot);
@@ -591,34 +595,35 @@ public class Main implements InputListener {
         if (state.isBHeld()) resetWorld();
     }
 
-    private void tryPlaceTile(double tileX, double tileY, Size size, Vector3f rotation) {
-        Tile newTile = new Tile(new Location(world, tileX, tileY));
-        newTile.setSize(size);
+    private void tryPlaceTile(float tileX, float tileY, Size size, Vector3f rotation) {
+        Tile newTile = new Tile(new Location(player.getWorld(), tileX, tileY));
+        newTile.setSize(size, true);
         newTile.setRotation(rotation);
 
-        for (Entity entity : world.getEntities())
+        for (Entity entity : player.getWorld().getEntities())
             if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-        world.addEntity(newTile);
+        player.getWorld().addEntity(newTile);
     }
 
     private void resetWorld() {
-        world.getEntities().clear();
+        player.getWorld().getEntities().clear();
 
-        world.addEntity(player);
-        world.addEntity(selectyTile);
+        player.getWorld().addEntity(player);
+        player.getWorld().addEntity(selectyTile);
     }
 
     private void tryCreateSelectyTile() {
         if (selectyTile == null) {
-            selectyTile = new Tile(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanBeInteractedWith(false);
-            runOnUIThread(() -> world.addEntity(selectyTile));
+            selectyTile = new Tile(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectyTile.setCanInteract(true);
+            runOnUIThread(() -> player.getWorld().addEntity(selectyTile));
         }
     }
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
         if (keyboard.isKeyDown(GLFW_KEY_R)) resetWorld();
+        if (keyboard.isKeyDown(GLFW_KEY_X)) player.addAnimation(new TestAnimation());
     }
 
     private float rotationX = 0;
@@ -630,8 +635,8 @@ public class Main implements InputListener {
     public void handleMouseInput(Mouse mouse) {
         tryCreateSelectyTile();
 
-        float tileX = (float) (mouse.getX() - selectyTile.getSize().getWidth() / 2);
-        float tileY = (float) (mouse.getY() - selectyTile.getSize().getHeight() / 2);
+        float tileX = Math.max(0, mouse.getX() - selectyTile.getSize().getWidth() / 2);
+        float tileY = Math.max(0, mouse.getY() - selectyTile.getSize().getHeight() / 2);
 
         double rotateAmount = mouse.getScrollDy() * 360 / 20;
 
@@ -648,12 +653,12 @@ public class Main implements InputListener {
 
         Size s = new Size(size, size);
 
-        selectyTile.setSize(s);
+        selectyTile.setSize(s, true);
 
         if (System.currentTimeMillis() - mouse.getLastUsed() > 500)
-            selectyTile.teleport(new Location(world, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectyTile.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
         else {
-            selectyTile.teleport(new Location(world, resizePoint != null ? resizePoint.getX() : tileX, resizePoint != null ? resizePoint.getY() : tileY));
+            selectyTile.teleport(new Location(player.getWorld(), /*resizePoint != null ? resizePoint.getX() : */tileX, /*resizePoint != null ? resizePoint.getY() : */tileY));
             selectyTile.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
         }
 
