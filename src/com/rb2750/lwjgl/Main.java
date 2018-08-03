@@ -5,6 +5,7 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.debug.Timer;
 import com.rb2750.lwjgl.animations.TestAnimation;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
@@ -38,12 +39,13 @@ import java.util.*;
 public class Main implements InputListener {
     public static Main instance;
 
-    private static final float ORTHO_NEAR_PLANE = -1.0f;
-    private static final float ORTHO_FAR_PLANE = 1.0f;
+    private static final float ORTHO_NEAR_PLANE = -100000.0f;
+    private static final float ORTHO_FAR_PLANE = 100000.0f;
     private static final float PERSP_NEAR_PLANE = 0.1f;
     private static final float PERSP_FAR_PLANE = 1000.0f;
+    private static final boolean USE_TIMERS = false;
 
-    // The handle handle
+    // The handle
     public static long handle;
     @Getter
     private static int gameWidth = 1000;
@@ -88,14 +90,17 @@ public class Main implements InputListener {
 
     private void init() {
         GLFWErrorCallback.createPrint(System.err).set();
+
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
+
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
         // Create the handle
         handle = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
 
@@ -117,9 +122,12 @@ public class Main implements InputListener {
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         }
+
         glfwMakeContextCurrent(handle);
+
         // Enable v-sync
         glfwSwapInterval(0);
+
         // Make the handle visible
         glfwShowWindow(handle);
 
@@ -130,24 +138,33 @@ public class Main implements InputListener {
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 //        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+//        glCullFace(GL_BACK);
 
         glEnable(GL_DEPTH_TEST);
+
         glActiveTexture(GL_TEXTURE1);
 
         Shader.loadAllShaders();
-        //Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
-        System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
-        currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+
+        currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
+        //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+
         Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.GENERAL.disable();
-        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
-        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
-//        Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
-//        Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
+
+//        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
+//        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
+        Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
+        Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
+
         Shader.WATER.disable();
+
         //Shader.GENERAL.setUniformMat4f("pr_matrix", MatrixUtil.projection(gameWidth, gameHeight, 0.1f, 1000.0f, 70.0f));
         Shader.GENERAL.setUniform1i("tex", 1);
+        Shader.GENERAL.disable();
+
+        Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.BASIC.setUniform1i("tex", 1);
 
         light = new Light(new Vector3f(80, 10, -30), new Vector3f(1, 1, 1));
         Shader.GENERAL.setUniform3f("lightPosition", light.getPosition());
@@ -185,16 +202,19 @@ public class Main implements InputListener {
                 glViewport(0, 0, width, height);
 //                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
 //                System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
-////                currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
+                currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
+                //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
 //                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
 //                Shader.GENERAL.disable();
                 Shader.WATER.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
-                Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
+//                Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
+//                Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
                 Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
                 Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
                 Shader.WATER.disable();
-                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -100000, 100000));
+                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.GENERAL.disable();
+                Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
             }
         });
 
@@ -322,6 +342,24 @@ public class Main implements InputListener {
 
         // Used to reduce glitchy edges when water intersects geometry.
         float waterHeightIncrease = 0.5f;
+        Timer updateTimer;
+        Timer renderTimer;
+        Timer sleepTimer;
+
+        if (USE_TIMERS)
+        {
+            updateTimer = new Timer("update");
+            updateTimer.addTimer("input");
+            updateTimer.addTimer("tasks");
+            updateTimer.addTimer("world");
+
+            renderTimer = new Timer("render");
+            renderTimer.addTimer("water");
+            renderTimer.addTimer("world");
+            renderTimer.addTimer("gui");
+
+            sleepTimer = new Timer("sleep");
+        }
 
         FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
 //        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
@@ -329,9 +367,12 @@ public class Main implements InputListener {
         GUIText fpsText = new GUIText("", 2, font, new Vector2f(0.0f, 0.0f), 1f, false);
 
         while (!glfwWindowShouldClose(handle)) {
-            deltaTime = Util.getTime() - lastFrame;
+            deltaTime = (float)(Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
             averageDeltaTime += deltaTime;
+
+            if (USE_TIMERS)
+                updateTimer.startTimer();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -347,6 +388,9 @@ public class Main implements InputListener {
 //            player.setRotation(player.getRotation() + 1.0);
 //            player2.setRotation(player2.getRotation() - 2.0);
 //            player3.setRotation(player3.getRotation() + 3.5);
+
+            if (USE_TIMERS)
+                updateTimer.startSubTimer("input");
 
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
@@ -388,37 +432,93 @@ public class Main implements InputListener {
 
             inputManager.update();
 
+            if (USE_TIMERS)
+            {
+                updateTimer.stopSubTimer("input");
+                updateTimer.startSubTimer("tasks");
+            }
+
             while (!toRun.isEmpty()) toRun.pop().run();
+
+            if (USE_TIMERS)
+            {
+                updateTimer.stopSubTimer("tasks");
+                updateTimer.startSubTimer("world");
+            }
+
             world.update();
 
-            fbos.bindReflectionFrameBuffer();
-            float distance = 2 * (camera.getPosition().y - water.getHeight());
-            camera.getPosition().y -= distance;
-            camera.invertPitch();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            world.renderWorld(camera, new Vector4f(0, 1, 0, -water.getHeight() + waterHeightIncrease));
-            camera.getPosition().y += distance;
-            camera.invertPitch();
+            if (USE_TIMERS)
+            {
+                updateTimer.stopSubTimer("world");
 
-            fbos.bindRefractionFrameBuffer();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
-            fbos.unbindFrameBuffer();
+                updateTimer.stopTimer();
+
+                renderTimer.startTimer();
+                renderTimer.startSubTimer("water");
+            }
+
+//            fbos.bindReflectionFrameBuffer();
+//            float distance = 2 * (camera.getPosition().y - water.getHeight());
+//            camera.getPosition().y -= distance;
+//            camera.invertPitch();
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//            world.renderWorld(camera, new Vector4f(0, 1, 0, -water.getHeight() + waterHeightIncrease));
+//            camera.getPosition().y += distance;
+//            camera.invertPitch();
+//
+//            fbos.bindRefractionFrameBuffer();
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//            world.renderWorld(camera, new Vector4f(0, -1, 0, water.getHeight()));
+//            fbos.unbindFrameBuffer();
+
+            if (USE_TIMERS)
+            {
+                renderTimer.pauseSubTimer("water");
+                renderTimer.startSubTimer("world");
+            }
 
             world.renderWorld(camera, new Vector4f(0, 0, 0, 0));
+
+            if (USE_TIMERS)
+            {
+                renderTimer.stopSubTimer("world");
+                renderTimer.resumeSubTimer("water");
+            }
+
             waterRenderer.render(waters, camera, light, deltaTime);
+
+            if (USE_TIMERS)
+            {
+                renderTimer.stopSubTimer("water");
+                renderTimer.startSubTimer("gui");
+            }
 
             guiManager.render();
 
             guiRenderer.render(guis);
             TextMaster.render();
 
+            if (USE_TIMERS)
+                renderTimer.pauseSubTimer("gui");
+
             glfwSwapBuffers(handle);
             glfwPollEvents();
 
+            if (USE_TIMERS)
+                renderTimer.stopTimer();
+
             if (Util.getTime() - lastFPS >= 1000) {
+                if (USE_TIMERS)
+                    renderTimer.resumeSubTimer("gui");
+
                 fpsText.setText("FPS: " + currentFPS);
-                averageDeltaTime = 0;
+
+                if (USE_TIMERS)
+                    renderTimer.stopSubTimer("gui");
+
+                System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
+                averageDeltaTime = 0.0f;
 
                 currentFPS = 0;
                 lastFPS += 1000;
@@ -426,7 +526,19 @@ public class Main implements InputListener {
 
             currentFPS++;
 
+            if (USE_TIMERS)
+                sleepTimer.startTimer();
+
             sync.sync(60);
+
+            if (USE_TIMERS)
+            {
+                sleepTimer.stopTimer();
+
+                updateTimer.timerInfomation();
+                renderTimer.timerInfomation();
+                sleepTimer.timerInfomation();
+            }
         }
 
         Shader.cleanUpAll();

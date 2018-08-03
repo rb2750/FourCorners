@@ -7,7 +7,7 @@ import com.rb2750.lwjgl.util.Size;
 
 public class Tile extends Entity {
     public Tile(Location location) {
-        super(location, new Size(100, 100), Shader.GENERAL);
+        super(location, new Size(100, 100), Shader.BASIC);
 
         vertices = new float[]{
                 0f, 1f, 0f,
@@ -84,37 +84,7 @@ public class Tile extends Entity {
                 1, 0
         };
 
-        normals = new float[]{
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f
-        };
+        normals = calcNormals();
 
         this.texturePath = "res/textures/red.png";
         createMesh();

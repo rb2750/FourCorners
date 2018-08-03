@@ -7,7 +7,7 @@ import com.rb2750.lwjgl.util.Size;
 
 public class Cube extends Entity {
     public Cube(Location location) {
-        super(location, new Size(100, 100), Shader.GENERAL);
+        super(location, new Size(100, 100), Shader.BASIC);
 
         vertices = new float[]{
                 0.0f, 0.0f, 0.0f,
@@ -28,12 +28,7 @@ public class Cube extends Entity {
                 1, 1
         };
 
-        normals = new float[]{
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f
-        };
+        normals = calcNormals();
         texturePath = "res/textures/red.png";
 
         createMesh();

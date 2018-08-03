@@ -274,8 +274,13 @@ public abstract class Entity implements Cloneable {
         shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
 //        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
-        shader.setUniform1f("shineDamper", texture.getShineDamper());
-        shader.setUniform1f("reflectivity", texture.getReflectivity());
+
+        if (shader != Shader.BASIC)
+        {
+            shader.setUniform1f("shineDamper", texture.getShineDamper());
+            shader.setUniform1f("reflectivity", texture.getReflectivity());
+        }
+
         shader.setUniform4f("clipPlane", clipPlane);
         texture.bind();
         mesh.render();
@@ -365,6 +370,55 @@ public abstract class Entity implements Cloneable {
     public void cleanUp() {
         mesh.cleanUp();
         texture.cleanUp();
+    }
+
+    /**
+     * Takes the set vertices and indices and calculates normals for each.
+     * @throws IllegalArgumentException If vertices and indices aren't set.
+     * @return Array of normals
+     */
+    protected float[] calcNormals()
+    {
+        if (vertices == null || indices == null)
+        {
+            throw new IllegalArgumentException("Vertices and indices must be set before calculating normals.");
+        }
+
+        List<Vector3f> verticesList = new ArrayList<Vector3f>();
+
+        for (int i = 0; i < vertices.length; i += 3)
+        {
+            verticesList.add(new Vector3f(vertices[i], vertices[i + 1], vertices[i + 2]));
+        }
+
+        List<Vector3f> normalsList = new ArrayList<Vector3f>();
+
+        for (int i = 0; i < indices.length; i += 3)
+        {
+            int i0 = indices[i];
+            int i1 = indices[i + 1];
+            int i2 = indices[i + 2];
+
+            Vector3f v1 = verticesList.get(i1).sub(verticesList.get(i0));
+            Vector3f v2 = verticesList.get(i2).sub(verticesList.get(i0));
+
+            Vector3f normal = v1.cross(v2).normalize();
+
+            normalsList.add(normal);
+        }
+
+        float[] resultingNormals = new float[normalsList.size() * 3];
+
+        int normalPointer = 0;
+
+        for (Vector3f normal : normalsList)
+        {
+            resultingNormals[normalPointer++] = normal.x;
+            resultingNormals[normalPointer++] = normal.y;
+            resultingNormals[normalPointer++] = normal.z;
+        }
+
+        return resultingNormals;
     }
 
     /**
