@@ -11,7 +11,7 @@ import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Player extends Entity implements InputListener, Collidable {
-    float speed = 8f;
+    float speed = 12f;
     boolean jumping = false;
     boolean doubleJump = false;
 

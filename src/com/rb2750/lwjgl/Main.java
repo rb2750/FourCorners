@@ -606,7 +606,7 @@ public class Main implements InputListener {
     private void tryCreateSelectyTile() {
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanBeInteractedWith(false);
+            selectyTile.setCanInteract(true);
             runOnUIThread(() -> player.getWorld().addEntity(selectyTile));
         }
     }

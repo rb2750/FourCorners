@@ -34,9 +34,6 @@ public abstract class Entity implements Cloneable {
     @Setter
     private Entity interactingWithY = null;
     @Getter
-    @Setter
-    private boolean canBeInteractedWith = true;
-    @Getter
     private Size size;
 
     @Getter
@@ -56,6 +53,9 @@ public abstract class Entity implements Cloneable {
     @Getter
     protected Texture texture;
     protected Shader shader;
+    @Getter
+    @Setter
+    private boolean canInteract = true;
 
     float[] vertices;
     int[] indices;
