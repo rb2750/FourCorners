@@ -168,17 +168,6 @@ public class Main implements InputListener {
         Shader.BASIC.setUniform1i("tex", 1);
         Shader.BASIC.disable();
 
-        directionalLight = new DirectionalLight(new Light(new Vector3f(1, 1, 1), 0.8f),
-                                                new Vector3f(1, 1, 1));
-
-        //world.setDirectionalLight(directionalLight);
-        world.addPointLight(new PointLight(new Light(new Vector3f(1, 0, 0), 0.8f),
-                                           new Attenution(0, 0, 1),
-                                           new Vector3f(-2, 0, 5), 6.0f));
-        world.addPointLight(new PointLight(new Light(new Vector3f(0, 0, 1), 0.8f),
-                                           new Attenution(0, 0, 1),
-                                           new Vector3f(2, 0, 7), 6.0f));
-
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
         WorldManager.createDefaultWorld();
@@ -187,6 +176,17 @@ public class Main implements InputListener {
 
         player = new Player(new Location(world, 0, 0));
         world.addEntity(player);
+
+        directionalLight = new DirectionalLight(new Light(new Vector3f(1, 1, 1), 0.8f),
+                new Vector3f(1, 1, 1));
+
+        //world.setDirectionalLight(directionalLight);
+//        world.addPointLight(new PointLight(new Light(new Vector3f(1, 0, 0), 0.8f),
+//                new Attenution(0, 0, 1),
+//                new Vector3f(-2, 0, 5), 6.0f));
+//        world.addPointLight(new PointLight(new Light(new Vector3f(0, 0, 1), 0.8f),
+//                new Attenution(0, 0, 1),
+//                new Vector3f(2, 0, 7), 6.0f));
 
         InputManager.registerInputListener(this);
         inputManager.Setup();
