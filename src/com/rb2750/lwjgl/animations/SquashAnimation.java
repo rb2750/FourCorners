@@ -5,7 +5,7 @@ import com.rb2750.lwjgl.util.Size;
 
 public class SquashAnimation extends Animation {
     public SquashAnimation() {
-        super(0.5);
+        super(0.3);
     }
 
     public SquashAnimation(int time) {

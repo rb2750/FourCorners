@@ -12,11 +12,8 @@ public abstract class Animation {
     @Getter
     private Entity original;
     private boolean paused;
-    private float timeOfCurrFrame;
     private float totalTime;
     private long lastFrameTime;
-
-    long start;
 
     Animation(double time) {
         this.timePerFrame = (float) time / (float) getKeyFrames(null).length;
@@ -25,40 +22,19 @@ public abstract class Animation {
     public void doAnimation(Entity entity) {
         Keyframe[] frames = getKeyFrames(entity);
 
-//        for (int i = 1; i <= frames.length - 1; i++) {
-//            if (frames[i].size != null && frames[i].position == null) {
-//                if (i == frames.length - 1) {
-//                    frames[i].position = new Vector2f(0, 0);
-//                    continue;
-//                }
-//                frames[i].position = new Vector2f((frames[i + 1].size.getWidth() - frames[i].size.getWidth()) / 2, 0);
-//            }
-//        }
-//
-//        for (Keyframe frame : frames) {
-//            System.out.println(frame.getPosition() + ":" + frame.getSize());
-//        }
-
         if (original == null) {
-            for (Animation animation : entity.getAnimations()) {
-                original = animation.getOriginal();
-                break;
-            }
+            if (!entity.getAnimations().isEmpty()) original = entity.getAnimations().get(0).getOriginal();
             if (original == null) original = entity.clone();
 
             lastFrameTime = Util.getTime();
-
-            start = Util.getTime();
         }
-
-        float lastTime = timeOfCurrFrame;
 
         double dTime = (Util.getTime() - lastFrameTime) / 1000f;
         totalTime += dTime;
 
+        float timeOfCurrFrame;
         if (paused) {
             if (frames[currentFrame].pauseFrame) {
-                timeOfCurrFrame = 0;
                 totalTime -= dTime;
             }
         }
@@ -103,13 +79,6 @@ public abstract class Animation {
         if (currFrame.rotation != null && nextFrame.rotation != null) {
             entity.setRotation(new Vector3f(currFrame.rotation).lerp(nextFrame.rotation, lerpAmount).add(original.getRotation()));
         }
-
-//        if (totalTime >= timePerFrame * (currentFrame + 1) - dTime) {
-////            System.out.println(Util.getTime() - start);
-////            System.out.println("tpf: " + timePerFrame);
-//            currentFrame++;
-//            start = Util.getTime();
-//        }
     }
 
     public void onFinish(Entity entity) {
