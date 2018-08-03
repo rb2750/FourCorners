@@ -517,7 +517,7 @@ public class Main implements InputListener {
                 if (USE_TIMERS)
                     renderTimer.stopSubTimer("gui");
 
-                System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
+//                System.out.println("Average delta time: " + (averageDeltaTime / (float)currentFPS));
                 averageDeltaTime = 0.0f;
 
                 currentFPS = 0;

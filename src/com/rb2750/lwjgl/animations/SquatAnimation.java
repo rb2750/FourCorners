@@ -5,7 +5,7 @@ import com.rb2750.lwjgl.util.Size;
 
 public class SquatAnimation extends Animation {
     public SquatAnimation() {
-        super(1);
+        super(0.5f);
     }
 
     public SquatAnimation(int time) {
@@ -16,11 +16,8 @@ public class SquatAnimation extends Animation {
     public Keyframe[] getKeyFrames(Entity entity) {
         return new Keyframe[]{
                 new Keyframe(null, null, new Size(100, 100), false),
-                new Keyframe(null, null, new Size(200, 75), true), //TODO: No reason for this to be negative
+                new Keyframe(null, null, new Size(175, 75), true),
                 new Keyframe(null, null, new Size(100, 100), false)
-//                new Keyframe(null, null, new Size(100, 100), false),
-//                new Keyframe(null, null, new Size(200, -75), true), //TODO: No reason for this to be negative
-//                new Keyframe(null, null, new Size(100, 100), false)
         };
     }
 }
