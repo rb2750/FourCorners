@@ -30,13 +30,13 @@ public abstract class Animation {
         }
 
         double dTime = (Util.getTime() - lastFrameTime) / 1000f;
-        totalTime += dTime;
+
+        lastFrameTime = Util.getTime();
 
         float timeOfCurrFrame;
-        if (paused) {
-            if (frames[currentFrame].pauseFrame) {
-                totalTime -= dTime;
-            }
+        if (paused && frames[currentFrame].pauseFrame) {
+//            totalTime -= dTime;
+            return;
         }
 
         currentFrame = (int) (totalTime / timePerFrame);
@@ -52,8 +52,6 @@ public abstract class Animation {
 
         float lerpAmount = Math.min(1, timeOfCurrFrame / timePerFrame);
 
-        lastFrameTime = Util.getTime();
-
         Keyframe currFrame = frames[currentFrame];
         Keyframe nextFrame = frames[currentFrame + 1];
 
@@ -66,11 +64,13 @@ public abstract class Animation {
             Vector2f oldSize = new Vector2f(entity.getSize().getWidth(), entity.getSize().getHeight());
 
             if (entity.setSize(new Size(newSize.x, newSize.y))) {
-                Vector2f dSize = new Vector2f(newSize).sub(oldSize);
-                if (!entity.move(new Location(entity.getLocation().asVector().sub(dSize.mul(0.5f).x, 0)).setWorld(entity.getWorld())))
+                if (!entity.move(new Location(entity.getLocation().asVector().sub(new Vector2f(newSize).sub(oldSize).mul(0.5f).x, 0)).setWorld(entity.getWorld())))
                     return;
             } else return;
         }
+
+        totalTime += dTime;
+
         if (currFrame.position != null && nextFrame.position != null) {
             if (!entity.move(new Location(original.getLocation().asVector().add(currFrame.position.lerp(nextFrame.position, lerpAmount))).setWorld(original.getWorld())))
                 return;

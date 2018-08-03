@@ -124,7 +124,7 @@ public class Player extends Entity implements InputListener, Collidable {
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         //Let's assume the squash animation 'sticks them to the ground' here.
-        //Let's also stop them from jumping while squating because hey, that's pretty stupid.
+        //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
         if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class)) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
@@ -150,7 +150,7 @@ public class Player extends Entity implements InputListener, Collidable {
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
         //Let's assume the squash animation 'sticks them to the ground' here.
-        //Let's also stop them from jumping while squating because hey, that's pretty stupid.
+        //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
         if (keyboard.isKeyDown(GLFW_KEY_SPACE) && !animationExists(SquashAnimation.class)&& !animationExists(SquatAnimation.class)) {
             if (!doubleJump && jumping && !onGround() && !keyboard.wasKeyDown(GLFW_KEY_SPACE)) {
                 doubleJump = true;

@@ -25,7 +25,6 @@ public abstract class Entity implements Cloneable {
     @Getter
     private Vector2 acceleration = new Vector2(0, 0);
     @Getter
-    @Setter
     private Vector3f rotation = new Vector3f(0, 0, 0);
     @Getter
     @Setter
@@ -111,12 +110,21 @@ public abstract class Entity implements Cloneable {
         return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() >= 0 && location.getX() >= 0;
     }
 
+    /**
+     * Move the entity to a specific location if its possible
+     *
+     * @param location Location to move to
+     * @return Was the entity able to move
+     */
+    public boolean move(Location location) {
+        return move(location, false);
+    }
+
     private boolean move(Location location, boolean force) {
         if (!force && !canMove(location)) return false;
         this.location = location;
         return true;
     }
-
 
     /**
      * Move the entity to a specific location while ignoring any objects that are in the way
@@ -128,14 +136,8 @@ public abstract class Entity implements Cloneable {
         return move(location, true);
     }
 
-    /**
-     * Move the entity to a specific location if its possible
-     *
-     * @param location Location to move to
-     * @return Was the entity able to move
-     */
-    public boolean move(Location location) {
-        return move(location, false);
+    public boolean setSize(Size size) {
+        return setSize(size, false);
     }
 
     /**
@@ -144,30 +146,31 @@ public abstract class Entity implements Cloneable {
      * @param size The new size of the entity
      * @return Was the size of the entity changed
      */
-    public boolean setSize(Size size) {
-        Entity intersectsWith = location.getWorld().intersects(this, Util.getRectangle(getLocation(), size));
+    public boolean setSize(Size size, boolean force) {
+        if (!force) {
+            Entity intersectsWith = location.getWorld().intersects(this, Util.getRectangle(getLocation(), size));
 
-        if (intersectsWith != null) {
-            boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
-            boolean right = intersectsWith.getLocation().getX() > getLocation().getX();
-            boolean top = intersectsWith.getLocation().getY() >= getLocation().getY();
-//            boolean bottom = intersectsWith.getLocation().getY() + intersectsWith.getSize().getHeight() > getLocation().getY();
+            if (intersectsWith != null) {
+                boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
+                boolean right = intersectsWith.getLocation().getX() <= getLocation().getX() + size.getWidth();
+                boolean top = intersectsWith.getLocation().getY() >= getLocation().getY();
 
-            if (top && !left && !right) return false;
-//            if (bottom)
-//                if (!move(new Location(getWorld(), getLocation().getX(), getLocation().getY() + Math.abs(getSize().getHeight() - size.getHeight()))))
-//                    return;
-            Location moveTo = null;
+                if (top && !left && !right)
+                    return false;
 
-            if (right)
-                moveTo = new Location(getWorld(), getLocation().getX() - Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY());
-            if (left)
-                moveTo = new Location(getWorld(), getLocation().getX() + Math.abs(getSize().getWidth() - size.getWidth()), getLocation().getY());
+                Location moveTo = null;
 
-            if (moveTo != null) {
-                if (location.getWorld().intersects(this, Util.getRectangle(moveTo, size)) == null)
-                    this.location = moveTo;
-                else return false;
+                if (left)
+                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() + size.getWidth(), getLocation().getY());
+                if (right)
+                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() - size.getWidth() - 1, getLocation().getY());
+
+                if (moveTo != null) {
+                    Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
+
+                    if (intersects == null) this.location = moveTo;
+                    else return false;
+                }
             }
         }
 
@@ -275,8 +278,7 @@ public abstract class Entity implements Cloneable {
 //        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
-        if (shader != Shader.BASIC)
-        {
+        if (shader != Shader.BASIC) {
             shader.setUniform1f("shineDamper", texture.getShineDamper());
             shader.setUniform1f("reflectivity", texture.getReflectivity());
         }
@@ -374,27 +376,24 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Takes the set vertices and indices and calculates normals for each.
-     * @throws IllegalArgumentException If vertices and indices aren't set.
+     *
      * @return Array of normals
+     * @throws IllegalArgumentException If vertices and indices aren't set.
      */
-    protected float[] calcNormals()
-    {
-        if (vertices == null || indices == null)
-        {
+    protected float[] calcNormals() {
+        if (vertices == null || indices == null) {
             throw new IllegalArgumentException("Vertices and indices must be set before calculating normals.");
         }
 
         List<Vector3f> verticesList = new ArrayList<Vector3f>();
 
-        for (int i = 0; i < vertices.length; i += 3)
-        {
+        for (int i = 0; i < vertices.length; i += 3) {
             verticesList.add(new Vector3f(vertices[i], vertices[i + 1], vertices[i + 2]));
         }
 
         List<Vector3f> normalsList = new ArrayList<Vector3f>();
 
-        for (int i = 0; i < indices.length; i += 3)
-        {
+        for (int i = 0; i < indices.length; i += 3) {
             int i0 = indices[i];
             int i1 = indices[i + 1];
             int i2 = indices[i + 2];
@@ -411,8 +410,7 @@ public abstract class Entity implements Cloneable {
 
         int normalPointer = 0;
 
-        for (Vector3f normal : normalsList)
-        {
+        for (Vector3f normal : normalsList) {
             resultingNormals[normalPointer++] = normal.x;
             resultingNormals[normalPointer++] = normal.y;
             resultingNormals[normalPointer++] = normal.z;

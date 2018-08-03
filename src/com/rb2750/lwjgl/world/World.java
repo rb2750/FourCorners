@@ -14,6 +14,12 @@ import java.util.List;
 public class World {
     @Getter
     private List<Entity> entities = new ArrayList<>();
+    @Getter
+    private WorldSettings settings;
+
+    public World(WorldSettings settings) {
+        this.settings = settings;
+    }
 
     public void addEntity(Entity entity) {
         entities.add(entity);
@@ -23,7 +29,7 @@ public class World {
         if (!entity.isGravity()) return;
 
         if (entity.getLocation().getY() > 0) {
-            entity.getAcceleration().setY(entity.getAcceleration().getY() - WorldSettings.GRAVITY);
+            entity.getAcceleration().setY(entity.getAcceleration().getY() - settings.getGravity());
         } else if (entity.getAcceleration().getY() < 0) {
             if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());
             entity.getAcceleration().setY(0);
@@ -31,7 +37,7 @@ public class World {
     }
 
     private void handleFriction(Entity entity) {
-        double friction = entity.onGround() ? WorldSettings.frictionGround : WorldSettings.frictionAir;
+        double friction = entity.onGround() ? settings.getFrictionGround() : settings.getFrictionAir();
         if (entity.getAcceleration().getX() > 0)
             entity.getAcceleration().setX(entity.getAcceleration().getX() - friction);
         if (entity.getAcceleration().getX() < 0)
@@ -47,9 +53,15 @@ public class World {
             float x = (float) Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
             float y = (float) Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
 
-            Entity interactingWithX = null;
+            Entity interactingWithX;
 
-            if (entity.getAcceleration().getX() != 0 && (intersects(entity, entity.getRectangle()) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
+
+            Entity interact;
+            if (entity.getAcceleration().getX() != 0 && (interact = intersects(entity, entity.getRectangle())) != null) {
+                entity.getLocation().setX((float) Util.getNearestPointInPerimeter(interact.getRectangle(), x, y).getX());
+            }
+
+            if ((interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null) {
                 entity.getLocation().setX(x);
                 entity.setInteractingWithX(null);
             } else {
