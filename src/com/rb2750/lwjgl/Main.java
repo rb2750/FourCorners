@@ -5,6 +5,7 @@ import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
 import com.ivan.xinput.listener.XInputDeviceListener;
+import com.rb2750.lwjgl.animations.TestAnimation;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.gui.*;
@@ -445,8 +446,8 @@ public class Main implements InputListener {
         double halfGameWidth = gameWidth / 2f;
         double halfGameHeight = gameHeight / 2f;
 
-        double tileX = halfGameWidth * state.getAnalogRight().x() + halfGameWidth;
-        double tileY = halfGameHeight * state.getAnalogRight().y() + halfGameHeight;
+        float tileX = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
+        float tileY = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
 
         tryCreateSelectyTile();
 
@@ -470,7 +471,7 @@ public class Main implements InputListener {
         if (state.isBHeld()) resetWorld();
     }
 
-    private void tryPlaceTile(double tileX, double tileY, Size size, Vector3f rotation) {
+    private void tryPlaceTile(float tileX, float tileY, Size size, Vector3f rotation) {
         Tile newTile = new Tile(new Location(world, tileX, tileY));
         newTile.setSize(size);
         newTile.setRotation(rotation);
@@ -498,6 +499,7 @@ public class Main implements InputListener {
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
         if (keyboard.isKeyDown(GLFW_KEY_R)) resetWorld();
+        if (keyboard.isKeyDown(GLFW_KEY_X)) player.addAnimation(new TestAnimation());
     }
 
     private float rotationX = 0;
@@ -509,8 +511,8 @@ public class Main implements InputListener {
     public void handleMouseInput(Mouse mouse) {
         tryCreateSelectyTile();
 
-        float tileX = (float) (mouse.getX() - selectyTile.getSize().getWidth() / 2);
-        float tileY = (float) (mouse.getY() - selectyTile.getSize().getHeight() / 2);
+        float tileX = (mouse.getX() - selectyTile.getSize().getWidth() / 2);
+        float tileY = (mouse.getY() - selectyTile.getSize().getHeight() / 2);
 
         double rotateAmount = mouse.getScrollDy() * 360 / 20;
 

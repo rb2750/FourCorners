@@ -66,10 +66,9 @@ public abstract class Entity implements Cloneable {
     float layer = 0.0f;
 
     /**
-     *
      * @param location Where on the screen
-     * @param size How big should the entity be on the screen
-     * @param shader What shader should be used to render the entity
+     * @param size     How big should the entity be on the screen
+     * @param shader   What shader should be used to render the entity
      */
     Entity(Location location, Size size, Shader shader) {
         this.location = location;
@@ -90,6 +89,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Create new mesh from an obj file
+     *
      * @param filePath Path to the obj tile
      */
     public void createMesh(String filePath) {
@@ -102,11 +102,12 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Determine if the ability is able to move to a specific location
+     *
      * @param location The location to move to
      * @return Is the entity able to move
      */
     private boolean canMove(Location location) {
-        if(location == null) return false;
+        if (location == null) return false;
         return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() >= 0 && location.getX() >= 0;
     }
 
@@ -119,6 +120,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Move the entity to a specific location while ignoring any objects that are in the way
+     *
      * @param location Location to move to
      * @return Was the entity able to move
      */
@@ -128,6 +130,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Move the entity to a specific location if its possible
+     *
      * @param location Location to move to
      * @return Was the entity able to move
      */
@@ -137,6 +140,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Set the size of the entity. If the new size would cause the entity to collide with another entity it will scale in the opposite direction.
+     *
      * @param size The new size of the entity
      * @return Was the size of the entity changed
      */
@@ -173,6 +177,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Check whether the entity is on the ground
+     *
      * @return Is the entity on the ground
      */
     public boolean onGround() {
@@ -181,6 +186,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Get Rectangle of the entity
+     *
      * @return the entity Rectangle2D
      */
     public Rectangle2D getRectangle() {
@@ -189,14 +195,16 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Get the midpoint of the entity
+     *
      * @return A location for the center of the entity
      */
     public Location getCenter() {
-        return new Location(location.getWorld(), getRectangle().getCenterX(), getRectangle().getCenterY());
+        return new Location(location.getWorld(), (float) getRectangle().getCenterX(), (float) getRectangle().getCenterY());
     }
 
     /**
      * Rotate the entity relative to its current rotation
+     *
      * @param rotation How much to rotate the entity
      */
     public void rotate(Vector3f rotation) {
@@ -205,6 +213,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Change the entities rotation to whatever is passed in as a parameter
+     *
      * @param rotation The new rotation of the entity
      */
     public void setRotation(Vector3f rotation) {
@@ -234,6 +243,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Called whenever another entity interacts with the current one
+     *
      * @param other The entity that is interacting with it
      */
     public void onInteract(Entity other) {
@@ -242,6 +252,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Get the world the entity exists within
+     *
      * @return The world
      */
     public World getWorld() {
@@ -250,7 +261,8 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Render the object using the camera
-     * @param camera The camera to render the object to
+     *
+     * @param camera    The camera to render the object to
      * @param clipPlane The clipping plane, meaning if the object is to far from the camera it won't be rendered
      */
     public void render(Camera camera, Vector4f clipPlane) {
@@ -272,6 +284,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * A check to verify if an animation already exists
+     *
      * @param clazz The Animation to check
      * @return Does the animation already exist on the entity
      */
@@ -286,6 +299,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * If an animation return that animation
+     *
      * @param clazz The animation to return
      * @return The animation if it exists. Null if it doesn't
      */
@@ -300,24 +314,26 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Add an animation to the entity provided it isn't already added
+     *
      * @param animation The animation to add
      */
     public void addAnimation(Animation animation) {
-        if(this.animationExists(animation.getClass())) return;
+        if (this.animationExists(animation.getClass())) return;
 
         animations.add(animation);
     }
 
     /**
      * Remove a given animation given that it does exist
+     *
      * @param animation The animation to remove
      */
     public void removeAnimation(Animation animation) {
-        if(!this.animationExists(animation.getClass())) return;
+        if (!this.animationExists(animation.getClass())) return;
 
         animations.remove(animation);
 
-        if(animations.size() == 0) {
+        if (animations.size() == 0) {
             this.setRotation(originalRotation);
             this.setSize(originalSize);
         }
@@ -353,6 +369,7 @@ public abstract class Entity implements Cloneable {
 
     /**
      * Create a copy of the current object
+     *
      * @return A copy of the current object
      */
     public Entity clone() {

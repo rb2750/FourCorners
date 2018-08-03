@@ -1,20 +1,25 @@
 package com.rb2750.lwjgl.animations;
 
-import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.Entity;
-import com.rb2750.lwjgl.util.Location;
-import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.*;
 import lombok.Getter;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public abstract class Animation {
-    private double timePerFrame;
+    private float timePerFrame;
     private int currentFrame;
     @Getter
     private Entity original;
     private boolean paused;
-    private double timeOfCurrFrame;
+    private float timeOfCurrFrame;
+    private float timeOfOldFrame = 0;
     private Vector3f remainingRotation;
+    private long frameStartTime = 0;
+    private long lastFrameStartTime = 0;
+    private long animationStartTime = 0;
+    private Long pauseTime = null;
+    private long lastFrame = 0;
 
     Animation(double time) {
         this.currentFrame = 0;
@@ -24,9 +29,26 @@ public abstract class Animation {
     }
 
     public void doAnimation(Entity entity) {
-        Keyframe[] frames=  getKeyFrames(entity);
+        Keyframe[] frames = getKeyFrames(entity);
+
+//        for (int i = 1; i <= frames.length - 1; i++) {
+//            if (frames[i].size != null && frames[i].position == null) {
+//                if (i == frames.length - 1) {
+//                    frames[i].position = new Vector2f(0, 0);
+//                    continue;
+//                }
+//                frames[i].position = new Vector2f((frames[i + 1].size.getWidth() - frames[i].size.getWidth()) / 2, 0);
+//            }
+//        }
+//
+//        for (Keyframe frame : frames) {
+//            System.out.println(frame.getPosition() + ":" + frame.getSize());
+//        }
 
         if (original == null) {
+            frameStartTime = Util.getTime();
+            animationStartTime = Util.getTime();
+
             for (Animation animation : entity.getAnimations()) {
                 original = animation.getOriginal();
                 break;
@@ -40,39 +62,48 @@ public abstract class Animation {
             }
         }
 
-        if (currentFrame >= frames.length - 1) {
-            this.onFinish(entity);
-            entity.removeAnimation(this);
-            return;
-        }
+        double dTime = (Util.getTime() - frameStartTime) / 1000f;
+
+        timeOfCurrFrame = (Util.getTime() - frameStartTime) / 1000f;
+        timeOfOldFrame = (Util.getTime() - lastFrameStartTime) / 1000f;
+
+        lastFrameStartTime = Util.getTime();
 
         Keyframe currFrame = frames[currentFrame];
         Keyframe nextFrame = frames[currentFrame + 1];
-        double dTime = (double) Main.getDeltaTime() / 1000D;
+        float lerpAmount = Math.min(1, timeOfCurrFrame / timePerFrame);
 
-        if (currFrame.position != null && nextFrame.position != null) {
-            Location dLoc = entity.getLocation().clone().add(nextFrame.position.clone().subtract(currFrame.position).multiply(dTime));
-            if (!entity.move(dLoc)) return;
-        }
         if (currFrame.size != null && nextFrame.size != null) {
-            Size dSize = nextFrame.size.clone().subtract(currFrame.size).multiply(dTime);
-            if (entity.setSize(entity.getSize().clone().add(dSize))) {
-                Size halfSize = dSize.clone().multiply(0.5);
+            Vector2f currsize = new Vector2f(currFrame.size.getWidth(), currFrame.size.getHeight());
+            Vector2f nextsize = new Vector2f(nextFrame.size.getWidth(), nextFrame.size.getHeight());
 
-                entity.move(entity.getLocation().clone().add(-halfSize.getWidth(), 0));
+            Vector2f newSize = new Vector2f(currsize.lerp(nextsize, lerpAmount));
+
+            Vector2f oldSize = new Vector2f(entity.getSize().getWidth(), entity.getSize().getHeight());
+
+            if (entity.setSize(new Size(newSize.x, newSize.y))) {
+                Vector2f dSize = new Vector2f(newSize).sub(oldSize);
+                if (!entity.move(new Location(entity.getLocation().asVector().sub(dSize.mul(0.5f))).setWorld(entity.getWorld())))
+                    return;
             } else return;
         }
-        if (currFrame.rotation != null && nextFrame.rotation != null) {
-            if(remainingRotation == null) remainingRotation = nextFrame.rotation;
-            if(remainingRotation.x < 0 && remainingRotation.y < 0 && remainingRotation.z < 0) remainingRotation = null;
-            Vector3f dRot = remainingRotation.sub(new Vector3f(currFrame.rotation).mul((float)dTime));
-            entity.rotate(dRot);
+        if (currFrame.position != null && nextFrame.position != null) {
+            if (!entity.move(new Location(original.getLocation().asVector().add(currFrame.position.lerp(nextFrame.position, lerpAmount))).setWorld(original.getWorld())))
+                return;
         }
 
-        timeOfCurrFrame += dTime;
-        if (timeOfCurrFrame > timePerFrame) {
+        if (currFrame.rotation != null && nextFrame.rotation != null) {
+            entity.setRotation(new Vector3f(currFrame.rotation).lerp(nextFrame.rotation, lerpAmount).add(original.getRotation()));
+        }
+
+        if (timeOfCurrFrame >= timePerFrame) {
+            frameStartTime = Util.getTime();
             currentFrame++;
-            timeOfCurrFrame = 0;
+        }
+
+        if (currentFrame >= frames.length - 1) {
+            this.onFinish(entity);
+            entity.removeAnimation(this);
         }
     }
 

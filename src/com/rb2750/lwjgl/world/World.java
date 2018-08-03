@@ -1,7 +1,8 @@
 package com.rb2750.lwjgl.world;
 
 import com.rb2750.lwjgl.animations.SquashAnimation;
-import com.rb2750.lwjgl.entities.*;
+import com.rb2750.lwjgl.entities.Camera;
+import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
 import org.joml.Vector4f;
@@ -43,8 +44,8 @@ public class World {
             handleFriction(entity);
 
             boolean skipY = false;
-            double x = Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
-            double y = Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
+            float x = (float) Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
+            float y = (float) Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
 
             Entity interactingWithX = null;
 
@@ -60,7 +61,7 @@ public class World {
                     skipY = true;
                 } else {
                     if (interactingWithX != null) {
-                        double pointX = Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
+                        float pointX = (float) Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
                         if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.getSize().getWidth();
                         entity.getLocation().setX(pointX);
                     }
@@ -77,7 +78,7 @@ public class World {
                     entity.setInteractingWithY(null);
                 } else {
                     if (interactingWithY != null) {
-                        double pointY = Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
+                        float pointY = (float) Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
                         if (pointY == interactingWithY.getRectangle().getY()) pointY -= entity.getSize().getHeight();
                         entity.getLocation().setY(pointY);
                         if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());

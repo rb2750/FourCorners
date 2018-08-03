@@ -16,8 +16,11 @@ public class SquatAnimation extends Animation {
     public Keyframe[] getKeyFrames(Entity entity) {
         return new Keyframe[]{
                 new Keyframe(null, null, new Size(100, 100), false),
-                new Keyframe(null, null, new Size(200, -75), true), //TODO: No reason for this to be negative
+                new Keyframe(null, null, new Size(200, 75), true), //TODO: No reason for this to be negative
                 new Keyframe(null, null, new Size(100, 100), false)
+//                new Keyframe(null, null, new Size(100, 100), false),
+//                new Keyframe(null, null, new Size(200, -75), true), //TODO: No reason for this to be negative
+//                new Keyframe(null, null, new Size(100, 100), false)
         };
     }
 }
