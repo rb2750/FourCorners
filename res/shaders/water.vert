@@ -7,14 +7,13 @@ out DATA
     vec4 clipSpace;
     vec2 tc;
     vec3 toCameraVector;
-    vec3 fromLightVector;
+    vec3 worldPos;
 } vs_out;
 
 uniform mat4 pr_matrix = mat4(1.0);
 uniform mat4 vw_matrix = mat4(1.0);
 uniform mat4 ml_matrix = mat4(1.0);
 uniform vec3 cameraPosition;
-uniform vec3 lightPosition;
 
 const float tiling = 4.0;
 
@@ -24,5 +23,5 @@ void main() {
 	gl_Position = vs_out.clipSpace;
 	vs_out.tc = vec2(position.x / 2.0 + 0.5, position.y / 2.0 + 0.5) * tiling;
 	vs_out.toCameraVector = cameraPosition - worldPosition.xyz;
-	vs_out.fromLightVector = worldPosition.xyz - lightPosition;
+	vs_out.worldPos = worldPosition.xyz;
 }

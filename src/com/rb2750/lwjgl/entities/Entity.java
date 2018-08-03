@@ -65,16 +65,20 @@ public abstract class Entity implements Cloneable {
 
     float layer = 0.0f;
 
+    @Getter
+    private Vector3f baseColour;
+
     /**
      *
      * @param location Where on the screen
      * @param size How big should the entity be on the screen
      * @param shader What shader should be used to render the entity
      */
-    Entity(Location location, Size size, Shader shader) {
+    Entity(Location location, Size size, Shader shader, Vector3f baseColour) {
         this.location = location;
         this.size = size;
         this.shader = shader;
+        this.baseColour = baseColour;
 
         this.originalSize = size;
         this.originalRotation = new Vector3f(0);
@@ -265,8 +269,10 @@ public abstract class Entity implements Cloneable {
 
         if (shader != Shader.BASIC)
         {
+            shader.setUniform3f("baseColour", baseColour);
             shader.setUniform1f("shineDamper", texture.getShineDamper());
             shader.setUniform1f("reflectivity", texture.getReflectivity());
+            shader.setUniform3f("eyePos", camera.getPosition());
         }
 
         shader.setUniform4f("clipPlane", clipPlane);

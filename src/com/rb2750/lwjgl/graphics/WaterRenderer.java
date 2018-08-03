@@ -1,8 +1,6 @@
 package com.rb2750.lwjgl.graphics;
 
 import com.rb2750.lwjgl.entities.Camera;
-import com.rb2750.lwjgl.entities.Light;
-import com.rb2750.lwjgl.entities.Water;
 import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.util.Util;
 import org.joml.Matrix4f;
@@ -50,16 +48,18 @@ public class WaterRenderer
         mesh = new VertexArray(vertices, 2);
     }
 
-    public void render(List<Water> water, Camera camera, Light light, float deltaTime)
+    public void render(List<Water> water, Camera camera, float deltaTime)
     {
         Shader.WATER.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
         Shader.WATER.setUniform3f("cameraPosition", camera.getPosition());
+
         moveFactor += WAVE_SPEED * deltaTime;
         moveFactor %= 1;
+
         Shader.WATER.setUniform1f("moveFactor", moveFactor);
-        Shader.WATER.setUniform3f("lightPosition", light.getPosition());
-        Shader.WATER.setUniform3f("lightColour", light.getColour());
+
         mesh.bind();
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, fbos.getReflectionTexture());
         glActiveTexture(GL_TEXTURE1);
@@ -70,6 +70,7 @@ public class WaterRenderer
         glBindTexture(GL_TEXTURE_2D, normalMap.getTexture());
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, fbos.getRefractionDepthTexture());
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -81,7 +82,9 @@ public class WaterRenderer
         }
 
         glDisable(GL_BLEND);
+
         mesh.unbind();
+
         Shader.WATER.disable();
     }
 

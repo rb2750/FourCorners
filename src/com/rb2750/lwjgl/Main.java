@@ -65,7 +65,7 @@ public class Main implements InputListener {
 
     private Matrix4f currentProjMatrix;
 
-    private Light light;
+    private DirectionalLight directionalLight;
 
     public static void main(String[] args) {
         new Main().run();
@@ -164,10 +164,18 @@ public class Main implements InputListener {
 
         Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.BASIC.setUniform1i("tex", 1);
+        Shader.BASIC.disable();
 
-        light = new Light(new Vector3f(80, 10, -30), new Vector3f(1, 1, 1));
-        Shader.GENERAL.setUniform3f("lightPosition", light.getPosition());
-        Shader.GENERAL.setUniform3f("lightColour", light.getColour());
+        directionalLight = new DirectionalLight(new Light(new Vector3f(1, 1, 1), 0.8f),
+                                                new Vector3f(1, 1, 1));
+
+        //world.setDirectionalLight(directionalLight);
+        world.addPointLight(new PointLight(new Light(new Vector3f(1, 0, 0), 0.8f),
+                                           new Attenution(0, 0, 1),
+                                           new Vector3f(-2, 0, 5), 6.0f));
+        world.addPointLight(new PointLight(new Light(new Vector3f(0, 0, 1), 0.8f),
+                                           new Attenution(0, 0, 1),
+                                           new Vector3f(2, 0, 7), 6.0f));
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
@@ -214,6 +222,7 @@ public class Main implements InputListener {
                 Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
                 Shader.GENERAL.disable();
                 Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.BASIC.disable();
             }
         });
 
@@ -485,7 +494,7 @@ public class Main implements InputListener {
                 renderTimer.resumeSubTimer("water");
             }
 
-            waterRenderer.render(waters, camera, light, deltaTime);
+            waterRenderer.render(waters, camera, deltaTime);
 
             if (USE_TIMERS)
             {
