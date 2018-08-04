@@ -70,6 +70,10 @@ public class Main implements InputListener {
 
     private DirectionalLight directionalLight;
 
+    private FontType font;
+    private GUIText fpsText;
+    private GUIText posText;
+
     public static void main(String[] args) {
         new Main().run();
     }
@@ -196,6 +200,12 @@ public class Main implements InputListener {
 
         TextMaster.init();
 
+        font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
+//        text.setColour(1, 1, 0);
+        fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
+        posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
+
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
 
@@ -210,6 +220,8 @@ public class Main implements InputListener {
     private static float deltaTime;
 
     private void loop() {
+
+
         glfwSetWindowSizeCallback(handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
@@ -232,6 +244,14 @@ public class Main implements InputListener {
                 Shader.GENERAL.disable();
                 Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
                 Shader.BASIC.disable();
+
+                TextMaster.cleanUp();
+
+                font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
+//        text.setColour(1, 1, 0);
+                fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
+                posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
             }
         });
 
@@ -377,11 +397,7 @@ public class Main implements InputListener {
             sleepTimer = new Timer("sleep");
         }
 
-        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
-//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
-//        text.setColour(1, 1, 0);
-        GUIText fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
-        GUIText posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
+
 
         while (!glfwWindowShouldClose(handle)) {
             deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;

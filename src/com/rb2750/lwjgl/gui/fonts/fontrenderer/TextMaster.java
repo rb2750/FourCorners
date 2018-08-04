@@ -59,5 +59,7 @@ public class TextMaster
                 text.getTextMesh().cleanUp();
             }
         }
+
+        texts.clear();
     }
 }
