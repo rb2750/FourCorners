@@ -1,4 +1,4 @@
-package com.rb2750.lwjgl.entities;
+package com.rb2750.lwjgl.graphics;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,8 +10,8 @@ public class Light
 {
     @Getter
     @Setter
-    private Vector3f position;
+    private Vector3f colour;
     @Getter
     @Setter
-    private Vector3f colour;
+    private float intensity;
 }

@@ -16,7 +16,7 @@ public class Player extends Entity implements InputListener {
     boolean doubleJump = false;
 
     public Player(Location location) {
-        super(location, new Size(100, 100), Shader.BASIC, false);
+        super(location, new Size(100, 100), Shader.BASIC, new Vector3f(0.0f, 0.0f, 1.0f));
         setGravity(true);
 
         InputManager.registerInputListener(this);

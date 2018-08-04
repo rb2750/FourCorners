@@ -1,10 +1,12 @@
 package com.rb2750.lwjgl.world;
 
 import com.rb2750.lwjgl.animations.SquashAnimation;
-import com.rb2750.lwjgl.entities.Camera;
-import com.rb2750.lwjgl.entities.Entity;
+import com.rb2750.lwjgl.entities.*;
+import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
+import lombok.Setter;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.ode4j.ode.*;
 import static org.ode4j.ode.OdeConstants.dContactApprox1;
@@ -65,8 +67,35 @@ public class World {
         }
     }
 
+    public static final int MAX_POINT_LIGHTS = 4;
+    public static final int MAX_SPOT_LIGHTS = 4;
+
+    @Getter
+    @Setter
+    private Vector3f ambientLight = new Vector3f(0.5f, 0.5f, 0.5f);
+    @Setter
+    private DirectionalLight directionalLight;
+    private List<PointLight> pointLights = new ArrayList<PointLight>();
+    private List<SpotLight> spotLights = new ArrayList<SpotLight>();
+
     public void addEntity(Entity entity) {
         entities.add(entity);
+    }
+
+    public void addPointLight(PointLight pointLight)
+    {
+        if (pointLights.size() == MAX_POINT_LIGHTS)
+            throw new IndexOutOfBoundsException("There is already " + MAX_POINT_LIGHTS + " point lights.");
+
+        pointLights.add(pointLight);
+    }
+
+    public void addSpotLight(SpotLight spotLight)
+    {
+        if (spotLights.size() == MAX_SPOT_LIGHTS)
+            throw new IndexOutOfBoundsException("There is already " + MAX_SPOT_LIGHTS + " spot lights.");
+
+        spotLights.add(spotLight);
     }
 
     private void handleGravity(Entity entity) {
@@ -154,9 +183,83 @@ public class World {
     }
 
     public void renderWorld(Camera camera, Vector4f clipPlane) {
+        prepareShaders();
+
         for (Entity entity : entities) {
             renderEntity(entity, camera, clipPlane);
         }
+    }
+
+    private void prepareShaders()
+    {
+        Shader.GENERAL.setUniform3f("ambientLight", ambientLight);
+        Shader.WATER.setUniform3f("ambientLight", ambientLight);
+
+        if (directionalLight != null)
+        {
+            shaderSetDirectionalLight("dirLight", directionalLight);
+        }
+
+        int i = 0;
+
+        for (PointLight pointLight : pointLights)
+        {
+            shaderSetPointLight("pointLights[" + i + "]", pointLight);
+            i++;
+        }
+
+        i = 0;
+
+        for (SpotLight spotLight : spotLights)
+        {
+            shaderSetSpotLight("spotLights[" + i + "]", spotLight);
+            i++;
+        }
+    }
+
+    private void shaderSetBaseLight(String uniformName, Light base)
+    {
+        Shader.GENERAL.setUniform3f(uniformName + ".colour", base.getColour());
+        Shader.GENERAL.setUniform1f(uniformName + ".intensity", base.getIntensity());
+
+        Shader.WATER.setUniform3f(uniformName + ".colour", base.getColour());
+        Shader.WATER.setUniform1f(uniformName + ".intensity", base.getIntensity());
+    }
+
+    private void shaderSetDirectionalLight(String uniformName, DirectionalLight directionalLight)
+    {
+        shaderSetBaseLight(uniformName + ".base", directionalLight.getBase());
+
+        Shader.GENERAL.setUniform3f(uniformName + ".direction", directionalLight.getDirection());
+        //Shader.WATER.setUniform3f(uniformName + ".direction", directionalLight.getDirection());
+    }
+
+    private void shaderSetPointLight(String uniformName, PointLight pointLight)
+    {
+        shaderSetBaseLight(uniformName + ".base", pointLight.getBase());
+
+        Shader.GENERAL.setUniform1f(uniformName + ".atten.constant", pointLight.getAtten().getConstant());
+        Shader.GENERAL.setUniform1f(uniformName + ".atten.linear", pointLight.getAtten().getLinear());
+        Shader.GENERAL.setUniform1f(uniformName + ".atten.exponent", pointLight.getAtten().getExponent());
+        Shader.GENERAL.setUniform3f(uniformName + ".position", pointLight.getPosition());
+        Shader.GENERAL.setUniform1f(uniformName + ".range", pointLight.getRange());
+
+        Shader.WATER.setUniform1f(uniformName + ".atten.constant", pointLight.getAtten().getConstant());
+        Shader.WATER.setUniform1f(uniformName + ".atten.linear", pointLight.getAtten().getLinear());
+        Shader.WATER.setUniform1f(uniformName + ".atten.exponent", pointLight.getAtten().getExponent());
+        Shader.WATER.setUniform3f(uniformName + ".position", pointLight.getPosition());
+        Shader.WATER.setUniform1f(uniformName + ".range", pointLight.getRange());
+    }
+
+    private void shaderSetSpotLight(String uniformName, SpotLight spotLight)
+    {
+        shaderSetPointLight(uniformName + ".pointLight", spotLight.getPointLight());
+
+        Shader.GENERAL.setUniform3f(uniformName + ".direction", spotLight.getDirection());
+        Shader.GENERAL.setUniform1f(uniformName + ".cutoff", spotLight.getCutoff());
+
+        Shader.WATER.setUniform3f(uniformName + ".direction", spotLight.getDirection());
+        Shader.WATER.setUniform1f(uniformName + ".cutoff", spotLight.getCutoff());
     }
 
     private void renderEntity(Entity entity, Camera camera, Vector4f clipPlane) {

@@ -9,8 +9,14 @@ import static org.lwjgl.opengl.GL20.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ShaderUtils
 {
+    private static String currentVertPath;
+    private static String currentFragPath;
+
     public static int load(String vertPath, String fragPath)
     {
+        currentVertPath = vertPath;
+        currentFragPath = fragPath;
+
         String vert = FileUtils.loadAsString(vertPath);
         String frag = FileUtils.loadAsString(fragPath);
 
@@ -30,8 +36,9 @@ public class ShaderUtils
 
         if (glGetShaderi(vertID, GL_COMPILE_STATUS) == GL_FALSE)
         {
-            System.err.println("Failed to compile vertex shader!");
+            System.err.println("Failed to compile vertex shader! (" + currentVertPath + ")");
             System.err.println(glGetShaderInfoLog(vertID));
+            new Exception().printStackTrace();
             return -1;
         }
 
@@ -39,8 +46,9 @@ public class ShaderUtils
 
         if (glGetShaderi(fragID, GL_COMPILE_STATUS) == GL_FALSE)
         {
-            System.err.println("Failed to compile fragment shader!");
+            System.err.println("Failed to compile fragment shader! (" + currentFragPath + ")");
             System.err.println(glGetShaderInfoLog(fragID));
+            new Exception().printStackTrace();
             return -1;
         }
 

@@ -65,18 +65,19 @@ public abstract class Entity implements Cloneable {
 
     float layer = 0.0f;
 
-    private DBody body;
-    private DGeom geom;
+    @Getter
+    private Vector3f baseColour;
 
     /**
      * @param location Where on the screen
      * @param size     How big should the entity be on the screen
      * @param shader   What shader should be used to render the entity
      */
-    Entity(Location location, Size size, Shader shader, boolean hasPhysics) {
+    Entity(Location location, Size size, Shader shader, Vector3f baseColour) {
         this.location = location;
         this.size = size;
         this.shader = shader;
+        this.baseColour = baseColour;
 
 //        body = OdeHelper.createBody(location.getWorld().getPhysicsWorld());
 //        body.setPosition(location.getX(), location.getY(), layer);
@@ -297,9 +298,12 @@ public abstract class Entity implements Cloneable {
         shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
-        if (shader != Shader.BASIC) {
+        if (shader != Shader.BASIC)
+        {
+            shader.setUniform3f("baseColour", baseColour);
             shader.setUniform1f("shineDamper", texture.getShineDamper());
             shader.setUniform1f("reflectivity", texture.getReflectivity());
+            shader.setUniform3f("eyePos", camera.getPosition());
         }
 
         shader.setUniform4f("clipPlane", clipPlane);
