@@ -1,11 +1,11 @@
 package com.rb2750.lwjgl.util;
 
 import com.rb2750.lwjgl.entities.Entity;
+import static org.lwjgl.opengl.GL.createCapabilities;
 import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.geom.Rectangle2D;
-
-import static org.lwjgl.opengl.GL11.*;
 
 public class Util {
     public static void drawSquare(double x, double y, double width, double height) {

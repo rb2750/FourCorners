@@ -3,14 +3,15 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.*;
-import com.rb2750.lwjgl.maths.MatrixUtil;
-import com.rb2750.lwjgl.maths.Vector2;
+import com.rb2750.lwjgl.maths.*;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.ode4j.math.DMatrix3;
+import org.ode4j.ode.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -64,15 +65,30 @@ public abstract class Entity implements Cloneable {
 
     float layer = 0.0f;
 
+    private DBody body;
+    private DGeom geom;
+
     /**
      * @param location Where on the screen
      * @param size     How big should the entity be on the screen
      * @param shader   What shader should be used to render the entity
      */
-    Entity(Location location, Size size, Shader shader) {
+    Entity(Location location, Size size, Shader shader, boolean hasPhysics) {
         this.location = location;
         this.size = size;
         this.shader = shader;
+
+//        body = OdeHelper.createBody(location.getWorld().getPhysicsWorld());
+//        body.setPosition(location.getX(), location.getY(), layer);
+//
+//        if (hasPhysics) {
+//            geom = OdeHelper.createBox(location.getWorld().getSpace(), size.getWidth(), size.getHeight(), size.getWidth());
+//            geom.setBody(body);
+//            geom.setData(this);
+//            DMass mass = OdeHelper.createMass();
+//            mass.setBox(1, size.getWidth(), size.getHeight(), size.getWidth());
+//            body.setMass(mass);
+//        }
 
         this.originalSize = size;
         this.originalRotation = new Vector3f(0);
@@ -123,6 +139,7 @@ public abstract class Entity implements Cloneable {
     private boolean move(Location location, boolean force) {
         if (!force && !canMove(location)) return false;
         this.location = location;
+        //body.setPosition(location.getX(), location.getY(), layer);
         return true;
     }
 
@@ -232,6 +249,8 @@ public abstract class Entity implements Cloneable {
     public void update() {
         if (getAcceleration().getX() < 0) setFacing(Direction.LEFT);
         if (getAcceleration().getX() > 0) setFacing(Direction.RIGHT);
+//        body.setPosition(location.getX(), location.getY(), layer);
+//        body.setRotation(Conversions.mat4fToOdeMat3f(MatrixUtil.rotate(rotation.x, rotation.y, -rotation.z)));
         handleAnimations();
 
         if (interactingWithX != null) {
@@ -274,8 +293,8 @@ public abstract class Entity implements Cloneable {
 
 //        System.out.println(rotation);
         shader.enable();
+//        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(Conversions.odeVec3ToVec3f(body.getPosition()), Conversions.odeQuatToQuatF(body.getQuaternion()), new Vector3f(size.getWidth(), size.getHeight(), size.getWidth())));
         shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
-//        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
         if (shader != Shader.BASIC) {

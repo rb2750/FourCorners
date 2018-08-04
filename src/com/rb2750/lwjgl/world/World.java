@@ -6,6 +6,8 @@ import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.util.Util;
 import lombok.Getter;
 import org.joml.Vector4f;
+import org.ode4j.ode.*;
+import static org.ode4j.ode.OdeConstants.dContactApprox1;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -17,8 +19,50 @@ public class World {
     @Getter
     private WorldSettings settings;
 
+    @Getter
+    private DSpace space;
+    @Getter
+    private DWorld physicsWorld;
+    private DJointGroup contactGroup;
+
+    private DGeom.DNearCallback nearCallback = new DGeom.DNearCallback() {
+        @Override
+        public void call(Object o, DGeom dGeom, DGeom dGeom1) {
+            nearCallback(o, dGeom, dGeom1);
+        }
+    };
+
     public World(WorldSettings settings) {
         this.settings = settings;
+
+//        physicsWorld = OdeHelper.createWorld();
+//        physicsWorld.setGravity(0, 0, 0);
+//        physicsWorld.setQuickStepNumIterations(2);
+//
+//        space = OdeHelper.createSimpleSpace(null);
+//
+//        contactGroup = OdeHelper.createJointGroup();
+//        DGeom ground = OdeHelper.createPlane(space, 0, 0, 0, 0);
+
+
+    }
+
+    private void nearCallback(Object data, DGeom o1, DGeom o2) {
+        DBody b1 = o1.getBody();
+        DBody b2 = o2.getBody();
+
+        final int MAX_CONTACTS = 8;
+
+        DContactBuffer contacts = new DContactBuffer(MAX_CONTACTS);
+
+        int numc = OdeHelper.collide(o1, o2, MAX_CONTACTS, contacts.getGeomBuffer());
+
+        for (int i = 0; i < numc; i++) {
+            contacts.get(i).surface.mode = dContactApprox1;
+            contacts.get(i).surface.mu = 5;
+            DJoint c = OdeHelper.createContactJoint(physicsWorld, contactGroup, contacts.get(i));
+            c.attach(b1, b2);
+        }
     }
 
     public void addEntity(Entity entity) {
@@ -54,6 +98,12 @@ public class World {
             boolean skipY = false;
             float x = (float) Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
             float y = (float) Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
+
+            if (!entity.isCanInteract()) {
+                entity.getLocation().setX(x);
+                entity.getLocation().setY(y);
+                return;
+            }
 
             Entity interactingWithX = null;
             Entity interact = null;
@@ -123,7 +173,9 @@ public class World {
         return null;
     }
 
-    public void update() {
+    public void update(float deltaTime) {
+//        space.collide(null, nearCallback);
+//        physicsWorld.quickStep(deltaTime);
         handleEntities();
     }
 }

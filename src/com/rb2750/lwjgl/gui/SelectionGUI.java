@@ -7,7 +7,7 @@ import se.albin.steamcontroller.SteamController;
 public class SelectionGUI extends GUI {
     @Override
     void draw() {
-//        Util.drawCircle((double) Main.getGameWidth() / 2, (double) Main.getGameHeight() / 2, 50);
+        Util.drawCircle((double) Main.getGameWidth() / 2, (double) Main.getGameHeight() / 2, 50);
     }
 
     @Override

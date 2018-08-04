@@ -137,6 +137,12 @@
             <artifactId>joml</artifactId>
             <version>1.9.10</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.ode4j</groupId>
+            <artifactId>demo</artifactId>
+            <version>0.3.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

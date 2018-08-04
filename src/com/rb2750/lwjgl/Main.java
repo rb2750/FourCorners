@@ -32,6 +32,7 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import org.ode4j.ode.OdeHelper;
 
 import java.io.File;
 import java.lang.Math;
@@ -172,6 +173,8 @@ public class Main implements InputListener {
         Shader.GENERAL.setUniform3f("lightColour", light.getColour());
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
+
+        OdeHelper.initODE2(0);
 
         WorldManager.createDefaultWorld();
 
@@ -453,7 +456,7 @@ public class Main implements InputListener {
             }
 
             for (World world : WorldManager.getWorlds())
-                world.update();
+                world.update(deltaTime);
 
             if (USE_TIMERS) {
                 updateTimer.stopSubTimer("world");
@@ -549,6 +552,8 @@ public class Main implements InputListener {
         waterRenderer.cleanUp();
         guiRenderer.cleanUp();
 
+
+
         for (GUITexture guiTexture : guis) {
             guiTexture.cleanUp();
         }
@@ -606,7 +611,7 @@ public class Main implements InputListener {
     private void tryCreateSelectyTile() {
         if (selectyTile == null) {
             selectyTile = new Tile(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanInteract(true);
+            selectyTile.setCanInteract(false);
             runOnUIThread(() -> player.getWorld().addEntity(selectyTile));
         }
     }

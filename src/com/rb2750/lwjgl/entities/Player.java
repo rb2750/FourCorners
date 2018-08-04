@@ -10,13 +10,13 @@ import com.rb2750.lwjgl.util.Size;
 import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Player extends Entity implements InputListener, Collidable {
+public class Player extends Entity implements InputListener {
     float speed = 12f;
     boolean jumping = false;
     boolean doubleJump = false;
 
     public Player(Location location) {
-        super(location, new Size(100, 100), Shader.BASIC);
+        super(location, new Size(100, 100), Shader.BASIC, false);
         setGravity(true);
 
         InputManager.registerInputListener(this);
@@ -174,11 +174,6 @@ public class Player extends Entity implements InputListener, Collidable {
 
     @Override
     public void handleMouseInput(Mouse mouse) {
-
-    }
-
-    @Override
-    public void OnCollide(Entity e) {
 
     }
 }
