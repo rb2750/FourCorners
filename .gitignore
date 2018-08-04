@@ -4,3 +4,5 @@ core
 target/
 
 LWJGL Test\.iml
+
+out/

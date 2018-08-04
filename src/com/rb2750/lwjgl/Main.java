@@ -70,6 +70,10 @@ public class Main implements InputListener {
 
     private DirectionalLight directionalLight;
 
+    private FontType font;
+    private GUIText fpsText;
+    private GUIText posText;
+
     public static void main(String[] args) {
         new Main().run();
     }
@@ -165,9 +169,12 @@ public class Main implements InputListener {
         Shader.GENERAL.setUniform1i("tex", 1);
         Shader.GENERAL.disable();
 
-        Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
-        Shader.BASIC.setUniform1i("tex", 1);
-        Shader.BASIC.disable();
+        Shader.BASIC_TEX.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.BASIC_TEX.setUniform1i("tex", 1);
+        Shader.BASIC_TEX.disable();
+
+        Shader.BASIC_COLOUR.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.BASIC_COLOUR.disable();
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
 
@@ -192,9 +199,16 @@ public class Main implements InputListener {
 //                new Vector3f(2, 0, 7), 6.0f));
 
         InputManager.registerInputListener(this);
+        InputManager.registerInputListener(guiManager);
         inputManager.Setup();
 
         TextMaster.init();
+
+        font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
+//        text.setColour(1, 1, 0);
+        fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
+        posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
@@ -230,8 +244,18 @@ public class Main implements InputListener {
                 Shader.WATER.disable();
                 Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
                 Shader.GENERAL.disable();
-                Shader.BASIC.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.BASIC.disable();
+                Shader.BASIC_TEX.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.BASIC_TEX.disable();
+                Shader.BASIC_COLOUR.setUniformMat4f("pr_matrix", currentProjMatrix);
+                Shader.BASIC_COLOUR.disable();
+
+                TextMaster.cleanUp();
+
+                font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
+//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
+//        text.setColour(1, 1, 0);
+                fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
+                posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
             }
         });
 
@@ -377,12 +401,6 @@ public class Main implements InputListener {
             sleepTimer = new Timer("sleep");
         }
 
-        FontType font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
-//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
-//        text.setColour(1, 1, 0);
-        GUIText fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
-        GUIText posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
-
         while (!glfwWindowShouldClose(handle)) {
             deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
@@ -510,7 +528,7 @@ public class Main implements InputListener {
                 renderTimer.startSubTimer("gui");
             }
 
-            guiManager.render();
+            guiManager.render(player.getWorld());
 
             guiRenderer.render(guis);
             TextMaster.render();
@@ -562,7 +580,6 @@ public class Main implements InputListener {
         guiRenderer.cleanUp();
 
 
-
         for (GUITexture guiTexture : guis) {
             guiTexture.cleanUp();
         }
@@ -594,7 +611,7 @@ public class Main implements InputListener {
 
             if (state.isLeftPadTouched()) {
                 guiManager.displayGUI(new SelectionGUI());
-            } else guiManager.hideGUI(SelectionGUI.class);
+            } else guiManager.hideGUI(player.getWorld(), SelectionGUI.class);
         });
 
         if (state.isBHeld()) resetWorld();

@@ -5,10 +5,11 @@ import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class Cube extends Entity {
     public Cube(Location location) {
-        super(location, new Size(100, 100), Shader.BASIC, new Vector3f(1.0f, 0.0f, 0.0f));
+        super(location, new Size(100, 100), Shader.BASIC_TEX, new Vector4f(1.0f, 0.0f, 0.0f, 1.0f));
 
         vertices = new float[]{
                 0.0f, 0.0f, 0.0f,

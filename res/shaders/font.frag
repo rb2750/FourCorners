@@ -13,10 +13,10 @@ uniform sampler2D fontAtlas;
 const float width = 0.51;
 const float edge = 0.02;
 
-const float borderWidth = 0.62;
-const float borderEdge = 0.3;
+const float borderWidth = 0.0;
+const float borderEdge = 0.0;
 
-const vec3 outlineColour = vec3(1.0, 0.0, 0.0);
+const vec3 outlineColour = vec3(0.0, 0.0, 0.0);
 
 void main(void) {
     float distance = 1.0 - texture(fontAtlas, fs_in.tc).a;

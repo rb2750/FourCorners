@@ -3,11 +3,11 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
-import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class Tile extends Entity {
-    public Tile(Location location) {
-        super(location, new Size(100, 100), Shader.BASIC, new Vector3f(1.0f, 0.0f, 0.0f));
+    public Tile() {
+        super(new Size(100, 100), Shader.BASIC_COLOUR, new Vector4f(1.0f, 0.0f, 0.0f, 1.0f));
 
         vertices = new float[]{
                 0f, 1f, 0f,
@@ -88,6 +88,11 @@ public class Tile extends Entity {
 
         this.texturePath = "res/textures/red.png";
         createMesh();
+    }
+
+    public Tile(Location location) {
+        this();
+        this.location = location;
     }
 
 //    @Override

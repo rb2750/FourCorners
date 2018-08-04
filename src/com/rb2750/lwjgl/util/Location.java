@@ -26,6 +26,12 @@ public class Location implements Cloneable {
         this.y = vector.y;
     }
 
+    public Location(World world, Vector2f vector) {
+        this.world = world;
+        this.x = vector.x;
+        this.y = vector.y;
+    }
+
     public Vector2f asVector() {
         return new Vector2f(x, y);
     }

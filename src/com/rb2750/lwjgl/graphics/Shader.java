@@ -24,7 +24,8 @@ public class Shader
 
     private Map<String, Integer> locationCache = new HashMap<String, Integer>();
 
-    public static Shader BASIC;
+    public static Shader BASIC_COLOUR;
+    public static Shader BASIC_TEX;
     public static Shader GENERAL;
     public static Shader WATER;
     public static Shader GUI;
@@ -39,7 +40,8 @@ public class Shader
 
     public static void loadAllShaders()
     {
-        BASIC = new Shader("res/shaders/basic.vert", "res/shaders/basic.frag");
+        BASIC_COLOUR = new Shader("res/shaders/basic_colour.vert", "res/shaders/basic_colour.frag");
+        BASIC_TEX = new Shader("res/shaders/basic_tex.vert", "res/shaders/basic_tex.frag");
         GENERAL = new Shader("res/shaders/general.vert", "res/shaders/general.frag");
         WATER = new Shader("res/shaders/water.vert", "res/shaders/water.frag");
         GUI = new Shader("res/shaders/gui.vert", "res/shaders/gui.frag");
@@ -145,7 +147,8 @@ public class Shader
 
     public static void cleanUpAll()
     {
-        Shader.BASIC.cleanUp();
+        Shader.BASIC_COLOUR.cleanUp();
+        Shader.BASIC_TEX.cleanUp();
         Shader.GENERAL.cleanUp();
         Shader.WATER.cleanUp();
         Shader.FONT.cleanUp();
