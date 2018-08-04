@@ -224,6 +224,8 @@ public class Main implements InputListener {
     private static float deltaTime;
 
     private void loop() {
+
+
         glfwSetWindowSizeCallback(handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
