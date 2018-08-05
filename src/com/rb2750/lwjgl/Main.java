@@ -619,7 +619,7 @@ public class Main implements InputListener {
             if (state.isRightPadPressed()) tryPlaceObject(objectX, objectY, size, rot);
 
             if (state.isLeftPadTouched()) {
-                guiManager.displayGUI(new SelectionGUI());
+                if (!guiManager.guiExists(SelectionGUI.class)) guiManager.displayGUI(new SelectionGUI());
             } else guiManager.hideGUI(player.getWorld(), SelectionGUI.class);
         });
 
