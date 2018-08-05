@@ -54,6 +54,7 @@ public class Main implements InputListener {
     private static int gameWidth = 1000;
     @Getter
     private static int gameHeight = 1000;
+    @Getter
     private Player player;
 
     //input
@@ -73,6 +74,8 @@ public class Main implements InputListener {
     private FontType font;
     private GUIText fpsText;
     private GUIText posText;
+
+    public static Entity selectedObject;
 
     public static void main(String[] args) {
         new Main().run();
@@ -587,29 +590,33 @@ public class Main implements InputListener {
         }
     }
 
-    private Tile selectyTile;
+//    private Entity selectyObject;
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         double halfGameWidth = gameWidth / 2f;
         double halfGameHeight = gameHeight / 2f;
 
-        float tileX = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
-        float tileY = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
+        float objectX = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
+        float objectY = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
 
-        tryCreateSelectyTile();
+        tryCreateSelectyObject();
 
         Vector3f rot = new Vector3f((float) (state.getLeftTrigger() * 90), (float) (state.getLeftTrigger() * 90), 0);
         Size size = new Size(100f, 100f);
 
-        selectyTile.setRotation(rot);
+        selectedObject.setRotation(rot);
+//        selectyObject.setRotation(rot);
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
-            selectyTile.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-        else selectyTile.teleport(new Location(player.getWorld(), tileX, tileY));
+            selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+        else selectedObject.teleport(new Location(player.getWorld(), objectX, objectY));
+//        if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
+//            selectyObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+//        else selectyObject.teleport(new Location(player.getWorld(), objectX, objectY));
 
         runOnUIThread(() -> {
-            if (state.isRightPadPressed()) tryPlaceTile(tileX, tileY, size, rot);
+            if (state.isRightPadPressed()) tryPlaceObject(objectX, objectY, size, rot);
 
             if (state.isLeftPadTouched()) {
                 guiManager.displayGUI(new SelectionGUI());
@@ -619,29 +626,41 @@ public class Main implements InputListener {
         if (state.isBHeld()) resetWorld();
     }
 
-    private void tryPlaceTile(float tileX, float tileY, Size size, Vector3f rotation) {
-        Tile newTile = new Tile(new Location(player.getWorld(), tileX, tileY));
-        newTile.setSize(size, true);
-        newTile.setRotation(rotation);
+    private void tryPlaceObject(float objectX, float objectY, Size size, Vector3f rotation) {
+        Entity newObject = selectedObject.clone();
+        newObject.teleport(new Location(player.getWorld(), objectX, objectY));
+        newObject.setSize(size, true);
+        newObject.setRotation(rotation);
 
         for (Entity entity : player.getWorld().getEntities())
-            if (entity != selectyTile && entity.getRectangle().intersects(newTile.getRectangle())) return;
-        player.getWorld().addEntity(newTile);
+            if (entity != selectedObject && entity.getRectangle().intersects(newObject.getRectangle())) return;
+        player.getWorld().addEntity(newObject);
     }
 
     private void resetWorld() {
         player.getWorld().getEntities().clear();
 
         player.getWorld().addEntity(player);
-        player.getWorld().addEntity(selectyTile);
+        player.getWorld().addEntity(selectedObject);
     }
 
-    private void tryCreateSelectyTile() {
-        if (selectyTile == null) {
-            selectyTile = new Tile(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-            selectyTile.setCanInteract(false);
-            runOnUIThread(() -> player.getWorld().addEntity(selectyTile));
+    private void tryCreateSelectyObject() {
+//        if (selectyObject == null) {
+        if (selectedObject == null) {
+            selectedObject = new Tile();
+            player.getWorld().addDisplayObject(selectedObject);
         }
+//            selectyObject = selectedObject.clone();
+//            selectyObject.setSize(new Size(100, 100), true);
+//            selectyObject.setRotation(new Vector3f(0, 0, 0));
+//            selectyObject.setBaseColour(new Vector4f(1, 1, 0, 1));
+//            selectyObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+        selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+//        runOnUIThread(() -> player.getWorld().addDisplayObject(selectyObject));
+//        if (!player.getWorld().getDisplayObjects().contains(selectedObject)) {
+//            runOnUIThread(() -> player.getWorld().addDisplayObject(selectedObject));
+//        }
+//        }
     }
 
     @Override
@@ -657,10 +676,12 @@ public class Main implements InputListener {
 
     @Override
     public void handleMouseInput(Mouse mouse) {
-        tryCreateSelectyTile();
+        tryCreateSelectyObject();
 
-        float tileX = Math.max(0, mouse.getX() - selectyTile.getSize().getWidth() / 2);
-        float tileY = Math.max(0, mouse.getY() - selectyTile.getSize().getHeight() / 2);
+//        float tileX = Math.max(0, mouse.getX() - selectyObject.getSize().getWidth() / 2);
+//        float tileY = Math.max(0, mouse.getY() - selectyObject.getSize().getHeight() / 2);
+        float tileX = Math.max(0, mouse.getX() - selectedObject.getSize().getWidth() / 2);
+        float tileY = Math.max(0, mouse.getY() - selectedObject.getSize().getHeight() / 2);
 
         double rotateAmount = mouse.getScrollDy() * 360 / 20;
 
@@ -677,17 +698,17 @@ public class Main implements InputListener {
 
         Size s = new Size(size, size);
 
-        selectyTile.setSize(s, true);
+        selectedObject.setSize(s, true);
 
         if (System.currentTimeMillis() - mouse.getLastUsed() > 500)
-            selectyTile.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
         else {
-            selectyTile.teleport(new Location(player.getWorld(), /*resizePoint != null ? resizePoint.getX() : */tileX, /*resizePoint != null ? resizePoint.getY() : */tileY));
-            selectyTile.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
+            selectedObject.teleport(new Location(player.getWorld(), /*resizePoint != null ? resizePoint.getX() : */tileX, /*resizePoint != null ? resizePoint.getY() : */tileY));
+            selectedObject.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
         }
 
         if (mouse.isLeftMouseDown()) {
-            tryPlaceTile(tileX, tileY, s, new Vector3f(rotationX, rotationY, rotationZ));
+            tryPlaceObject(tileX, tileY, s, new Vector3f(rotationX, rotationY, rotationZ));
         }
     }
 }

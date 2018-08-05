@@ -24,19 +24,20 @@ public class SelectionGUI extends GUI {
     private Vector4f defaultColor = new Vector4f(220f / 255f, 220f / 255f, 220f / 255f, 1f);
     private DisplayObject[] objects = new DisplayObject[]{new Tile().setBaseColour(new Vector4f(0, 1, 0, 1)), new Tile().setBaseColour(new Vector4f(1, 1, 0, 1)), new Tile().setBaseColour(new Vector4f(0, 1, 1, 1)), new Tile().setBaseColour(new Vector4f(0, 0, 1, 1))};
     private List<DisplayObject> misc = new ArrayList<>();
+    private int selectedSection = -1;
 
     @Override
     void draw(World world) {
         if (sectors[0] == null) {
             addSector(world, new Vector2f(circleLocation).add(-100f, -100), 180, 0);
             addSector(world, new Vector2f(circleLocation).add(-100f, 0), 90, 1);
-            addSector(world, new Vector2f(circleLocation).add(0, -100), 270, 2);
-            addSector(world, new Vector2f(circleLocation), 0, 3);
+            addSector(world, new Vector2f(circleLocation), 0, 2);
+            addSector(world, new Vector2f(circleLocation).add(0, -100), 270, 3);
 
             for (int i = 0; i < objects.length; i++) {
                 DisplayObject object = objects[i];
 
-                displayObject(world, object, 45 + 90 * i);
+                displayObject(world, object, -45 + 90 * i);
             }
         }
 
@@ -49,17 +50,19 @@ public class SelectionGUI extends GUI {
         selector.teleport(new Location(world, selectorLocation));
 
 
-        int section;
-        if (selectorLocation.x < circleLocation.x) if (selectorLocation.y > circleLocation.y) section = 0;
-        else section = 2;
-        else if (selectorLocation.y > circleLocation.y) section = 1;
-        else section = 3;
-
         for (int i = 0; i < sectors.length; i++) {
             CircularSector sector = sectors[i];
-            if (i == section) sector.setBaseColour(selectColor);
+            if (i == selectedSection) sector.setBaseColour(new Vector4f(defaultColor).sub(0.3f, 0.3f, 0.3f, 0f));
+            else if (i == getTouchedSection()) sector.setBaseColour(selectColor);
             else sector.setBaseColour(defaultColor);
         }
+    }
+
+    private int getTouchedSection() {
+        if (selectorLocation.x < circleLocation.x) if (selectorLocation.y > circleLocation.y) return 0;
+        else return 3;
+        else if (selectorLocation.y > circleLocation.y) return 1;
+        else return 2;
     }
 
     private void displayObject(World world, DisplayObject object, int angle) {
@@ -115,5 +118,15 @@ public class SelectionGUI extends GUI {
         float selectorY = (float) ((circleHeight / 2) * state.getAnalogLeft().y() + circleLocation.y);
 
         selectorLocation = new Vector2f(selectorX, selectorY);
+
+        if (state.isLeftPadPressed()) {
+            int section = getTouchedSection();
+            if (section == selectedSection) return;
+            Main.instance.getPlayer().getWorld().removeDisplayObject(Main.selectedObject);
+            Main.selectedObject = ((Entity) objects[section]).clone();
+            Main.selectedObject.setLayer(-45f);
+            Main.instance.getPlayer().getWorld().addDisplayObject(Main.selectedObject);
+            selectedSection = section;
+        }
     }
 }

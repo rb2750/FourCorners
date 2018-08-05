@@ -106,7 +106,7 @@ public class Player extends Entity implements InputListener {
         texturePath = "res/textures/blue.png";
 
         createMesh();
-//        createMesh("res/models/Base Mesh sculpt 2.obj");
+//        createMesh("res/models/newplayer.obj");
     }
 
 //    @Override
