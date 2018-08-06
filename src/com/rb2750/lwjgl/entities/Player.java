@@ -137,7 +137,7 @@ public class Player extends Entity implements InputListener {
 
         //Let's assume the squash animation 'sticks them to the ground' here.
         //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
-        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && getAcceleration().y >= 0 && getAcceleration().y <= 21) {
+        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && (getAcceleration().y >= 0 || !doubleJump) && getAcceleration().y <= 21) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;

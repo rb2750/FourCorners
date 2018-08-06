@@ -617,15 +617,7 @@ public class Main implements InputListener {
 //        selectedObject.setRotation(rot);
 
         if (state.getLeftTrigger() == 1) {
-            for (Entity entity : new ArrayList<>(player.getWorld().getEntities())) {
-                if (entity instanceof Tile) {
-                    if (entity.getLocation().asVector().distance(location) <= 0.1f) {
-                        player.getWorld().removeEntity(entity);
-                        selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-                        break;
-                    }
-                }
-            }
+            removeEntityAtLocation(location);
         }
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral()) {
@@ -699,14 +691,15 @@ public class Main implements InputListener {
     public void handleMouseInput(Mouse mouse) {
         tryCreateSelectyObject();
 
-        float tileX = Math.max(0, mouse.getX() - selectedObject.getSize().getWidth() / 2);
-        float tileY = Math.max(0, mouse.getY() - selectedObject.getSize().getHeight() / 2);
+        float x = Math.max(0, mouse.getX()/* - selectedObject.getSize().getWidth() / 2*/);
+        float y = Math.max(0, mouse.getY() /*- selectedObject.getSize().getHeight() / 2*/);
+        Vector2f location = snapToGrid(new Vector2f(x, y));
 
-        double rotateAmount = mouse.getScrollDy() * 360 / 20;
+//        double rotateAmount = mouse.getScrollDy() * 360 / 20;
 
-        if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_SHIFT)) rotationX += rotateAmount;
-        else if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_CONTROL)) rotationY += rotateAmount;
-        else rotationZ += rotateAmount;
+//        if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_SHIFT)) rotationX += rotateAmount;
+//        else if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_CONTROL)) rotationY += rotateAmount;
+//        else rotationZ += rotateAmount;
 
         int size = 100;
 
@@ -719,15 +712,29 @@ public class Main implements InputListener {
 
         selectedObject.setSize(s, true);
 
-        if (System.currentTimeMillis() - mouse.getLastUsed() > 500)
+        if (System.currentTimeMillis() - mouse.getLastUsed() > 900)
             selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
         else {
-            selectedObject.teleport(new Location(player.getWorld(), /*resizePoint != null ? resizePoint.getX() : */tileX, /*resizePoint != null ? resizePoint.getY() : */tileY));
+            selectedObject.teleport(new Location(player.getWorld(), /*resizePoint != null ? resizePoint.getX() : */location.x, /*resizePoint != null ? resizePoint.getY() : */location.y));
             selectedObject.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
         }
 
         if (mouse.isLeftMouseDown()) {
-            tryPlaceObject(tileX, tileY, s, new Vector3f(rotationX, rotationY, rotationZ));
+            tryPlaceObject(location.x, location.y, s, new Vector3f(rotationX, rotationY, rotationZ));
+        }else if (mouse.isRightMouseDown()) {
+            removeEntityAtLocation(location);
+        }
+    }
+
+    private void removeEntityAtLocation(Vector2f location) {
+        for (Entity entity : new ArrayList<>(player.getWorld().getEntities())) {
+            if (entity instanceof Tile) {
+                if (entity.getLocation().asVector().distance(location) <= 0.1f) {
+                    player.getWorld().removeEntity(entity);
+                    selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+                    break;
+                }
+            }
         }
     }
 }

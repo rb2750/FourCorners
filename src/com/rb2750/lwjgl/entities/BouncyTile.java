@@ -23,10 +23,16 @@ public class BouncyTile extends Tile {
                 boolean a = Main.instance.getInputManager().getCurrentControllerState().isAHeld() || Main.instance.getInputManager().getKeyboard().isKeyDown(GLFW_KEY_SPACE);
 
                 if (y.getAcceleration().y < -25) y.addAnimation(new StretchAnimation());
-                y.getAcceleration().y *= -(a ? 1.2 : 0.75);
-                y.getAcceleration().y = Math.min(40, y.getAcceleration().y);
+
+                float startAcceleration = y.getAcceleration().y;
+
+                if (a && Math.abs(startAcceleration) > 40) {
+                    y.getAcceleration().y *= -1;
+                } else {
+                    y.getAcceleration().y *= -(a ? 1.2 : 0.75);
+                    y.getAcceleration().y = Math.min(40, y.getAcceleration().y);
+                }
             }
-//            }
         }
     }
 }
