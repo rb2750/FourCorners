@@ -3,13 +3,11 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.DisplayObject;
 import com.rb2750.lwjgl.graphics.Shader;
-import com.rb2750.lwjgl.maths.Vector2;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -17,12 +15,15 @@ import java.util.List;
 
 public abstract class Entity extends DisplayObject implements Cloneable {
     @Getter
-    private Vector2 acceleration = new Vector2(0, 0);
+    @Setter
+    private Vector2f acceleration = new Vector2f(0, 0);
     @Getter
     @Setter
     private boolean gravity = false;
+    @Getter
     @Setter
     private Entity interactingWithX = null;
+    @Getter
     @Setter
     private Entity interactingWithY = null;
     @Getter
@@ -114,10 +115,10 @@ public abstract class Entity extends DisplayObject implements Cloneable {
             if (intersectsWith != null) {
                 boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
                 boolean right = intersectsWith.getLocation().getX() <= getLocation().getX() + size.getWidth();
-                boolean top = intersectsWith.getLocation().getY() >= getLocation().getY();
+                boolean top = intersectsWith.getLocation().getY() <= getLocation().getY() + size.getHeight() && intersectsWith.getLocation().getY() > getLocation().getY();
 
-                if (top && !left && !right)
-                    return false;
+//                if (top && !left && !right)
+//                    return false;
 
                 Location moveTo = null;
 
@@ -125,11 +126,17 @@ public abstract class Entity extends DisplayObject implements Cloneable {
                     moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() + size.getWidth(), getLocation().getY());
                 if (right)
                     moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() - size.getWidth() - 1, getLocation().getY());
+                if (top) {
+                    this.size.setHeight(intersectsWith.getLocation().getY() - this.location.getY());
+                    System.out.println(this.size.getHeight());
+//                    return false;
+                }
 
                 if (moveTo != null) {
                     Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
 
-                    if (intersects == null) this.location = moveTo;
+                    if (intersects == null && this.location.asVector().distance(moveTo.asVector()) < 15)
+                        this.location = moveTo;
                     else return false;
                 }
             }
@@ -170,28 +177,30 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      * The update function of the entity. Should be called every frame
      */
     public void update() {
-        if (getAcceleration().getX() < 0) setFacing(Direction.LEFT);
-        if (getAcceleration().getX() > 0) setFacing(Direction.RIGHT);
+        if (getAcceleration().x < 0) setFacing(Direction.LEFT);
+        if (getAcceleration().x > 0) setFacing(Direction.RIGHT);
 //        body.setPosition(location.getX(), location.getY(), layer);
 //        body.setRotation(Conversions.mat4fToOdeMat3f(MatrixUtil.rotate(rotation.x, rotation.y, -rotation.z)));
         handleAnimations();
 
-        if (interactingWithX != null) {
-            onInteract(interactingWithX);
-            interactingWithX.onInteract(this);
-        }
-        if (interactingWithY != null) {
-            onInteract(interactingWithY);
-            interactingWithY.onInteract(this);
-        }
+//        if (interactingWithX != null || interactingWithY != null) {
+//            onInteract(interactingWithX, interactingWithY);
+//            if (interactingWithX != null && interactingWithX.equals(interactingWithY)) {
+//                interactingWithX.onInteract(this, this);
+//            } else {
+//                if (interactingWithX != null) interactingWithX.onInteract(this, null);
+//                if (interactingWithY != null) interactingWithY.onInteract(null, this);
+//            }
+//        }
     }
 
     /**
      * Called whenever another entity interacts with the current one
      *
-     * @param other The entity that is interacting with it
+     * @param x The entity that is interacting with it on the x axis
+     * @param y The entity that is interacting with it on the y axis
      */
-    public void onInteract(Entity other) {
+    public void onInteract(Entity x, Entity y) {
         //Empty stub
     }
 

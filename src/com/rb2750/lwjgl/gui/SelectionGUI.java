@@ -22,7 +22,7 @@ public class SelectionGUI extends GUI {
     private Circle selector;
     private Vector4f selectColor = new Vector4f(60f / 255f, 179f / 255f, 113f / 255f, 1f);
     private Vector4f defaultColor = new Vector4f(220f / 255f, 220f / 255f, 220f / 255f, 1f);
-    private DisplayObject[] objects = new DisplayObject[]{new Tile().setBaseColour(new Vector4f(0, 1, 0, 1)), new Tile().setBaseColour(new Vector4f(1, 1, 0, 1)), new Tile().setBaseColour(new Vector4f(0, 1, 1, 1)), new Tile().setBaseColour(new Vector4f(0, 0, 1, 1))};
+    private DisplayObject[] objects = new DisplayObject[]{new BouncyTile(), new Tile(), new Tile().setBaseColour(new Vector4f(0, 1, 1, 1)), new Tile().setBaseColour(new Vector4f(0, 0, 1, 1))};
     private List<DisplayObject> misc = new ArrayList<>();
     private int selectedSection = -1;
 

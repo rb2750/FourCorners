@@ -115,19 +115,19 @@ public class World {
         if (!entity.isGravity()) return;
 
         if (entity.getLocation().getY() > 0) {
-            entity.getAcceleration().setY(entity.getAcceleration().getY() - settings.getGravity());
-        } else if (entity.getAcceleration().getY() < 0) {
-            if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());
-            entity.getAcceleration().setY(0);
+            entity.getAcceleration().y = (float) (entity.getAcceleration().y - settings.getGravity());
+        } else if (entity.getAcceleration().y < 0) {
+            if (entity.getAcceleration().y < -25) entity.addAnimation(new SquashAnimation());
+            entity.getAcceleration().y = 0;
         }
     }
 
     private void handleFriction(Entity entity) {
-        double friction = entity.onGround() ? settings.getFrictionGround() : settings.getFrictionAir();
-        if (entity.getAcceleration().getX() > 0)
-            entity.getAcceleration().setX(entity.getAcceleration().getX() - friction);
-        if (entity.getAcceleration().getX() < 0)
-            entity.getAcceleration().setX(entity.getAcceleration().getX() + friction);
+        float friction = entity.onGround() ? settings.getFrictionGround() : settings.getFrictionAir();
+        if (entity.getAcceleration().x > 0)
+            entity.getAcceleration().x = entity.getAcceleration().x - friction;
+        if (entity.getAcceleration().x < 0)
+            entity.getAcceleration().x = entity.getAcceleration().x + friction;
     }
 
     private void handleEntities() {
@@ -138,8 +138,8 @@ public class World {
             entity.update();
 
             boolean skipY = false;
-            float x = (float) Math.max(entity.getLocation().getX() + entity.getAcceleration().getX(), 0);
-            float y = (float) Math.max(entity.getLocation().getY() + entity.getAcceleration().getY(), 0);
+            float x = Math.max(entity.getLocation().getX() + entity.getAcceleration().x, 0);
+            float y = Math.max(entity.getLocation().getY() + entity.getAcceleration().y, 0);
 
             if (!entity.isCanInteract()) {
                 entity.getLocation().setX(x);
@@ -150,9 +150,9 @@ public class World {
             Entity interactingWithX = null;
             Entity interact;
 
-            if (entity.getAcceleration().getX() != 0 && ((interact = intersects(entity, entity.getRectangle())) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
-                if (interact != null && entity.getAcceleration().getX() >= 0) {
-                    entity.getLocation().setX((float) Util.getNearestPointInPerimeter(interact.getRectangle(), x, y).getX() - entity.getSize().getWidth());
+            if (entity.getAcceleration().x != 0 && ((interact = intersects(entity, entity.getRectangle())) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
+                if (interact != null && entity.getAcceleration().x >= 0 && entity.size.getHeight() < interact.size.getHeight()) {
+                    entity.getLocation().setX((float) Util.getNearestPointInPerimeter(interact.getRectangle(), x, y).getX() - entity.getSize().getWidth()); //TODO FIX
                 } else {
                     entity.getLocation().setX(x);
                     entity.setInteractingWithX(null);
@@ -165,32 +165,50 @@ public class World {
                 if (interactingWithX != null && interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight() - entity.getLocation().getY() < 60 && entity.onGround() && entity.move(entity.getLocation().clone().setY(interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight()))) {
                     skipY = true;
                 } else {
+                    entity.setInteractingWithX(interactingWithX);
+                    updateInteractEvents(entity);
+
                     if (interactingWithX != null) {
+//                        interactingWithX.onInteract(entity, null);
                         float pointX = (float) Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
                         if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.getSize().getWidth();
                         entity.getLocation().setX(pointX);
                     }
-                    entity.getAcceleration().setX(0);
+//                    entity.getAcceleration().x = 0;
                 }
-                entity.setInteractingWithX(interactingWithX);
             }
 
             if (!skipY) {
                 Entity interactingWithY = null;
 
-                if (entity.getAcceleration().getY() != 0 && (interactingWithY = intersects(entity, Util.getRectangle(entity.getRectangle().getX(), y, entity.getSize()))) == null) {
+                if (entity.getAcceleration().y != 0 && (interactingWithY = intersects(entity, Util.getRectangle(entity.getRectangle().getX(), y, entity.getSize()))) == null) {
                     entity.getLocation().setY(y);
                     entity.setInteractingWithY(null);
                 } else {
+                    entity.setInteractingWithY(interactingWithY);
+                    updateInteractEvents(entity);
+
                     if (interactingWithY != null) {
                         float pointY = (float) Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
                         if (pointY == interactingWithY.getRectangle().getY()) pointY -= entity.getSize().getHeight();
                         entity.getLocation().setY(pointY);
-                        if (entity.getAcceleration().getY() < -25) entity.addAnimation(new SquashAnimation());
+                        if (entity.getAcceleration().y < -25) entity.addAnimation(new SquashAnimation());
+                        if (entity.getAcceleration().y < 0 || entity.getLocation().getY() + entity.size.getHeight() <= interactingWithY.getLocation().getY() && entity.getAcceleration().y > 0)
+                            entity.getAcceleration().y = 0;
                     }
-                    entity.getAcceleration().setY(0);
-                    if (interactingWithY != null) entity.setInteractingWithY(interactingWithY);
                 }
+            }
+        }
+    }
+
+    public void updateInteractEvents(Entity entity) {
+        if (entity.getInteractingWithX() != null || entity.getInteractingWithY() != null) {
+            entity.onInteract(entity.getInteractingWithX(), entity.getInteractingWithY());
+            if (entity.getInteractingWithX() != null && entity.getInteractingWithX().equals(entity.getInteractingWithY())) {
+                entity.getInteractingWithX().onInteract(entity, entity);
+            } else {
+                if (entity.getInteractingWithX() != null) entity.getInteractingWithX().onInteract(entity, null);
+                if (entity.getInteractingWithY() != null) entity.getInteractingWithY().onInteract(null, entity);
             }
         }
     }
