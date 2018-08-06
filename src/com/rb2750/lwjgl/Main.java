@@ -641,7 +641,6 @@ public class Main implements InputListener {
         player.getWorld().getEntities().clear();
 
         player.getWorld().addEntity(player);
-        player.getWorld().addEntity(selectedObject);
     }
 
     private void tryCreateSelectyObject() {
