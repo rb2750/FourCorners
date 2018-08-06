@@ -130,7 +130,7 @@ public class DisplayObject {
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
         if (shader != Shader.BASIC_TEX && shader != Shader.BASIC_COLOUR) {
-            Vector3f colour = new Vector3f(baseColour.x, baseColour.y, baseColour.z);
+            Vector3f colour = new Vector3f(baseColour.x / 255f, baseColour.y / 255f, baseColour.z / 255f);
             shader.setUniform3f("baseColour", colour);
             shader.setUniform1f("shineDamper", texture.getShineDamper());
             shader.setUniform1f("reflectivity", texture.getReflectivity());

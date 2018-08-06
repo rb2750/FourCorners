@@ -7,7 +7,7 @@ import org.joml.Vector4f;
 public class BouncyTile extends Tile {
     public BouncyTile() {
         super();
-        setBaseColour(new Vector4f(1, 0, 1, 1));
+        setBaseColour(new Vector4f(255, 0, 255, 255));
     }
 
     public BouncyTile(Location location) {

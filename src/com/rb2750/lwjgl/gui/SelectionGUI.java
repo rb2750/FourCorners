@@ -16,15 +16,14 @@ import java.util.List;
 public class SelectionGUI extends GUI {
     private CircularSector[] sectors = new CircularSector[4];
     private Vector2f selectorLocation = new Vector2f();
-    private float circleWidth = 600f;
-    private float circleHeight = 600f;
+    private float circleRadius = 250;
     private Vector2f circleLocation = new Vector2f((float) Main.getGameWidth() / 2f, (float) Main.getGameHeight() / 2f);
     private Circle selector;
-    private Vector4f selectColor = new Vector4f(60f / 255f, 179f / 255f, 113f / 255f, 1f);
-    private Vector4f defaultColor = new Vector4f(220f / 255f, 220f / 255f, 220f / 255f, 1f);
-    private DisplayObject[] objects = new DisplayObject[]{new BouncyTile(), new Tile(), new Tile().setBaseColour(new Vector4f(0, 1, 1, 1)), new Tile().setBaseColour(new Vector4f(0, 0, 1, 1))};
+    private Vector4f selectColor = new Vector4f(60, 179, 113, 255);
+    private Vector4f defaultColor = new Vector4f(220, 220, 220, 255);
+    private DisplayObject[] objects = new DisplayObject[]{new BouncyTile(), new Tile(), new Tile().setBaseColour(new Vector4f(0, 255, 255, 255)), new Tile().setBaseColour(new Vector4f(0, 0, 255, 255))};
     private List<DisplayObject> misc = new ArrayList<>();
-    private int selectedSection = -1;
+    private static int selectedSection = -1;
 
     @Override
     void draw(World world) {
@@ -43,6 +42,7 @@ public class SelectionGUI extends GUI {
 
         if (selector == null) {
             selector = new Circle(new Location(world, circleLocation.x, circleLocation.y));
+            selector.setBaseColour(new Vector4f())
             selector.size = new Size(10, 10);
             selector.setLayer(2000);
             world.addDisplayObject(selector);
@@ -68,8 +68,7 @@ public class SelectionGUI extends GUI {
     private void displayObject(World world, DisplayObject object, int angle) {
         Location circleLoc = new Location(world, circleLocation);
 
-        float r = circleWidth / 2;
-        Vector2f base = new Vector2f((float) (r * Math.sin(Math.toRadians(angle))), (float) (r * Math.cos(Math.toRadians(angle))));
+        Vector2f base = new Vector2f((float) (circleRadius * Math.sin(Math.toRadians(angle))), (float) (circleRadius * Math.cos(Math.toRadians(angle))));
         base.mul(0.6f);
         base.x -= object.size.getWidth() / 2;
         base.y -= object.size.getHeight() / 2;
@@ -87,7 +86,7 @@ public class SelectionGUI extends GUI {
 
     private void addSector(World world, Vector2f location, int zrot, int index) {
         CircularSector sector = new CircularSector(new Location(world, location.x, location.y), defaultColor);
-        sector.size = new Size(circleWidth / 2, circleHeight / 2);
+        sector.size = new Size(circleRadius, circleRadius);
         sector.rotate(new Vector3f(0, 0, zrot));
         sector.setLayer(100);
         sectors[index] = sector;
@@ -114,8 +113,8 @@ public class SelectionGUI extends GUI {
 
     @Override
     void handleInput(Controller state, Controller last) {
-        float selectorX = (float) ((circleWidth / 2) * state.getAnalogLeft().x() + circleLocation.x);
-        float selectorY = (float) ((circleHeight / 2) * state.getAnalogLeft().y() + circleLocation.y);
+        float selectorX = (float) (circleRadius * state.getAnalogLeft().x() + circleLocation.x);
+        float selectorY = (float) (circleRadius * state.getAnalogLeft().y() + circleLocation.y);
 
         selectorLocation = new Vector2f(selectorX, selectorY);
 

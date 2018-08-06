@@ -9,7 +9,7 @@ import org.joml.Vector4f;
 
 public class Cube extends Entity {
     public Cube(Location location) {
-        super(location, new Size(100, 100), Shader.BASIC_TEX, new Vector4f(1.0f, 0.0f, 0.0f, 1.0f));
+        super(location, new Size(100, 100), Shader.BASIC_TEX, new Vector4f(255.0f, 0.0f, 0.0f, 255.0f));
 
         vertices = new float[]{
                 0.0f, 0.0f, 0.0f,
