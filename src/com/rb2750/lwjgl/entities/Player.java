@@ -124,18 +124,6 @@ public class Player extends Entity implements InputListener {
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
-        //Let's assume the squash animation 'sticks them to the ground' here.
-        //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
-        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && getAcceleration().y >= 0 && getAcceleration().y <= 21/* (getInteractingWithY() == null|| !(getInteractingWithY() instanceof BouncyTile))*/) {
-            if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
-                doubleJump = true;
-                jumping = false;
-                addAnimation(new FlipAnimation());
-            } else if (!onGround()) return;
-            else jumping = true;
-            getAcceleration().y = 21;
-        }
-
         getAcceleration().x = (float) (speed * state.getAnalogStick().x());
 
         if (state.isHomeHeld()) rotate(new Vector3f(2, 2, 2));
@@ -146,14 +134,11 @@ public class Player extends Entity implements InputListener {
             if (state.isXHeld()) getAnimation(SquatAnimation.class).Pause();
             else getAnimation(SquatAnimation.class).Unpause();
         }
-    }
 
-    @Override
-    public void handleKeyboardInput(Keyboard keyboard) {
         //Let's assume the squash animation 'sticks them to the ground' here.
         //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
-        if (keyboard.isKeyDown(GLFW_KEY_SPACE) && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class)) {
-            if (!doubleJump && jumping && !onGround() && !keyboard.wasKeyDown(GLFW_KEY_SPACE)) {
+        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && getAcceleration().y >= 0 && getAcceleration().y <= 21) {
+            if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;
                 addAnimation(new FlipAnimation());
@@ -161,7 +146,10 @@ public class Player extends Entity implements InputListener {
             else jumping = true;
             getAcceleration().y = 21;
         }
+    }
 
+    @Override
+    public void handleKeyboardInput(Keyboard keyboard) {
         getAcceleration().x = keyboard.isKeyDown(GLFW_KEY_RIGHT) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) ? -speed : 0;
 
         if (!animationExists(SquatAnimation.class)) {
@@ -170,6 +158,18 @@ public class Player extends Entity implements InputListener {
         } else {
             if (keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT)) getAnimation(SquatAnimation.class).Pause();
             else getAnimation(SquatAnimation.class).Unpause();
+        }
+
+        //Let's assume the squash animation 'sticks them to the ground' here.
+        //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
+        if (keyboard.isKeyDown(GLFW_KEY_SPACE) && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && getAcceleration().y >= 0 && getAcceleration().y <= 21) {
+            if (!doubleJump && jumping && !onGround() && !keyboard.wasKeyDown(GLFW_KEY_SPACE)) {
+                doubleJump = true;
+                jumping = false;
+                addAnimation(new FlipAnimation());
+            } else if (!onGround()) return;
+            else jumping = true;
+            getAcceleration().y = 21;
         }
     }
 

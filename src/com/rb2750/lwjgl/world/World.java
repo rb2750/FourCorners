@@ -133,7 +133,7 @@ public class World {
     private void handleEntities() {
         for (Entity entity : entities) {
             handleGravity(entity);
-            handleFriction(entity);
+//            handleFriction(entity);
 
             entity.update();
 
