@@ -1,6 +1,6 @@
 package com.rb2750.lwjgl.gui;
 
-import com.rb2750.lwjgl.input.InputListener;
+import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.input.controllers.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
@@ -8,12 +8,15 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GUIManager implements InputListener {
+public class GUIManager {
     @Getter
     private List<GUI> displayedGUIs = new ArrayList<>();
 
     public void displayGUI(GUI gui) {
-        if (!guiExists(gui.getClass())) displayedGUIs.add(gui);
+        if (!guiExists(gui.getClass())) {
+            InputManager.registerInputListener(gui);
+            displayedGUIs.add(gui);
+        }
     }
 
     public boolean guiExists(Class<? extends GUI> gui) {
@@ -40,22 +43,5 @@ public class GUIManager implements InputListener {
         for (GUI gui : displayedGUIs) {
             gui.draw(world);
         }
-    }
-
-    @Override
-    public void handleControllerInput(Controller state, Controller last) {
-        for (GUI gui : displayedGUIs) {
-            gui.handleInput(state, last);
-        }
-    }
-
-    @Override
-    public void handleKeyboardInput(Keyboard keyboard) {
-
-    }
-
-    @Override
-    public void handleMouseInput(Mouse mouse) {
-
     }
 }

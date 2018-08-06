@@ -34,10 +34,12 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import org.ode4j.ode.OdeHelper;
 
+import java.awt.*;
 import java.io.File;
 import java.lang.Math;
 import java.nio.IntBuffer;
 import java.util.*;
+import java.util.List;
 
 public class Main implements InputListener {
     public static Main instance;
@@ -203,7 +205,6 @@ public class Main implements InputListener {
 //                new Vector3f(2, 0, 7), 6.0f));
 
         InputManager.registerInputListener(this);
-        InputManager.registerInputListener(guiManager);
         inputManager.Setup();
 
         TextMaster.init();
@@ -613,7 +614,7 @@ public class Main implements InputListener {
         Vector2f location = snapToGrid(new Vector2f(x, y));
 
         tryCreateSelectyObject();
-        
+
         Vector3f rot = new Vector3f(0, 0, 0);
         Size size = new Size(100f, 100f);
 
@@ -630,7 +631,7 @@ public class Main implements InputListener {
         }
         selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
         pointer.teleport(new Location(player.getWorld(), x, y));
-        if (getTileAtLocation(new Vector2f(x, y)) != null)
+        if (getTileAtLocation(new Vector2f(x, y)) != null || intersectsWithEntity(new Vector2f(x, y)))
             pointer.setBaseColour(new Vector4f(255, 0, 0, 255));
         else pointer.setBaseColour(new Vector4f(0, 255, 0, 200));
 
@@ -657,7 +658,7 @@ public class Main implements InputListener {
         newObject.getBaseColour().w = 255;
         newObject.setLayer(-120);
 
-        if (getTileAtLocation(location) != null) return;
+        if (getTileAtLocation(location) != null || intersectsWithEntity(location)) return;
 
         Vector2f tileLocation = asGridLocation(location);
 
@@ -685,7 +686,7 @@ public class Main implements InputListener {
             pointer = new Circle(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
             pointer.setBaseColour(new Vector4f(150, 150, 150, 200));
             pointer.size = new Size(15, 15);
-            pointer.setLayer(2000);
+            pointer.setLayer(50);
             player.getWorld().addDisplayObject(pointer);
         }
         selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -696,6 +697,8 @@ public class Main implements InputListener {
         if (keyboard.isKeyDown(GLFW_KEY_R)) resetWorld();
         if (keyboard.isKeyDown(GLFW_KEY_X)) player.addAnimation(new TestAnimation());
     }
+
+    private long lastScroll;
 
     @Override
     public void handleMouseInput(Mouse mouse) {
@@ -711,9 +714,19 @@ public class Main implements InputListener {
 
         selectedObject.setSize(s, true);
 
+        if (mouse.getScrollDy() != 0) {
+            lastScroll = System.currentTimeMillis();
+            if (!guiManager.guiExists(SelectionGUI.class))
+                runOnUIThread(() -> guiManager.displayGUI(new SelectionGUI()));
+        }
+
+        if (System.currentTimeMillis() - lastScroll > 1200) {
+            runOnUIThread(() -> guiManager.hideGUI(player.getWorld(), SelectionGUI.class));
+        }
+
         if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.setInvisible(true);
         else selectedObject.setInvisible(false);
-        selectedObject.teleport(new Location(player.getWorld(), location.x,location.y));
+        selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
 
         if (mouse.isLeftMouseDown()) {
             tryPlaceObject(location.x, location.y, s, new Vector3f());
@@ -722,9 +735,18 @@ public class Main implements InputListener {
         }
     }
 
+    private boolean intersectsWithEntity(Vector2f point) {
+        point = snapToGrid(point);
+
+        for (Entity entity : player.getWorld().getEntities())
+            if (entity.getRectangle().intersects(new Rectangle((int) point.x, (int) point.y, (int) gridSize, (int) gridSize)))
+                return true;
+        return false;
+    }
+
     private boolean locationInGrid(Vector2f location) {
         location = asGridLocation(location);
-        return location.x > 0 && location.y > 0 && location.x <= player.getWorld().getSettings().getWorldWidth() && location.y <= player.getWorld().getSettings().getWorldHeight();
+        return location.x >= 0 && location.y >= 0 && location.x <= player.getWorld().getSettings().getWorldWidth() && location.y <= player.getWorld().getSettings().getWorldHeight();
     }
 
     private Entity getTileAtLocation(Vector2f location) {

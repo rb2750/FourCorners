@@ -70,6 +70,10 @@ public class InputManager {
         listeners.add(listener);
     }
 
+    public static void unregisterInputListener(InputListener listener) {
+        listeners.remove(listener);
+    }
+
     public void update() {
         if (mode == InputMode.KEYBOARD) queue.clear();
 

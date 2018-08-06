@@ -3,7 +3,8 @@ package com.rb2750.lwjgl.gui;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.DisplayObject;
-import com.rb2750.lwjgl.input.controllers.Controller;
+import com.rb2750.lwjgl.input.InputManager;
+import com.rb2750.lwjgl.input.controllers.*;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import com.rb2750.lwjgl.world.World;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class SelectionGUI extends GUI {
     private CircularSector[] sectors = new CircularSector[4];
-    private Vector2f selectorLocation = new Vector2f();
+    private Vector2f selectorLocation = new Vector2f(Float.MAX_VALUE, Float.MAX_VALUE);
     private float circleRadius = 250;
     private Vector2f circleLocation = new Vector2f((float) Main.getGameWidth() / 2f, (float) Main.getGameHeight() / 2f);
     private Circle selector;
@@ -24,6 +25,7 @@ public class SelectionGUI extends GUI {
     private DisplayObject[] objects = new DisplayObject[]{new BouncyTile(), new Tile(), new Tile().setBaseColour(new Vector4f(0, 255, 255, 255)), new Tile().setBaseColour(new Vector4f(0, 0, 255, 255))};
     private List<DisplayObject> misc = new ArrayList<>();
     private static int selectedSection = -1;
+    private static int mouseSection = -1;
 
     @Override
     void draw(World world) {
@@ -59,6 +61,8 @@ public class SelectionGUI extends GUI {
     }
 
     private int getTouchedSection() {
+        if (mouseSection != -1) return mouseSection;
+
         if (selectorLocation.x < circleLocation.x) if (selectorLocation.y > circleLocation.y) return 0;
         else return 3;
         else if (selectorLocation.y > circleLocation.y) return 1;
@@ -109,24 +113,46 @@ public class SelectionGUI extends GUI {
         }
 
         if (selector != null) world.removeDisplayObject(selector);
+
+        InputManager.unregisterInputListener(this);
+    }
+
+    private void select() {
+        int section = getTouchedSection();
+        if (section == selectedSection) return;
+        Main.instance.getPlayer().getWorld().removeDisplayObject(Main.selectedObject);
+        Main.selectedObject = ((Entity) objects[section]).clone();
+        Main.selectedObject.setLayer(-40f);
+        Main.selectedObject.getBaseColour().w = 100;
+        Main.instance.getPlayer().getWorld().addDisplayObject(Main.selectedObject);
+        selectedSection = section;
     }
 
     @Override
-    void handleInput(Controller state, Controller last) {
+    public void handleControllerInput(Controller state, Controller last) {
         float selectorX = (float) (circleRadius * state.getAnalogLeft().x() + circleLocation.x);
         float selectorY = (float) (circleRadius * state.getAnalogLeft().y() + circleLocation.y);
 
         selectorLocation = new Vector2f(selectorX, selectorY);
+        mouseSection = -1;
 
-        if (state.isLeftPadPressed()) {
-            int section = getTouchedSection();
-            if (section == selectedSection) return;
-            Main.instance.getPlayer().getWorld().removeDisplayObject(Main.selectedObject);
-            Main.selectedObject = ((Entity) objects[section]).clone();
-            Main.selectedObject.setLayer(-40f);
-            Main.selectedObject.getBaseColour().w = 100;
-            Main.instance.getPlayer().getWorld().addDisplayObject(Main.selectedObject);
-            selectedSection = section;
+        if (state.isLeftPadPressed()) select();
+    }
+
+    @Override
+    public void handleKeyboardInput(Keyboard keyboard) {
+
+    }
+
+    @Override
+    public void handleMouseInput(Mouse mouse) {
+        if (mouse.getScrollDy() > 0) mouseSection += 1;
+        if (mouse.getScrollDy() < 0) {
+            mouseSection -= 1;
+            if (mouseSection < 0) mouseSection = 3;
         }
+        mouseSection %= 4;
+
+        if (mouse.isMiddleMouseDown()) select();
     }
 }
