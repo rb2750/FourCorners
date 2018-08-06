@@ -37,6 +37,9 @@ public class DisplayObject {
     public Size size;
     @Getter
     protected Vector3f rotation = new Vector3f(0, 0, 0);
+    @Getter
+    @Setter
+    private boolean invisible = false;
 
     public DisplayObject(Location location, Size size, Shader shader, Vector4f baseColour) {
         this.location = location;

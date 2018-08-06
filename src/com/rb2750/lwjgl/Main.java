@@ -613,24 +613,26 @@ public class Main implements InputListener {
         Vector2f location = snapToGrid(new Vector2f(x, y));
 
         tryCreateSelectyObject();
-
-//        Vector3f rot = new Vector3f((float) (state.getLeftTrigger() * 90), (float) (state.getLeftTrigger() * 90), 0);
+        
         Vector3f rot = new Vector3f(0, 0, 0);
         Size size = new Size(100f, 100f);
-
-//        selectedObject.setRotation(rot);
 
         if (state.getLeftTrigger() == 1) {
             removeEntityAtLocation(location);
         }
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral()) {
-            selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-            pointer.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+            selectedObject.setInvisible(true);
+            pointer.setInvisible(true);
         } else {
-            selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
-            pointer.teleport(new Location(player.getWorld(), x, y));
+            selectedObject.setInvisible(false);
+            pointer.setInvisible(false);
         }
+        selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
+        pointer.teleport(new Location(player.getWorld(), x, y));
+        if (getTileAtLocation(new Vector2f(x, y)) != null)
+            pointer.setBaseColour(new Vector4f(255, 0, 0, 255));
+        else pointer.setBaseColour(new Vector4f(0, 255, 0, 200));
 
         runOnUIThread(() -> {
             if (state.isRightPadPressed() || state.getRightTrigger() == 1)
@@ -657,9 +659,6 @@ public class Main implements InputListener {
 
         if (getTileAtLocation(location) != null) return;
 
-//        for (Entity entity : player.getWorld().getEntities())
-//            if (entity != selectedObject && entity.getRectangle().intersects(newObject.getRectangle())) return;
-//        player.getWorld().addEntity(newObject);
         Vector2f tileLocation = asGridLocation(location);
 
         player.getWorld().getWorldTiles()[(int) tileLocation.x][(int) tileLocation.y] = newObject;
@@ -698,45 +697,26 @@ public class Main implements InputListener {
         if (keyboard.isKeyDown(GLFW_KEY_X)) player.addAnimation(new TestAnimation());
     }
 
-    private float rotationX = 0;
-    private float rotationY = 0;
-    private float rotationZ = 0;
-    private Point resizePoint = new Point();
-
     @Override
     public void handleMouseInput(Mouse mouse) {
         tryCreateSelectyObject();
 
-        float x = Math.max(0, mouse.getX()/* - selectedObject.getSize().getWidth() / 2*/);
-        float y = Math.max(0, mouse.getY() /*- selectedObject.getSize().getHeight() / 2*/);
+        float x = Math.max(0, mouse.getX());
+        float y = Math.max(0, mouse.getY());
         Vector2f location = snapToGrid(new Vector2f(x, y));
 
-//        double rotateAmount = mouse.getScrollDy() * 360 / 20;
-
-//        if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_SHIFT)) rotationX += rotateAmount;
-//        else if (inputManager.getKeyboard().isKeyDown(GLFW_KEY_LEFT_CONTROL)) rotationY += rotateAmount;
-//        else rotationZ += rotateAmount;
-
         int size = 100;
-
-//        if (mouse.isRightMouseDown()) {
-//            if (resizePoint == null) resizePoint = new Point(tileX, tileY);
-//            size = (int) new Vector2f(mouse.getX(), mouse.getY()).distance((float) resizePoint.getX(), (float) resizePoint.getY());
-//        } else resizePoint = null;
 
         Size s = new Size(size, size);
 
         selectedObject.setSize(s, true);
 
-        if (System.currentTimeMillis() - mouse.getLastUsed() > 900)
-            selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-        else {
-            selectedObject.teleport(new Location(player.getWorld(), /*resizePoint != null ? resizePoint.getX() : */location.x, /*resizePoint != null ? resizePoint.getY() : */location.y));
-            selectedObject.setRotation(new Vector3f(rotationX, rotationY, rotationZ));
-        }
+        if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.setInvisible(true);
+        else selectedObject.setInvisible(false);
+        selectedObject.teleport(new Location(player.getWorld(), location.x,location.y));
 
         if (mouse.isLeftMouseDown()) {
-            tryPlaceObject(location.x, location.y, s, new Vector3f(rotationX, rotationY, rotationZ));
+            tryPlaceObject(location.x, location.y, s, new Vector3f());
         } else if (mouse.isRightMouseDown()) {
             removeEntityAtLocation(location);
         }
@@ -757,14 +737,5 @@ public class Main implements InputListener {
         if (!locationInGrid(location)) return;
         location = asGridLocation(location);
         player.getWorld().getWorldTiles()[(int) location.x][(int) location.y] = null;
-//        for (Entity entity : new ArrayList<>(player.getWorld().getEntities())) {
-//            if (entity instanceof Tile) {
-//                if (entity.getLocation().asVector().distance(location) <= 0.1f) {
-//                    player.getWorld().removeEntity(entity);
-//                    selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-//                    break;
-//                }
-//            }
-//        }
     }
 }

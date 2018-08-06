@@ -7,7 +7,7 @@ import org.joml.Vector4f;
 
 public class Tile extends Entity {
     public Tile() {
-        super(new Size(100, 100), Shader.BASIC_COLOUR, new Vector4f(255.0f, 0.0f, 0.0f, 255.0f));
+        super(new Size(100, 100), Shader.BASIC_COLOUR, new Vector4f(180, 0.0f, 0.0f, 255.0f));
 
         vertices = new float[]{
                 0f, 1f, 0f,

@@ -131,8 +131,17 @@ public class World {
             entity.getAcceleration().x = entity.getAcceleration().x + friction;
     }
 
+    private List<Entity> getInteractionEntities() {
+        List<Entity> interactionEntities = new ArrayList<>(entities);
+        for (Entity[] tiles : worldTiles)
+            for (Entity tile : tiles)
+                if (tile != null && !tile.isInvisible())
+                    interactionEntities.add(tile);
+        return interactionEntities;
+    }
+
     private void handleEntities() {
-        for (Entity entity : entities) {
+        for (Entity entity : getInteractionEntities()) {
             handleGravity(entity);
 //            handleFriction(entity);
 
@@ -217,19 +226,12 @@ public class World {
     public void renderWorld(Camera camera, Vector4f clipPlane) {
         prepareShaders();
 
-        for (Entity[] tiles : worldTiles) {
-            for (Entity tile : tiles) {
-                if (tile != null) {
+        for (Entity[] tiles : worldTiles)
+            for (Entity tile : tiles)
+                if (tile != null && !tile.isInvisible())
                     renderObject(tile, camera, clipPlane);
-                }
-            }
-        }
-        for (Entity entity : entities) {
-            renderObject(entity, camera, clipPlane);
-        }
-        for (DisplayObject object : displayObjects) {
-            renderObject(object, camera, clipPlane);
-        }
+        for (Entity entity : entities) if (!entity.isInvisible()) renderObject(entity, camera, clipPlane);
+        for (DisplayObject object : displayObjects) if (!object.isInvisible()) renderObject(object, camera, clipPlane);
     }
 
     private void prepareShaders() {
@@ -301,7 +303,7 @@ public class World {
     }
 
     public Entity intersects(Entity e, Rectangle2D rect) {
-        for (Entity entity : getEntities()) {
+        for (Entity entity : getInteractionEntities()) {
             if (e == entity || !entity.isCanInteract()) continue;
             if (entity.getRectangle().intersects(rect)) {
                 return entity;
