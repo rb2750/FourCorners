@@ -13,8 +13,8 @@ uniform sampler2D fontAtlas;
 const float width = 0.51;
 const float edge = 0.02;
 
-const float borderWidth = 0.0;
-const float borderEdge = 0.0;
+const float borderWidth = 0.01;
+const float borderEdge = 0.01;
 
 const vec3 outlineColour = vec3(0.0, 0.0, 0.0);
 
