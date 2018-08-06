@@ -126,7 +126,7 @@ public class Player extends Entity implements InputListener {
     public void handleControllerInput(Controller state, Controller last) {
         //Let's assume the squash animation 'sticks them to the ground' here.
         //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
-        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class)) {
+        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && getAcceleration().y >= 0 && getAcceleration().y <= 21/* (getInteractingWithY() == null|| !(getInteractingWithY() instanceof BouncyTile))*/) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;

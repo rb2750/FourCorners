@@ -61,6 +61,7 @@ public class Main implements InputListener {
     private boolean usingXInput = false;
     private boolean usingXInput14 = false;
 
+    @Getter
     private InputManager inputManager = new InputManager();
     @Getter
     private GUIManager guiManager = new GUIManager();

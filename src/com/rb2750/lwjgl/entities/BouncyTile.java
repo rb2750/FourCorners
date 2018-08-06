@@ -1,5 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
+import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.animations.StretchAnimation;
 import com.rb2750.lwjgl.util.Location;
 import org.joml.Vector4f;
@@ -18,9 +19,13 @@ public class BouncyTile extends Tile {
     public void onInteract(Entity x, Entity y) {
         if (y != null) {
             if (y.getAcceleration().y < -7) {
+                boolean a = Main.instance.getInputManager().getCurrentControllerState().isAHeld();
+
                 if (y.getAcceleration().y < -25) y.addAnimation(new StretchAnimation());
-                y.getAcceleration().y *= -0.75;
+                y.getAcceleration().y *= -(a ? 1.2 : 0.75);
+                y.getAcceleration().y = Math.min(40, y.getAcceleration().y);
             }
+//            }
         }
     }
 }
