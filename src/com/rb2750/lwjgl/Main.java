@@ -598,6 +598,10 @@ public class Main implements InputListener {
         return new Vector2f((float) Math.floor(location.x / gridSize) * gridSize, (float) Math.floor(location.y / gridSize) * gridSize);
     }
 
+    private Vector2f asGridLocation(Vector2f location) {
+        return new Vector2f((float) Math.floor(location.x / gridSize), (float) Math.floor(location.y / gridSize));
+    }
+
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         double halfGameWidth = gameWidth / 2f;
@@ -641,21 +645,33 @@ public class Main implements InputListener {
     }
 
     private void tryPlaceObject(float objectX, float objectY, Size size, Vector3f rotation) {
+        Vector2f location = new Vector2f(objectX, objectY);
+
         Entity newObject = selectedObject.clone();
-        newObject.teleport(new Location(player.getWorld(), objectX, objectY));
+        newObject.teleport(new Location(player.getWorld(), location));
         newObject.setSize(size, true);
         newObject.setRotation(rotation);
         newObject.setBaseColour(new Vector4f(newObject.getBaseColour()));
         newObject.getBaseColour().w = 255;
         newObject.setLayer(-120);
 
-        for (Entity entity : player.getWorld().getEntities())
-            if (entity != selectedObject && entity.getRectangle().intersects(newObject.getRectangle())) return;
-        player.getWorld().addEntity(newObject);
+        if (getTileAtLocation(location) != null) return;
+
+//        for (Entity entity : player.getWorld().getEntities())
+//            if (entity != selectedObject && entity.getRectangle().intersects(newObject.getRectangle())) return;
+//        player.getWorld().addEntity(newObject);
+        Vector2f tileLocation = asGridLocation(location);
+
+        player.getWorld().getWorldTiles()[(int) tileLocation.x][(int) tileLocation.y] = newObject;
     }
 
     private void resetWorld() {
         player.getWorld().getEntities().clear();
+        for (int x = 0; x < player.getWorld().getWorldTiles().length; x++) {
+            for (int y = 0; y < player.getWorld().getWorldTiles()[x].length; y++) {
+                player.getWorld().getWorldTiles()[x][y] = null;
+            }
+        }
 
         player.getWorld().addEntity(player);
     }
@@ -721,20 +737,34 @@ public class Main implements InputListener {
 
         if (mouse.isLeftMouseDown()) {
             tryPlaceObject(location.x, location.y, s, new Vector3f(rotationX, rotationY, rotationZ));
-        }else if (mouse.isRightMouseDown()) {
+        } else if (mouse.isRightMouseDown()) {
             removeEntityAtLocation(location);
         }
     }
 
+    private boolean locationInGrid(Vector2f location) {
+        location = asGridLocation(location);
+        return location.x > 0 && location.y > 0 && location.x <= player.getWorld().getSettings().getWorldWidth() && location.y <= player.getWorld().getSettings().getWorldHeight();
+    }
+
+    private Entity getTileAtLocation(Vector2f location) {
+        if (!locationInGrid(location)) return null;
+        location = asGridLocation(location);
+        return player.getWorld().getWorldTiles()[(int) location.x][(int) location.y];
+    }
+
     private void removeEntityAtLocation(Vector2f location) {
-        for (Entity entity : new ArrayList<>(player.getWorld().getEntities())) {
-            if (entity instanceof Tile) {
-                if (entity.getLocation().asVector().distance(location) <= 0.1f) {
-                    player.getWorld().removeEntity(entity);
-                    selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-                    break;
-                }
-            }
-        }
+        if (!locationInGrid(location)) return;
+        location = asGridLocation(location);
+        player.getWorld().getWorldTiles()[(int) location.x][(int) location.y] = null;
+//        for (Entity entity : new ArrayList<>(player.getWorld().getEntities())) {
+//            if (entity instanceof Tile) {
+//                if (entity.getLocation().asVector().distance(location) <= 0.1f) {
+//                    player.getWorld().removeEntity(entity);
+//                    selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+//                    break;
+//                }
+//            }
+//        }
     }
 }

@@ -9,8 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.ode4j.ode.*;
-import static org.ode4j.ode.OdeConstants.dContactApprox1;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -20,25 +18,28 @@ public class World {
     @Getter
     private List<Entity> entities = new ArrayList<>();
     @Getter
+    private Entity[][] worldTiles;
+    @Getter
     private List<DisplayObject> displayObjects = new ArrayList<>();
     @Getter
     private WorldSettings settings;
 
-    @Getter
-    private DSpace space;
-    @Getter
-    private DWorld physicsWorld;
-    private DJointGroup contactGroup;
-
-    private DGeom.DNearCallback nearCallback = new DGeom.DNearCallback() {
-        @Override
-        public void call(Object o, DGeom dGeom, DGeom dGeom1) {
-            nearCallback(o, dGeom, dGeom1);
-        }
-    };
+//    @Getter
+//    private DSpace space;
+//    @Getter
+//    private DWorld physicsWorld;
+//    private DJointGroup contactGroup;
+//
+//    private DGeom.DNearCallback nearCallback = new DGeom.DNearCallback() {
+//        @Override
+//        public void call(Object o, DGeom dGeom, DGeom dGeom1) {
+//            nearCallback(o, dGeom, dGeom1);
+//        }
+//    };
 
     public World(WorldSettings settings) {
         this.settings = settings;
+        worldTiles = new Entity[settings.getWorldWidth()][settings.getWorldHeight()];
 
 //        physicsWorld = OdeHelper.createWorld();
 //        physicsWorld.setGravity(0, 0, 0);
@@ -52,23 +53,23 @@ public class World {
 
     }
 
-    private void nearCallback(Object data, DGeom o1, DGeom o2) {
-        DBody b1 = o1.getBody();
-        DBody b2 = o2.getBody();
-
-        final int MAX_CONTACTS = 8;
-
-        DContactBuffer contacts = new DContactBuffer(MAX_CONTACTS);
-
-        int numc = OdeHelper.collide(o1, o2, MAX_CONTACTS, contacts.getGeomBuffer());
-
-        for (int i = 0; i < numc; i++) {
-            contacts.get(i).surface.mode = dContactApprox1;
-            contacts.get(i).surface.mu = 5;
-            DJoint c = OdeHelper.createContactJoint(physicsWorld, contactGroup, contacts.get(i));
-            c.attach(b1, b2);
-        }
-    }
+//    private void nearCallback(Object data, DGeom o1, DGeom o2) {
+//        DBody b1 = o1.getBody();
+//        DBody b2 = o2.getBody();
+//
+//        final int MAX_CONTACTS = 8;
+//
+//        DContactBuffer contacts = new DContactBuffer(MAX_CONTACTS);
+//
+//        int numc = OdeHelper.collide(o1, o2, MAX_CONTACTS, contacts.getGeomBuffer());
+//
+//        for (int i = 0; i < numc; i++) {
+//            contacts.get(i).surface.mode = dContactApprox1;
+//            contacts.get(i).surface.mu = 5;
+//            DJoint c = OdeHelper.createContactJoint(physicsWorld, contactGroup, contacts.get(i));
+//            c.attach(b1, b2);
+//        }
+//    }
 
     public static final int MAX_POINT_LIGHTS = 4;
     public static final int MAX_SPOT_LIGHTS = 4;
@@ -216,6 +217,13 @@ public class World {
     public void renderWorld(Camera camera, Vector4f clipPlane) {
         prepareShaders();
 
+        for (Entity[] tiles : worldTiles) {
+            for (Entity tile : tiles) {
+                if (tile != null) {
+                    renderObject(tile, camera, clipPlane);
+                }
+            }
+        }
         for (Entity entity : entities) {
             renderObject(entity, camera, clipPlane);
         }
