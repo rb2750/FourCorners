@@ -590,33 +590,54 @@ public class Main implements InputListener {
         }
     }
 
-//    private Entity selectyObject;
+    private static final float gridSize = 100f;
+    private Circle pointer;
+
+    private Vector2f snapToGrid(Vector2f location) {
+        return new Vector2f((float) Math.floor(location.x / gridSize) * gridSize, (float) Math.floor(location.y / gridSize) * gridSize);
+    }
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         double halfGameWidth = gameWidth / 2f;
         double halfGameHeight = gameHeight / 2f;
 
-        float objectX = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
-        float objectY = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
+        float x = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
+        float y = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
+
+        Vector2f location = snapToGrid(new Vector2f(x, y));
 
         tryCreateSelectyObject();
 
-        Vector3f rot = new Vector3f((float) (state.getLeftTrigger() * 90), (float) (state.getLeftTrigger() * 90), 0);
+//        Vector3f rot = new Vector3f((float) (state.getLeftTrigger() * 90), (float) (state.getLeftTrigger() * 90), 0);
+        Vector3f rot = new Vector3f(0, 0, 0);
         Size size = new Size(100f, 100f);
 
-        selectedObject.setRotation(rot);
-//        selectyObject.setRotation(rot);
+//        selectedObject.setRotation(rot);
 
-        if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
+        if (state.getLeftTrigger() == 1) {
+            for (Entity entity : new ArrayList<>(player.getWorld().getEntities())) {
+                if (entity instanceof Tile) {
+                    if (entity.getLocation().asVector().distance(location) <= 0.1f) {
+                        player.getWorld().removeEntity(entity);
+                        selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral()) {
             selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-        else selectedObject.teleport(new Location(player.getWorld(), objectX, objectY));
-//        if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral())
-//            selectyObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-//        else selectyObject.teleport(new Location(player.getWorld(), objectX, objectY));
+            pointer.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+        } else {
+            selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
+            pointer.teleport(new Location(player.getWorld(), x, y));
+        }
 
         runOnUIThread(() -> {
-            if (state.isRightPadPressed()) tryPlaceObject(objectX, objectY, size, rot);
+            if (state.isRightPadPressed() || state.getRightTrigger() == 1)
+                tryPlaceObject(location.x, location.y, size, rot);
 
             if (state.isLeftPadTouched()) {
                 if (!guiManager.guiExists(SelectionGUI.class)) guiManager.displayGUI(new SelectionGUI());
@@ -631,6 +652,9 @@ public class Main implements InputListener {
         newObject.teleport(new Location(player.getWorld(), objectX, objectY));
         newObject.setSize(size, true);
         newObject.setRotation(rotation);
+        newObject.setBaseColour(new Vector4f(newObject.getBaseColour()));
+        newObject.getBaseColour().w = 255;
+        newObject.setLayer(-120);
 
         for (Entity entity : player.getWorld().getEntities())
             if (entity != selectedObject && entity.getRectangle().intersects(newObject.getRectangle())) return;
@@ -644,22 +668,19 @@ public class Main implements InputListener {
     }
 
     private void tryCreateSelectyObject() {
-//        if (selectyObject == null) {
         if (selectedObject == null) {
             selectedObject = new Tile();
+            selectedObject.getBaseColour().w = 100;
             player.getWorld().addDisplayObject(selectedObject);
         }
-//            selectyObject = selectedObject.clone();
-//            selectyObject.setSize(new Size(100, 100), true);
-//            selectyObject.setRotation(new Vector3f(0, 0, 0));
-//            selectyObject.setBaseColour(new Vector4f(1, 1, 0, 1));
-//            selectyObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+        if (pointer == null) {
+            pointer = new Circle(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
+            pointer.setBaseColour(new Vector4f(150, 150, 150, 200));
+            pointer.size = new Size(15, 15);
+            pointer.setLayer(2000);
+            player.getWorld().addDisplayObject(pointer);
+        }
         selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
-//        runOnUIThread(() -> player.getWorld().addDisplayObject(selectyObject));
-//        if (!player.getWorld().getDisplayObjects().contains(selectedObject)) {
-//            runOnUIThread(() -> player.getWorld().addDisplayObject(selectedObject));
-//        }
-//        }
     }
 
     @Override
@@ -677,8 +698,6 @@ public class Main implements InputListener {
     public void handleMouseInput(Mouse mouse) {
         tryCreateSelectyObject();
 
-//        float tileX = Math.max(0, mouse.getX() - selectyObject.getSize().getWidth() / 2);
-//        float tileY = Math.max(0, mouse.getY() - selectyObject.getSize().getHeight() / 2);
         float tileX = Math.max(0, mouse.getX() - selectedObject.getSize().getWidth() / 2);
         float tileY = Math.max(0, mouse.getY() - selectedObject.getSize().getHeight() / 2);
 

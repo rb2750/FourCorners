@@ -42,8 +42,8 @@ public class SelectionGUI extends GUI {
 
         if (selector == null) {
             selector = new Circle(new Location(world, circleLocation.x, circleLocation.y));
-            selector.setBaseColour(new Vector4f())
-            selector.size = new Size(10, 10);
+            selector.setBaseColour(new Vector4f(150, 150, 150, 200));
+            selector.size = new Size(15, 15);
             selector.setLayer(2000);
             world.addDisplayObject(selector);
         }
@@ -52,7 +52,7 @@ public class SelectionGUI extends GUI {
 
         for (int i = 0; i < sectors.length; i++) {
             CircularSector sector = sectors[i];
-            if (i == selectedSection) sector.setBaseColour(new Vector4f(defaultColor).sub(0.3f, 0.3f, 0.3f, 0f));
+            if (i == selectedSection) sector.setBaseColour(new Vector4f(defaultColor).sub(30, 30, 30, 0f));
             else if (i == getTouchedSection()) sector.setBaseColour(selectColor);
             else sector.setBaseColour(defaultColor);
         }
@@ -76,7 +76,7 @@ public class SelectionGUI extends GUI {
         object.teleport(circleLoc.clone().add(base.x, base.y));
         Circle circle = new Circle(object.getLocation().clone().add(object.size.getWidth() / 2f, object.size.getHeight() / 2f));
         circle.size = object.size.clone().subtract(new Size(12, 12));
-        circle.setBaseColour(new Vector4f(defaultColor).sub(0.1f, 0.1f, 0.1f, 0));
+        circle.setBaseColour(new Vector4f(defaultColor).sub(20, 20, 20, 0));
         circle.setLayer(120);
         object.setLayer(130);
         world.addDisplayObject(object);
@@ -123,7 +123,8 @@ public class SelectionGUI extends GUI {
             if (section == selectedSection) return;
             Main.instance.getPlayer().getWorld().removeDisplayObject(Main.selectedObject);
             Main.selectedObject = ((Entity) objects[section]).clone();
-            Main.selectedObject.setLayer(-45f);
+            Main.selectedObject.setLayer(-40f);
+            Main.selectedObject.getBaseColour().w = 100;
             Main.instance.getPlayer().getWorld().addDisplayObject(Main.selectedObject);
             selectedSection = section;
         }

@@ -130,7 +130,7 @@ public class DisplayObject {
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
         if (shader != Shader.BASIC_TEX && shader != Shader.BASIC_COLOUR) {
-            Vector3f colour = new Vector3f(baseColour.x / 255f, baseColour.y / 255f, baseColour.z / 255f);
+            Vector3f colour = new Vector3f(baseColour.x, baseColour.y, baseColour.z);
             shader.setUniform3f("baseColour", colour);
             shader.setUniform1f("shineDamper", texture.getShineDamper());
             shader.setUniform1f("reflectivity", texture.getReflectivity());
@@ -140,7 +140,7 @@ public class DisplayObject {
         if (shader == Shader.BASIC_COLOUR) {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            shader.setUniform4f("colour", baseColour);
+            shader.setUniform4f("colour", new Vector4f(baseColour).div(255, 255, 255, 255));
         }
 
         shader.setUniform4f("clipPlane", clipPlane);
