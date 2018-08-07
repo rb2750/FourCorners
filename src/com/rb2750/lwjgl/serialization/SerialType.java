@@ -4,13 +4,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class Type
+public class SerialType
 {
     public static final byte UNKNOWN = 0;
     public static final byte BYTE = 1;
     public static final byte SHORT = 2;
     public static final byte CHAR = 3;
-    public static final byte INT = 4;
+    public static final byte INTEGER = 4;
     public static final byte LONG = 5;
     public static final byte FLOAT = 6;
     public static final byte DOUBLE = 7;
@@ -29,8 +29,8 @@ public class Type
                 return 2;
             case CHAR:
                 return 2;
-            case INT:
-                return 5;
+            case INTEGER:
+                return 4;
             case LONG:
                 return 8;
             case FLOAT:

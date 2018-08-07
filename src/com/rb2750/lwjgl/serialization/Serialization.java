@@ -7,7 +7,7 @@ public class Serialization
 
     public static int writeBytes(byte[] dest, int pointer, byte[] src)
     {
-        assert(dest.length > pointer + src.length);
+        assert(dest.length >= pointer + src.length);
 
         for (int i = 0; i < src.length; i++)
         {
@@ -17,9 +17,93 @@ public class Serialization
         return pointer;
     }
 
+    public static int writeBytes(byte[] dest, int pointer, short[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
+    public static int writeBytes(byte[] dest, int pointer, char[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
+    public static int writeBytes(byte[] dest, int pointer, int[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
+    public static int writeBytes(byte[] dest, int pointer, long[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
+    public static int writeBytes(byte[] dest, int pointer, float[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
+    public static int writeBytes(byte[] dest, int pointer, double[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
+    public static int writeBytes(byte[] dest, int pointer, boolean[] src)
+    {
+        assert(dest.length >= pointer + src.length);
+
+        for (int i = 0; i < src.length; i++)
+        {
+            pointer = writeBytes(dest, pointer, src[i]);
+        }
+
+        return pointer;
+    }
+
     public static int writeBytes(byte[] dest, int pointer, byte value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.BYTE));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.BYTE));
         dest[pointer++] = value;
 
         return pointer;
@@ -27,7 +111,7 @@ public class Serialization
 
     public static int writeBytes(byte[] dest, int pointer, short value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.SHORT));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.SHORT));
         dest[pointer++] = (byte)((value >> 8) & 0xFF);
         dest[pointer++] = (byte)((value) & 0xFF);
 
@@ -36,7 +120,7 @@ public class Serialization
 
     public static int writeBytes(byte[] dest, int pointer, char value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.CHAR));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.CHAR));
         dest[pointer++] = (byte)((value >> 8) & 0xFF);
         dest[pointer++] = (byte)((value) & 0xFF);
 
@@ -45,7 +129,7 @@ public class Serialization
 
     public static int writeBytes(byte[] dest, int pointer, int value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.INT));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.INTEGER));
         dest[pointer++] = (byte)((value >> 24) & 0xFF);
         dest[pointer++] = (byte)((value >> 16) & 0xFF);
         dest[pointer++] = (byte)((value >> 8) & 0xFF);
@@ -56,7 +140,7 @@ public class Serialization
 
     public static int writeBytes(byte[] dest, int pointer, long value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.LONG));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.LONG));
         dest[pointer++] = (byte)((value >> 56) & 0xFF);
         dest[pointer++] = (byte)((value >> 48) & 0xFF);
         dest[pointer++] = (byte)((value >> 40) & 0xFF);
@@ -71,19 +155,19 @@ public class Serialization
 
     public static int writeBytes(byte[] dest, int pointer, float value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.FLOAT));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.FLOAT));
         return writeBytes(dest, pointer, Float.floatToIntBits(value));
     }
 
     public static int writeBytes(byte[] dest, int pointer, double value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.DOUBLE));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.DOUBLE));
         return writeBytes(dest, pointer, Double.doubleToLongBits(value));
     }
 
     public static int writeBytes(byte[] dest, int pointer, boolean value)
     {
-        assert(dest.length > pointer + Type.getSize(Type.BOOLEAN));
+        assert(dest.length >= pointer + SerialType.getSize(SerialType.BOOLEAN));
         dest[pointer++] = (byte)(value ? 1 : 0);
 
         return pointer;
@@ -134,5 +218,10 @@ public class Serialization
     public static boolean readBoolean(byte[] src, int pointer)
     {
         return src[pointer] != 0;
+    }
+
+    public static String readString(byte[] src, int pointer, int length)
+    {
+        return new String(src, pointer, length);
     }
 }

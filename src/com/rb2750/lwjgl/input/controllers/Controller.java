@@ -153,13 +153,14 @@ public class Controller {
             default:
                 x = 0;
                 y = 0;
+                break;
         }
 
         return new Analog2D(x, y);
     }
 
     public Controller updateXInput() {
-        analogLeft = getDpad(XInputState.getAxes().dpad);
+        analogLeft = new Analog2D(XInputState.getAxes().lx, XInputState.getAxes().ly);
         analogRight = new Analog2D(XInputState.getAxes().rx, XInputState.getAxes().ry);
         analogStick = new Analog2D(XInputState.getAxes().lx, XInputState.getAxes().ly);
         aHeld = XInputState.getFromCurrent(XInputButton.A);
@@ -178,7 +179,7 @@ public class Controller {
         leftPadPressed = XInputState.getAxes().dpad != DPAD_CENTER;
         rightPadPressed = XInputState.getFromCurrent(XInputButton.RIGHT_THUMBSTICK);
         stickPressed = XInputState.getFromCurrent(XInputButton.LEFT_THUMBSTICK);
-        leftPadTouched = XInputState.getAxes().dpad == DPAD_CENTER;
+        leftPadTouched = XInputState.getAxes().dpad != DPAD_CENTER;
         rightPadTouched = analogRight.x() != 0 || analogRight.y() != 0;
         leftTrigger = XInputState.getAxes().lt;
         rightTrigger = XInputState.getAxes().rt;
@@ -206,7 +207,7 @@ public class Controller {
         leftPadPressed = XInputState.getAxes().dpad != DPAD_CENTER;
         rightPadPressed = XInputState.getFromPrevious(XInputButton.RIGHT_THUMBSTICK);
         stickPressed = XInputState.getFromPrevious(XInputButton.LEFT_THUMBSTICK);
-        leftPadTouched = XInputState.getAxes().dpad == DPAD_CENTER;
+        leftPadTouched = XInputState.getAxes().dpad != DPAD_CENTER;
         rightPadTouched = analogRight.x() != 0 || analogRight.y() != 0;
         leftTrigger = XInputState.getAxes().lt;
         rightTrigger = XInputState.getAxes().rt;

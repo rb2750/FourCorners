@@ -3,22 +3,22 @@ package com.rb2750.lwjgl.maths;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.joml.*;
-import org.ode4j.math.*;
+//import org.ode4j.math.*;
 
 import java.lang.Math;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Conversions
 {
-    public static Quaternionf odeQuatToQuatF(DQuaternionC quaternion)
-    {
-        return new Quaternionf((float)quaternion.get1(), (float)quaternion.get2(), (float)quaternion.get3(), (float)quaternion.get0());
-    }
-
-    public static Vector3f odeVec3ToVec3f(DVector3C vector)
-    {
-        return new Vector3f((float)vector.get0(), (float)vector.get1(), (float)vector.get2());
-    }
+//    public static Quaternionf odeQuatToQuatF(DQuaternionC quaternion)
+//    {
+//        return new Quaternionf((float)quaternion.get1(), (float)quaternion.get2(), (float)quaternion.get3(), (float)quaternion.get0());
+//    }
+//
+//    public static Vector3f odeVec3ToVec3f(DVector3C vector)
+//    {
+//        return new Vector3f((float)vector.get0(), (float)vector.get1(), (float)vector.get2());
+//    }
 
     /**
      * Takes rotational angles and turns them into a quaternion.
@@ -61,8 +61,8 @@ public class Conversions
         return result;
     }
 
-    public static DMatrix3 mat4fToOdeMat3f(Matrix4f matrix)
-    {
-        return new DMatrix3(matrix.m00(), matrix.m01(), matrix.m02(), matrix.m10(), matrix.m11(), matrix.m12(), matrix.m20(), matrix.m21(), matrix.m22());
-    }
+//    public static DMatrix3 mat4fToOdeMat3f(Matrix4f matrix)
+//    {
+//        return new DMatrix3(matrix.m00(), matrix.m01(), matrix.m02(), matrix.m10(), matrix.m11(), matrix.m12(), matrix.m20(), matrix.m21(), matrix.m22());
+//    }
 }

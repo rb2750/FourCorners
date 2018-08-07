@@ -1,9 +1,15 @@
 package com.rb2750.lwjgl;
 
-import com.rb2750.lwjgl.serialization.Field;
+import com.rb2750.lwjgl.serialization.*;
+
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.util.Random;
 
 public class NetworkMain
 {
+    private static Random random = new Random();
+
     private static void printBytes(byte[] data)
     {
         for (int i = 0; i < data.length; i++)
@@ -12,21 +18,33 @@ public class NetworkMain
         }
     }
 
+    private static void saveToFile(String path, byte[] data)
+    {
+        try
+        {
+            BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
+            stream.write(data);
+            stream.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void serializationTest()
+    {
+
+    }
+
+    public static void deserializationTest()
+    {
+        SerialDatabase database = SerialDatabase.deserializeFromFile("test.rcl");
+        System.out.println(database.getName());
+    }
+
     public static void main(String[] args)
     {
-        //byte[] data = new byte[16];
-
-        Field field = Field.createLong("Test", 8);
-
-        byte[] data = new byte[100];
-        field.getBytes(data, 0);
-
-
-//        int pointer = writeBytes(data, 0, true);
-//        pointer = writeBytes(data, pointer, false);
-//        String name = "Hello!";
-//        pointer = writeBytes(data, pointer, name);
-
-        printBytes(data);
+        deserializationTest();
     }
 }

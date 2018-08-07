@@ -32,7 +32,6 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
-import org.ode4j.ode.OdeHelper;
 
 import java.awt.*;
 import java.io.File;
@@ -183,8 +182,6 @@ public class Main implements InputListener {
         Shader.BASIC_COLOUR.disable();
 
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
-
-        OdeHelper.initODE2(0);
 
         WorldManager.createDefaultWorld();
 

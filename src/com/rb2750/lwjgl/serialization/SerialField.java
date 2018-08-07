@@ -1,84 +1,88 @@
 package com.rb2750.lwjgl.serialization;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import static com.rb2750.lwjgl.serialization.Serialization.*;
 
-public class Field
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class SerialField
 {
-    public static final byte CONTAINER_TYPE = ContainerType.FIELD;
+    public static final byte CONTAINER_TYPE = SerialContainerType.FIELD;
     public short nameLength;
     public byte[] name;
     public byte type;
     public byte[] data;
 
-    public static Field createField(String name, byte type)
+    private static SerialField createField(String name, byte type)
     {
-        Field field = new Field();
+        SerialField field = new SerialField();
         field.setName(name);
         field.type = type;
-        field.data = new byte[Type.getSize(type)];
+        field.data = new byte[SerialType.getSize(type)];
 
         return field;
     }
 
-    public static Field createByte(String name, byte value)
+    public static SerialField createByte(String name, byte value)
     {
-        Field field = createField(name, Type.BYTE);
+        SerialField field = createField(name, SerialType.BYTE);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createShort(String name, short value)
+    public static SerialField createShort(String name, short value)
     {
-        Field field = createField(name, Type.SHORT);
+        SerialField field = createField(name, SerialType.SHORT);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createChar(String name, char value)
+    public static SerialField createChar(String name, char value)
     {
-        Field field = createField(name, Type.CHAR);
+        SerialField field = createField(name, SerialType.CHAR);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createInteger(String name, int value)
+    public static SerialField createInteger(String name, int value)
     {
-        Field field = createField(name, Type.INT);
+        SerialField field = createField(name, SerialType.INTEGER);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createLong(String name, long value)
+    public static SerialField createLong(String name, long value)
     {
-        Field field = createField(name, Type.LONG);
+        SerialField field = createField(name, SerialType.LONG);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createFloat(String name, float value)
+    public static SerialField createFloat(String name, float value)
     {
-        Field field = createField(name, Type.FLOAT);
+        SerialField field = createField(name, SerialType.FLOAT);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createDouble(String name, double value)
+    public static SerialField createDouble(String name, double value)
     {
-        Field field = createField(name, Type.DOUBLE);
+        SerialField field = createField(name, SerialType.DOUBLE);
         writeBytes(field.data, 0, value);
 
         return field;
     }
 
-    public static Field createBoolean(String name, boolean value)
+    public static SerialField createBoolean(String name, boolean value)
     {
-        Field field = createField(name, Type.BOOLEAN);
+        SerialField field = createField(name, SerialType.BOOLEAN);
         writeBytes(field.data, 0, value);
 
         return field;
@@ -86,7 +90,7 @@ public class Field
 
     public int getSize()
     {
-        assert(data.length == Type.getSize(type));
+        assert(data.length == SerialType.getSize(type));
         return 1 + 2 + name.length + 1 + data.length;
     }
 
