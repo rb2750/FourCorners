@@ -117,10 +117,14 @@ public class StandardGUI extends GUI {
         text.add(new GUIText(option, 2, Main.instance.getFont(), new Vector2f(0.0f, 0.0f), button.size.getWidth() / Main.getGameWidth(), true));
     }
 
+    private void close() {
+        Main.instance.getGuiManager().hideGUI(Main.instance.getPlayer().getWorld());
+    }
+
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         if (state.isHomeHeld() && !last.isHomeHeld() || state.isBHeld() && !last.isBHeld())
-            Main.instance.getGuiManager().hideGUI(Main.instance.getPlayer().getWorld());
+            close();
 
         if (last.getAnalogStick().y() == 0 && !buttons.isEmpty()) {
             if (state.getAnalogStick().y() > 0) selectedOption -= 1;
@@ -132,6 +136,7 @@ public class StandardGUI extends GUI {
         if (state.isAHeld() && !last.isAHeld()) {
             Runnable onClick = options[selectedOption].onClick;
             if (onClick != null) onClick.run();
+            close();
         }
     }
 

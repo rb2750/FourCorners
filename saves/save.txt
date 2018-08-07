@@ -1,0 +1,9 @@
+com.rb2750.lwjgl.entities.BouncyTile - 1,0 - 100,0
+com.rb2750.lwjgl.entities.StartingPoint - 1,7 - 100,700
+com.rb2750.lwjgl.entities.BouncyTile - 6,0 - 600,0
+com.rb2750.lwjgl.entities.BouncyTile - 7,0 - 700,0
+com.rb2750.lwjgl.entities.BouncyTile - 8,0 - 800,0
+com.rb2750.lwjgl.entities.BouncyTile - 9,0 - 900,0
+com.rb2750.lwjgl.entities.StartingPoint - 9,6 - 900,600
+com.rb2750.lwjgl.entities.BouncyTile - 10,0 - 1000,0
+com.rb2750.lwjgl.entities.BouncyTile - 11,0 - 1100,0

@@ -19,6 +19,7 @@ import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import com.rb2750.lwjgl.world.WorldManager;
 import lombok.Getter;
+import org.apache.commons.io.FileUtils;
 import org.joml.*;
 import org.lwjgl.Version;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -36,6 +37,7 @@ import org.ode4j.ode.OdeHelper;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.lang.Math;
 import java.nio.IntBuffer;
 import java.util.*;
@@ -264,6 +266,8 @@ public class Main implements InputListener {
 //        text.setColour(1, 1, 0);
                 fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
                 posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
+
+                loadWorld();
             }
         });
 
@@ -660,23 +664,86 @@ public class Main implements InputListener {
     }
 
     private void saveWorld() {
+        File file = new File(System.getProperty("user.dir"), "saves/save.txt");
+        file.mkdirs();
+        if (file.exists()) file.delete();
+        try {
+            file.createNewFile();
+            Entity[][] worldTiles = player.getWorld().getWorldTiles();
+            List<String> lines = new ArrayList<>();
 
+            for (int x = 0; x < worldTiles.length; x++) {
+                for (int y = 0; y < worldTiles[x].length; y++) {
+                    if (worldTiles[x][y] != null) {
+                        Location location = worldTiles[x][y].getLocation();
+                        lines.add(worldTiles[x][y].getClass().getName() + " - " + x + "," + y + " - " + (int) location.getX() + "," + (int) location.getY());
+                    }
+                }
+            }
+            FileUtils.writeLines(file, lines);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadWorld() {
+        resetWorld();
 
+        File file = new File(System.getProperty("user.dir"), "saves/save.txt");
+        if (!file.exists()) return;
+
+        try {
+            Entity[][] worldTiles = player.getWorld().getWorldTiles();
+            List<String> lines = FileUtils.readLines(file, "utf-8");
+
+            for (String line : lines) {
+                String[] split = line.split(" - ");
+                String clazz = split[0];
+                String[] gridCoords = split[1].split(",");
+                String[] coords = split[2].split(",");
+                int gridX = Integer.parseInt(gridCoords[0]);
+                int gridY = Integer.parseInt(gridCoords[1]);
+                int x = Integer.parseInt(coords[0]);
+                int y = Integer.parseInt(coords[1]);
+
+                Entity entity = (Entity) Class.forName(clazz).newInstance();
+                entity.teleport(new Location(player.getWorld(), x, y));
+                worldTiles[gridX][gridY] = entity;
+
+                Location startPoint = getStartingPoint();
+
+                if (startPoint != null) player.teleport(startPoint);
+            }
+        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Location getStartingPoint() {
+        Entity[][] worldTiles = player.getWorld().getWorldTiles();
+
+        for (int x = 0; x < worldTiles.length; x++) {
+            for (int y = 0; y < worldTiles[x].length; y++) {
+                if (worldTiles[x][y] != null) {
+                    if (worldTiles[x][y] instanceof StartingPoint) return worldTiles[x][y].getLocation().clone();
+                }
+            }
+        }
+        return null;
     }
 
     private void tryPlaceObject(float objectX, float objectY, Size size, Vector3f rotation) {
         Vector2f location = new Vector2f(objectX, objectY);
 
-        Entity newObject = selectedObject.clone();
+        Entity newObject = null;
+        try {
+            newObject = selectedObject.getClass().newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         newObject.teleport(new Location(player.getWorld(), location));
         newObject.setSize(size, true);
         newObject.setRotation(rotation);
-        newObject.setBaseColour(new Vector4f(newObject.getBaseColour()));
-        newObject.getBaseColour().w = 255;
-        newObject.setLayer(-120);
 
         if (getTileAtLocation(location) != null || intersectsWithEntity(location)) return;
 

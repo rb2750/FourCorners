@@ -6,7 +6,6 @@ import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL11.*;
@@ -28,8 +27,6 @@ public class DisplayObject {
     @Setter
     protected float layer = 0.0f;
     @Getter
-    @Setter
-    @Accessors(chain = true)
     protected Vector4f baseColour;
     @Getter
     protected Location location;
@@ -46,6 +43,8 @@ public class DisplayObject {
     @Getter
     @Setter
     private boolean invisible = false;
+    @Getter
+    private Vector4f lastColor;
 
     public DisplayObject(Location location, Size size, Shader shader, Vector4f baseColour) {
         this.location = location;
@@ -58,6 +57,12 @@ public class DisplayObject {
         this.size = size;
         this.shader = shader;
         this.baseColour = baseColour;
+    }
+
+    public DisplayObject setBaseColour(Vector4f baseColour) {
+        this.baseColour = baseColour;
+        lastColor = baseColour;
+        return this;
     }
 
     /**

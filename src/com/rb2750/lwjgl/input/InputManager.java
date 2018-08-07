@@ -78,7 +78,15 @@ public class InputManager {
         listeners.remove(listener);
     }
 
+    private long guiLastOpen = 0;
+
+    private boolean guiOpen() {
+        return System.currentTimeMillis() - guiLastOpen < 500;
+    }
+
     public void update() {
+        if (Main.instance.getGuiManager().getDisplayedGUI() != null) guiLastOpen = System.currentTimeMillis();
+
         if (mode == InputMode.KEYBOARD) queue.clear();
 
         List<InputListener> copiedListeners = new ArrayList<>(listeners);
@@ -87,7 +95,7 @@ public class InputManager {
             SteamQueuedEvent event = queue.remove();
 
             for (InputListener listener : copiedListeners)
-                if (Main.instance.getGuiManager().getDisplayedGUI() == null || listener instanceof GUI)
+                if (!guiOpen() || listener instanceof GUI)
                     listener.handleControllerInput(event.state, event.last);
         }
 
@@ -97,7 +105,7 @@ public class InputManager {
         }
 
         for (InputListener listener : copiedListeners) {
-            if (Main.instance.getGuiManager().getDisplayedGUI() != null && !(listener instanceof GUI)) continue;
+            if (guiOpen() && !(listener instanceof GUI)) continue;
             if (currentControllerState == null || !currentControllerState.isPadTouched())
                 listener.handleMouseInput(mouse);
             if (mode == null || mode == InputMode.KEYBOARD) {
@@ -111,7 +119,7 @@ public class InputManager {
 
     public void updateXInputController() {
         for (InputListener listener : listeners)
-            if (Main.instance.getGuiManager().getDisplayedGUI() == null || listener instanceof GUI)
+            if (!guiOpen() || listener instanceof GUI)
                 listener.handleControllerInput(new Controller().updateXInput(), new Controller().updateLastXInput());
     }
 
