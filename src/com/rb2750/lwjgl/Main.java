@@ -431,7 +431,7 @@ public class Main implements InputListener {
 
 //            camera.setPosition(new Vector3f(0, 0f, 0));
 
-            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
+//            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
             posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
@@ -582,7 +582,7 @@ public class Main implements InputListener {
             if (USE_TIMERS)
                 sleepTimer.startTimer();
 
-            sync.sync(144);
+            sync.sync(60);
 
             if (USE_TIMERS) {
                 sleepTimer.stopTimer();
@@ -708,7 +708,7 @@ public class Main implements InputListener {
                 int gridY = Integer.parseInt(gridCoords[1]);
 
                 Entity entity = (Entity) Class.forName(clazz).newInstance();
-                entity.teleport(new Location(player.getWorld(), gridX*gridSize, gridY*gridSize));
+                entity.teleport(new Location(player.getWorld(), gridX * gridSize, gridY * gridSize));
                 worldTiles[gridX][gridY] = entity;
 
                 Location startPoint = getStartingPoint();
