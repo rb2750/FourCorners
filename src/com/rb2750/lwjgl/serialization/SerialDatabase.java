@@ -24,7 +24,7 @@ public class SerialDatabase
     private int size = HEADER.length + 1 + 2 + 4 + 4;
 
     private int objectCount;
-    private List<SerialObject> objects = new ArrayList<>();
+    public List<SerialObject> objects = new ArrayList<>();
 
     public SerialDatabase(String name)
     {
@@ -49,8 +49,15 @@ public class SerialDatabase
         result.size = readInt(data, pointer);
         pointer += 4;
 
-        result.objectCount = readShort(data, pointer);
-        pointer += 2;
+        result.objectCount = readInt(data, pointer);
+        pointer += 4;
+
+        for (int i = 0; i < result.objectCount; i++)
+        {
+            SerialObject object = SerialObject.deserialize(data, pointer);
+            result.objects.add(object);
+            pointer += object.getSize();
+        }
 
         return result;
     }

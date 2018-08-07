@@ -57,7 +57,7 @@ public class SerialArray
 
     public static SerialArray createChar(String name, char[] values)
     {
-        SerialArray serialArray = createArray(name, SerialType.SHORT);
+        SerialArray serialArray = createArray(name, SerialType.CHAR);
         serialArray.count = values.length;
         serialArray.charData = values;
         serialArray.updateSize();

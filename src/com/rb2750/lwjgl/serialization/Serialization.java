@@ -1,5 +1,7 @@
 package com.rb2750.lwjgl.serialization;
 
+import java.nio.ByteBuffer;
+
 public class Serialization
 {
     public static final byte[] HEADER = "RCL".getBytes();
@@ -196,7 +198,8 @@ public class Serialization
 
     public static int readInt(byte[] src, int pointer)
     {
-        return (int)((src[pointer] << 24) | (src[pointer + 1] << 16) | (src[pointer + 2] << 8) | (src[pointer + 3]));
+        return ByteBuffer.wrap(src, pointer, 4).getInt();
+        //return (int)((src[pointer] << 24) | (src[pointer + 1] << 16) | (src[pointer + 2] << 8) | (src[pointer + 3]));
     }
 
     public static long readLong(byte[] src, int pointer)
