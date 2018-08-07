@@ -676,7 +676,7 @@ public class Main implements InputListener {
                 for (int y = 0; y < worldTiles[x].length; y++) {
                     if (worldTiles[x][y] != null) {
                         Location location = worldTiles[x][y].getLocation();
-                        lines.add(worldTiles[x][y].getClass().getName() + " - " + x + "," + y + " - " + (int) location.getX() + "," + (int) location.getY());
+                        lines.add(worldTiles[x][y].getClass().getName() + " - " + x + "," + y);
                     }
                 }
             }
@@ -700,14 +700,11 @@ public class Main implements InputListener {
                 String[] split = line.split(" - ");
                 String clazz = split[0];
                 String[] gridCoords = split[1].split(",");
-                String[] coords = split[2].split(",");
                 int gridX = Integer.parseInt(gridCoords[0]);
                 int gridY = Integer.parseInt(gridCoords[1]);
-                int x = Integer.parseInt(coords[0]);
-                int y = Integer.parseInt(coords[1]);
 
                 Entity entity = (Entity) Class.forName(clazz).newInstance();
-                entity.teleport(new Location(player.getWorld(), x, y));
+                entity.teleport(new Location(player.getWorld(), gridX*gridSize, gridY*gridSize));
                 worldTiles[gridX][gridY] = entity;
 
                 Location startPoint = getStartingPoint();
