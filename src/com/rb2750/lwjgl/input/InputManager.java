@@ -1,6 +1,7 @@
 package com.rb2750.lwjgl.input;
 
 import com.rb2750.lwjgl.Main;
+import com.rb2750.lwjgl.gui.GUI;
 import com.rb2750.lwjgl.input.controllers.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,11 +16,14 @@ import java.util.*;
 public class InputManager {
     private static List<InputListener> listeners = new ArrayList<>();
     private Queue<SteamQueuedEvent> queue = new ArrayDeque<>();
-    @Getter private Keyboard keyboard = new Keyboard();
-    @Getter private Mouse mouse = new Mouse(0, 0);
+    @Getter
+    private Keyboard keyboard = new Keyboard();
+    @Getter
+    private Mouse mouse = new Mouse(0, 0);
     private HashMap<Integer, Boolean> keyState = new HashMap<>();
     private InputMode mode;
-    @Getter private Controller currentControllerState;
+    @Getter
+    private Controller currentControllerState;
 
     public void Setup() {
         glfwSetKeyCallback(Main.handle, (window, key, scancode, action, modifiers) -> {
@@ -77,10 +81,14 @@ public class InputManager {
     public void update() {
         if (mode == InputMode.KEYBOARD) queue.clear();
 
+        List<InputListener> copiedListeners = new ArrayList<>(listeners);
+
         while (!queue.isEmpty()) {
             SteamQueuedEvent event = queue.remove();
 
-            for (InputListener listener : listeners) listener.handleControllerInput(event.state, event.last);
+            for (InputListener listener : copiedListeners)
+                if (Main.instance.getGuiManager().getDisplayedGUI() == null || listener instanceof GUI)
+                    listener.handleControllerInput(event.state, event.last);
         }
 
         for (Map.Entry<Integer, Boolean> entry : keyState.entrySet()) {
@@ -88,7 +96,8 @@ public class InputManager {
             else keyboard.handleKeyRelease(entry.getKey());
         }
 
-        for (InputListener listener : listeners) {
+        for (InputListener listener : copiedListeners) {
+            if (Main.instance.getGuiManager().getDisplayedGUI() != null && !(listener instanceof GUI)) continue;
             if (currentControllerState == null || !currentControllerState.isPadTouched())
                 listener.handleMouseInput(mouse);
             if (mode == null || mode == InputMode.KEYBOARD) {
@@ -102,7 +111,8 @@ public class InputManager {
 
     public void updateXInputController() {
         for (InputListener listener : listeners)
-            listener.handleControllerInput(new Controller().updateXInput(), new Controller().updateLastXInput());
+            if (Main.instance.getGuiManager().getDisplayedGUI() == null || listener instanceof GUI)
+                listener.handleControllerInput(new Controller().updateXInput(), new Controller().updateLastXInput());
     }
 
     @AllArgsConstructor

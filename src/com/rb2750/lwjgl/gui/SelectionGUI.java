@@ -3,7 +3,6 @@ package com.rb2750.lwjgl.gui;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.DisplayObject;
-import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.input.controllers.*;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
@@ -113,8 +112,6 @@ public class SelectionGUI extends GUI {
         }
 
         if (selector != null) world.removeDisplayObject(selector);
-
-        InputManager.unregisterInputListener(this);
     }
 
     private void select() {
@@ -128,8 +125,14 @@ public class SelectionGUI extends GUI {
         selectedSection = section;
     }
 
+    private void hide() {
+        Main.instance.getGuiManager().hideGUI(Main.instance.getPlayer().getWorld());
+    }
+
     @Override
     public void handleControllerInput(Controller state, Controller last) {
+        if (state.isBHeld() && !last.isBHeld() || !state.isLeftPadTouched()) hide();
+
         float selectorX = (float) (circleRadius * state.getAnalogLeft().x() + circleLocation.x);
         float selectorY = (float) (circleRadius * state.getAnalogLeft().y() + circleLocation.y);
 

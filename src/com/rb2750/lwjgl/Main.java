@@ -74,6 +74,7 @@ public class Main implements InputListener {
 
     private DirectionalLight directionalLight;
 
+    @Getter
     private FontType font;
     private GUIText fpsText;
     private GUIText posText;
@@ -408,6 +409,9 @@ public class Main implements InputListener {
             sleepTimer = new Timer("sleep");
         }
 
+        float maxUpdatesPerSecond = 60;
+        float lastUpdate = 0;
+
         while (!glfwWindowShouldClose(handle)) {
             deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
@@ -640,11 +644,27 @@ public class Main implements InputListener {
                 tryPlaceObject(location.x, location.y, size, rot);
 
             if (state.isLeftPadTouched()) {
-                if (!guiManager.guiExists(SelectionGUI.class)) guiManager.displayGUI(new SelectionGUI());
-            } else guiManager.hideGUI(player.getWorld(), SelectionGUI.class);
+                if (guiManager.getDisplayedGUI() == null) guiManager.displayGUI(new SelectionGUI());
+            } else if (guiManager.getDisplayedGUI() instanceof SelectionGUI) guiManager.hideGUI(player.getWorld());
+
+            if (state.isHomeHeld() && !last.isHomeHeld())
+                if (guiManager.getDisplayedGUI() == null)
+                    guiManager.displayGUI(new StandardGUI(
+                            new StandardGUI.GUIOption("Save").setOnClick(this::saveWorld),
+                            new StandardGUI.GUIOption("Load").setOnClick(this::loadWorld)
+                    ));
+                else if (guiManager.getDisplayedGUI() instanceof StandardGUI) guiManager.hideGUI(player.getWorld());
         });
 
-        if (state.isBHeld()) resetWorld();
+        if (state.isBHeld() && !last.isBHeld()) resetWorld();
+    }
+
+    private void saveWorld() {
+
+    }
+
+    private void loadWorld() {
+
     }
 
     private void tryPlaceObject(float objectX, float objectY, Size size, Vector3f rotation) {
@@ -716,12 +736,14 @@ public class Main implements InputListener {
 
         if (mouse.getScrollDy() != 0) {
             lastScroll = System.currentTimeMillis();
-            if (!guiManager.guiExists(SelectionGUI.class))
+            if (guiManager.getDisplayedGUI() == null)
                 runOnUIThread(() -> guiManager.displayGUI(new SelectionGUI()));
         }
 
         if (System.currentTimeMillis() - lastScroll > 1200) {
-            runOnUIThread(() -> guiManager.hideGUI(player.getWorld(), SelectionGUI.class));
+            runOnUIThread(() -> {
+                if (guiManager.getDisplayedGUI() instanceof SelectionGUI) guiManager.hideGUI(player.getWorld());
+            });
         }
 
         if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.setInvisible(true);

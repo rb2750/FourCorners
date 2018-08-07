@@ -126,8 +126,6 @@ public class Player extends Entity implements InputListener {
     public void handleControllerInput(Controller state, Controller last) {
         getAcceleration().x = (float) (speed * state.getAnalogStick().x());
 
-        if (state.isHomeHeld()) rotate(new Vector3f(2, 2, 2));
-
         if (!animationExists(SquatAnimation.class)) {
             if (state.isXHeld() && !last.isXHeld()) addAnimation(new SquatAnimation());
         } else {

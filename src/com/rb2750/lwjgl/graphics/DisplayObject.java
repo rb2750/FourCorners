@@ -39,6 +39,12 @@ public class DisplayObject {
     protected Vector3f rotation = new Vector3f(0, 0, 0);
     @Getter
     @Setter
+    private float borderSize = 0;
+    @Getter
+    @Setter
+    private Vector4f borderColour = new Vector4f();
+    @Getter
+    @Setter
     private boolean invisible = false;
 
     public DisplayObject(Location location, Size size, Shader shader, Vector4f baseColour) {
@@ -129,7 +135,7 @@ public class DisplayObject {
 //        System.out.println(rotation);
         shader.enable();
 //        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(Conversions.odeVec3ToVec3f(body.getPosition()), Conversions.odeQuatToQuatF(body.getQuaternion()), new Vector3f(size.getWidth(), size.getHeight(), size.getWidth())));
-        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getWidth())));
+        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getDepth())));
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
         if (shader != Shader.BASIC_TEX && shader != Shader.BASIC_COLOUR) {
@@ -144,11 +150,41 @@ public class DisplayObject {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             shader.setUniform4f("colour", new Vector4f(baseColour).div(255, 255, 255, 255));
+            shader.setUniform1f("borderSize", borderSize);
+            shader.setUniform4f("borderColour", new Vector4f(borderColour).div(255, 255, 255, 255));
+
         }
 
         shader.setUniform4f("clipPlane", clipPlane);
         texture.bind();
+
+//        if (borderSize != 0) {
+//            glClearStencil(0);
+//            glClear(GL_STENCIL_BUFFER_BIT);
+//
+//            glEnable(GL_STENCIL_TEST);
+//
+//            glStencilFunc(GL_ALWAYS, 1, -1);
+//            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+//
+//            mesh.render();
+//
+//            glStencilFunc(GL_NOTEQUAL, 1, -1);
+//            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+//
+////            glColor3f(0, 255, 0);
+//
+//            glLineWidth(borderSize);
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        }
+
         mesh.render();
+
+//        if (borderSize != 0) {
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//            glDisable(GL_STENCIL_TEST);
+//        }
+
         glDisable(GL_BLEND);
         shader.disable();
     }
