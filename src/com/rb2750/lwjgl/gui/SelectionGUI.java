@@ -3,7 +3,6 @@ package com.rb2750.lwjgl.gui;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.DisplayObject;
-import com.rb2750.lwjgl.input.InputManager;
 import com.rb2750.lwjgl.input.controllers.*;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
@@ -11,8 +10,7 @@ import com.rb2750.lwjgl.world.World;
 import org.joml.*;
 
 import java.lang.Math;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class SelectionGUI extends GUI {
     private CircularSector[] sectors = new CircularSector[4];
@@ -22,7 +20,7 @@ public class SelectionGUI extends GUI {
     private Circle selector;
     private Vector4f selectColor = new Vector4f(60, 179, 113, 255);
     private Vector4f defaultColor = new Vector4f(220, 220, 220, 255);
-    private DisplayObject[] objects = new DisplayObject[]{new BouncyTile(), new Tile(), new Tile().setBaseColour(new Vector4f(0, 255, 255, 255)), new Tile().setBaseColour(new Vector4f(0, 0, 255, 255))};
+    private List<Class<? extends DisplayObject>> objects = Arrays.asList(BouncyTile.class, Tile.class, StartingPoint.class, Tile.class);
     private List<DisplayObject> misc = new ArrayList<>();
     private static int selectedSection = -1;
     private static int mouseSection = -1;
@@ -35,10 +33,14 @@ public class SelectionGUI extends GUI {
             addSector(world, new Vector2f(circleLocation), 0, 2);
             addSector(world, new Vector2f(circleLocation).add(0, -100), 270, 3);
 
-            for (int i = 0; i < objects.length; i++) {
-                DisplayObject object = objects[i];
+            for (int i = 0; i < objects.size(); i++) {
+                Class<? extends DisplayObject> object = objects.get(i);
 
-                displayObject(world, object, -45 + 90 * i);
+                try {
+                    displayObject(world, object.newInstance(), -45 + 90 * i);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -86,6 +88,7 @@ public class SelectionGUI extends GUI {
         world.addDisplayObject(object);
         world.addDisplayObject(circle);
         misc.add(circle);
+        misc.add(object);
     }
 
     private void addSector(World world, Vector2f location, int zrot, int index) {
@@ -103,33 +106,37 @@ public class SelectionGUI extends GUI {
             world.removeDisplayObject(sector);
         }
 
-        for (int i = 0; i < objects.length; i++) {
-            DisplayObject object = objects[i];
-            world.removeDisplayObject(object);
-        }
-
         for (DisplayObject displayObject : misc) {
             world.removeDisplayObject(displayObject);
         }
 
         if (selector != null) world.removeDisplayObject(selector);
-
-        InputManager.unregisterInputListener(this);
     }
 
     private void select() {
         int section = getTouchedSection();
         if (section == selectedSection) return;
         Main.instance.getPlayer().getWorld().removeDisplayObject(Main.selectedObject);
-        Main.selectedObject = ((Entity) objects[section]).clone();
+        try {
+            Main.selectedObject = ((Entity) objects.get(section).newInstance());
+            Main.selectedObject.teleport(Main.instance.getPlayer().getLocation().clone().setX(Integer.MAX_VALUE).setY(Integer.MAX_VALUE));
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         Main.selectedObject.setLayer(-40f);
         Main.selectedObject.getBaseColour().w = 100;
         Main.instance.getPlayer().getWorld().addDisplayObject(Main.selectedObject);
         selectedSection = section;
     }
 
+    private void hide() {
+        Main.instance.getGuiManager().hideGUI(Main.instance.getPlayer().getWorld());
+    }
+
     @Override
     public void handleControllerInput(Controller state, Controller last) {
+        if (state.isBHeld() && !last.isBHeld() || !state.isLeftPadTouched()) hide();
+
         float selectorX = (float) (circleRadius * state.getAnalogLeft().x() + circleLocation.x);
         float selectorY = (float) (circleRadius * state.getAnalogLeft().y() + circleLocation.y);
 

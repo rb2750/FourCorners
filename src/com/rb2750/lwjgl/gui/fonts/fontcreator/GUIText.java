@@ -19,10 +19,10 @@ public class GUIText {
     @Getter
     @Setter
     private Vector3f colour = new Vector3f(0.0f, 0.0f, 0.0f);
-
-    @Getter
-    private Vector2f position;
     private float lineMaxSize;
+    @Getter
+    @Setter
+    private Vector2f position;
     @Getter
     private int numberOfLines;
 
@@ -44,8 +44,7 @@ public class GUIText {
     public void setText(String text) {
         this.text = text;
 
-        if (textMesh != null)
-        {
+        if (textMesh != null) {
             textMesh.cleanUp();
             textMesh = null;
         }

@@ -3,7 +3,7 @@ package com.rb2750.lwjgl.util;
 import lombok.Getter;
 import lombok.Setter;
 
-public class Size implements Cloneable{
+public class Size implements Cloneable {
     @Getter
     @Setter
     private float width;
@@ -11,17 +11,18 @@ public class Size implements Cloneable{
     @Setter
     private float height;
     @Getter
-    private float initialWidth;
-    @Getter
-    private float initialHeight;
+    @Setter
+    private float depth;
 
-    public Size(float width, float height)
-    {
+    public Size(float width, float height) {
         this.width = width;
-        this.initialWidth = width;
-
         this.height = height;
-        this.initialHeight = height;
+    }
+
+    public Size(float width, float height, float depth) {
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
     }
 
     public Size add(Size size) {
@@ -44,15 +45,14 @@ public class Size implements Cloneable{
 
     public Size clone() {
         try {
-            return (Size)super.clone();
+            return (Size) super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public String toString()
-    {
-        return "Width: "+width+", Height"+height;
+    public String toString() {
+        return "Width: " + width + ", Height" + height;
     }
 }
