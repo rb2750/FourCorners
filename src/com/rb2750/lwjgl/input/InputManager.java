@@ -118,7 +118,7 @@ public class InputManager {
     }
 
     public void updateXInputController() {
-        for (InputListener listener : listeners)
+        for (InputListener listener : new ArrayList<>(listeners))
             if (!guiOpen() || listener instanceof GUI)
                 listener.handleControllerInput(new Controller().updateXInput(), new Controller().updateLastXInput());
     }

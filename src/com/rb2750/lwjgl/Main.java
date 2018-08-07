@@ -215,6 +215,8 @@ public class Main implements InputListener {
         fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
         posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
 
+        loadWorld();
+
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
 
@@ -227,6 +229,9 @@ public class Main implements InputListener {
     private static long lastFrame;
     @Getter
     private static float deltaTime;
+
+    @Getter
+    private Camera camera;
 
     private void loop() {
 
@@ -258,13 +263,14 @@ public class Main implements InputListener {
 
                 TextMaster.cleanUp();
 
+                guiManager.hideGUI(player.getWorld());
+
+
                 font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
 //        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
 //        text.setColour(1, 1, 0);
                 fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
                 posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
-
-                loadWorld();
             }
         });
 
@@ -360,7 +366,7 @@ public class Main implements InputListener {
         Sync sync = new Sync();
         long lastFPS = Util.getTime();
 
-        Camera camera = new Camera();
+        camera = new Camera();
         float averageDeltaTime = 0.0f;
 
         Shader.GENERAL.disable();
@@ -423,8 +429,9 @@ public class Main implements InputListener {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            camera.setPosition(new Vector3f(0, 0f, 0));
+//            camera.setPosition(new Vector3f(0, 0f, 0));
 
+            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
             posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
@@ -575,7 +582,7 @@ public class Main implements InputListener {
             if (USE_TIMERS)
                 sleepTimer.startTimer();
 
-            sync.sync(60);
+            sync.sync(144);
 
             if (USE_TIMERS) {
                 sleepTimer.stopTimer();

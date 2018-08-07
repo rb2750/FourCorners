@@ -175,7 +175,7 @@ public class Controller {
         rightGripHeld = false;
         leftCenterHeld = XInputState.getAxes().dpad == DPAD_CENTER;
         rightCenterHeld = XInputState.getFromCurrent(XInputButton.RIGHT_THUMBSTICK);
-        homeHeld = XInputState.getFromCurrent(XInputButton.GUIDE_BUTTON);
+        homeHeld = XInputState.getFromCurrent(XInputButton.START);
         leftPadPressed = XInputState.getAxes().dpad != DPAD_CENTER;
         rightPadPressed = XInputState.getFromCurrent(XInputButton.RIGHT_THUMBSTICK);
         stickPressed = XInputState.getFromCurrent(XInputButton.LEFT_THUMBSTICK);
@@ -188,7 +188,7 @@ public class Controller {
     }
 
     public Controller updateLastXInput() {
-        analogLeft = getDpad(XInputState.getAxes().dpad);
+        analogLeft = new Analog2D(XInputState.getAxes().lx, XInputState.getAxes().ly);
         analogRight = new Analog2D(XInputState.getAxes().rx, XInputState.getAxes().ry);
         analogStick = new Analog2D(XInputState.getAxes().lx, XInputState.getAxes().ly);
         aHeld = XInputState.getFromPrevious(XInputButton.A);
@@ -203,7 +203,7 @@ public class Controller {
         rightGripHeld = false;
         leftCenterHeld = XInputState.getAxes().dpad == DPAD_CENTER;
         rightCenterHeld = XInputState.getFromPrevious(XInputButton.RIGHT_THUMBSTICK);
-        homeHeld = XInputState.getFromPrevious(XInputButton.GUIDE_BUTTON);
+        homeHeld = XInputState.getFromPrevious(XInputButton.START);
         leftPadPressed = XInputState.getAxes().dpad != DPAD_CENTER;
         rightPadPressed = XInputState.getFromPrevious(XInputButton.RIGHT_THUMBSTICK);
         stickPressed = XInputState.getFromPrevious(XInputButton.LEFT_THUMBSTICK);

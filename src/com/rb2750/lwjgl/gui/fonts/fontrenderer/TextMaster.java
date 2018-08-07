@@ -42,11 +42,15 @@ public class TextMaster
     public static void removeText(GUIText text)
     {
         List<GUIText> textBatch = texts.get(text.getFont());
-        textBatch.remove(text);
 
-        if (textBatch.isEmpty())
+        if(textBatch != null)
         {
-            texts.remove(text.getFont());
+            textBatch.remove(text);
+
+            if (textBatch.isEmpty())
+            {
+                texts.remove(text.getFont());
+            }
         }
     }
 
