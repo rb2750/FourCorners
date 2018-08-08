@@ -8,9 +8,6 @@ import java.nio.ByteBuffer;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Serialization
 {
-    public static final byte[] HEADER = "RCL".getBytes();
-    public static final short VERSION = 0x0001;
-
     public static int writeBytes(byte[] dest, int pointer, byte[] src)
     {
         assert(dest.length >= pointer + src.length);
@@ -200,7 +197,7 @@ public class Serialization
 
     public static short readShort(byte[] src, int pointer)
     {
-        return (short) ((src[pointer] << 8) | (src[pointer + 1]));
+        return ByteBuffer.wrap(src, pointer, 2).getShort();
     }
 
     public static void readShorts(byte[] src, int pointer, short[] dest)
@@ -214,7 +211,7 @@ public class Serialization
 
     public static char readChar(byte[] src, int pointer)
     {
-        return (char) ((src[pointer] << 8) | (src[pointer + 1]));
+        return ByteBuffer.wrap(src, pointer, 2).getChar();
     }
 
     public static void readChars(byte[] src, int pointer, char[] dest)
@@ -243,8 +240,7 @@ public class Serialization
 
     public static long readLong(byte[] src, int pointer)
     {
-        return (long)((src[pointer] << 56) | (src[pointer + 1] << 48) | (src[pointer + 2] << 40) | (src[pointer + 3] << 32) |
-                      (src[pointer + 4] << 24) | (src[pointer + 5] << 16) | (src[pointer + 6] << 8) | (src[pointer + 7]));
+        return ByteBuffer.wrap(src, pointer, 8).getLong();
     }
 
     public static void readLongs(byte[] src, int pointer, long[] dest)

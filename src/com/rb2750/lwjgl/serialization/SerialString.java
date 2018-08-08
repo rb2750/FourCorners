@@ -1,22 +1,19 @@
 package com.rb2750.lwjgl.serialization;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import static com.rb2750.lwjgl.serialization.Serialization.*;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SerialString
+public class SerialString extends SerialBase
 {
     public static final byte CONTAINER_TYPE = SerialContainerType.STRING;
-    public short nameLength;
-    public byte[] name;
-    @Getter
-    public int size = 1 + 2 + 4 + 4;
+
     public int count = 0;
 
     public char[] characters;
+
+    private SerialString()
+    {
+        size += 1 + 4;
+    }
 
     public static SerialString create(String name, String data)
     {
@@ -52,18 +49,6 @@ public class SerialString
         return result;
     }
 
-    public void setName(String name)
-    {
-        assert(name.length() < Short.MAX_VALUE);
-
-        if (this.name != null)
-            size -= this.name.length;
-
-        nameLength = (short)name.length();
-        this.name = name.getBytes();
-        size += nameLength;
-    }
-
     private void updateSize()
     {
         size += getDataSize();
@@ -84,11 +69,6 @@ public class SerialString
     public int getDataSize()
     {
         return characters.length * SerialType.getSize(SerialType.CHAR);
-    }
-
-    public String getName()
-    {
-        return new String(name, 0, nameLength);
     }
 
     public String getString()

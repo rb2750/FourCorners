@@ -6,11 +6,9 @@ import lombok.NoArgsConstructor;
 import static com.rb2750.lwjgl.serialization.Serialization.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SerialField
+public class SerialField extends SerialBase
 {
     public static final byte CONTAINER_TYPE = SerialContainerType.FIELD;
-    public short nameLength;
-    public byte[] name;
     public byte type;
     public byte[] data;
 
@@ -113,13 +111,6 @@ public class SerialField
         return 1 + 2 + name.length + 1 + data.length;
     }
 
-    public void setName(String name)
-    {
-        assert(name.length() < Short.MAX_VALUE);
-        nameLength = (short)name.length();
-        this.name = name.getBytes();
-    }
-
     public int getBytes(byte[] dest, int pointer)
     {
         pointer = writeBytes(dest, pointer, CONTAINER_TYPE);
@@ -131,8 +122,67 @@ public class SerialField
         return pointer;
     }
 
-    public String getName()
+    public byte getByte()
     {
-        return new String(name, 0, nameLength);
+        if (type != SerialType.BYTE)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a byte.");
+
+        return data[0];
+    }
+
+    public short getShort()
+    {
+        if (type != SerialType.SHORT)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a short.");
+
+        return readShort(data, 0);
+    }
+
+    public char getChar()
+    {
+        if (type != SerialType.CHAR)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a char.");
+
+        return readChar(data, 0);
+    }
+
+    public int getInteger()
+    {
+        if (type != SerialType.INTEGER)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not an integer.");
+
+        return readInt(data, 0);
+    }
+
+    public long getLong()
+    {
+        if (type != SerialType.LONG)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a long.");
+
+        return readLong(data, 0);
+    }
+
+    public float getFloat()
+    {
+        if (type != SerialType.FLOAT)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a float.");
+
+        return readFloat(data, 0);
+    }
+
+    public double getDouble()
+    {
+        if (type != SerialType.DOUBLE)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a double.");
+
+        return readDouble(data, 0);
+    }
+
+    public boolean getBoolean()
+    {
+        if (type != SerialType.BOOLEAN)
+            throw new IllegalArgumentException("Field '" + getName() + "' is not a boolean.");
+
+        return readBoolean(data, 0);
     }
 }

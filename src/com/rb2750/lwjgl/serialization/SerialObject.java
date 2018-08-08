@@ -1,97 +1,33 @@
 package com.rb2750.lwjgl.serialization;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.rb2750.lwjgl.serialization.Serialization.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SerialObject
+public class SerialObject extends SerialBase
 {
     public static final byte CONTAINER_TYPE = SerialContainerType.OBJECT;
-    public short nameLength;
-    public byte[] name;
-    @Getter
-    private int size = 1 + 2 + 4 + 4 + 4 + 4;
-
-    private static final int SIZE_OFFSET = 1 + 2 + 4;
 
     private int fieldCount;
-    public List<SerialField> fields = new ArrayList<>();
+    public Map<String, SerialField> fields = new HashMap<>();
 
     private int stringCount;
-    public List<SerialString> strings = new ArrayList<>();
+    public Map<String, SerialString> strings = new HashMap<>();
 
     private int arrayCount;
-    public List<SerialArray> arrays = new ArrayList<>();
+    public Map<String, SerialArray> arrays = new HashMap<>();
 
     public SerialObject(String name)
     {
+        size += 1 + 4 + 4 + 4;
         setName(name);
-    }
-
-    public String getName()
-    {
-        return new String(name, 0, nameLength);
-    }
-
-    public void setName(String name)
-    {
-        assert(name.length() < Short.MAX_VALUE);
-
-        if (this.name != null)
-            size -= this.name.length;
-
-        nameLength = (short)name.length();
-        this.name = name.getBytes();
-        size += nameLength;
-    }
-
-    public void addField(SerialField field)
-    {
-        fields.add(field);
-        size += field.getSize();
-        fieldCount = fields.size();
-    }
-
-    public void addString(SerialString string)
-    {
-        strings.add(string);
-        size += string.getSize();
-        stringCount = strings.size();
-    }
-
-    public void addArray(SerialArray array)
-    {
-        arrays.add(array);
-        size += array.getSize();
-        arrayCount = arrays.size();
-    }
-
-    public int getBytes(byte[] dest, int pointer)
-    {
-        pointer = writeBytes(dest, pointer, CONTAINER_TYPE);
-        pointer = writeBytes(dest, pointer, nameLength);
-        pointer = writeBytes(dest, pointer, name);
-        pointer = writeBytes(dest, pointer, size);
-
-        pointer = writeBytes(dest, pointer, fieldCount);
-        for (SerialField field : fields)
-            pointer = field.getBytes(dest, pointer);
-
-        pointer = writeBytes(dest, pointer, stringCount);
-        for (SerialString string : strings)
-            pointer = string.getBytes(dest, pointer);
-
-        pointer = writeBytes(dest, pointer, arrayCount);
-        for (SerialArray array : arrays)
-            pointer = array.getBytes(dest, pointer);
-
-        return pointer;
     }
 
     public static SerialObject deserialize(byte[] data, Integer pointer)
@@ -114,7 +50,7 @@ public class SerialObject
         for (int i = 0; i < result.fieldCount; i++)
         {
             SerialField field = SerialField.deserialize(data, pointer);
-            result.fields.add(field);
+            result.fields.put(field.getName(), field);
             pointer += field.getSize();
         }
 
@@ -124,7 +60,7 @@ public class SerialObject
         for (int i = 0; i < result.stringCount; i++)
         {
             SerialString string = SerialString.deserialize(data, pointer);
-            result.strings.add(string);
+            result.strings.put(string.getName(), string);
             pointer += string.getSize();
         }
 
@@ -134,10 +70,92 @@ public class SerialObject
         for (int i = 0; i < result.arrayCount; i++)
         {
             SerialArray array = SerialArray.deserialize(data, pointer);
-            result.arrays.add(array);
+            result.arrays.put(array.getName(), array);
             pointer += array.getSize();
         }
 
         return result;
+    }
+
+    public void addField(SerialField field)
+    {
+        if (fields.containsKey(field.getName()))
+            throw new IllegalArgumentException("Field '" + field.getName() + "' already exists in object '" + getName() + "'.");
+
+        fields.put(field.getName(), field);
+        size += field.getSize();
+        fieldCount = fields.size();
+    }
+
+    public SerialField getField(String name)
+    {
+        SerialField result = fields.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Object '" + getName() + "' does not contain field '" + name + "'.");
+
+        return result;
+    }
+
+    public void addString(SerialString string)
+    {
+        if (strings.containsKey(string.getName()))
+            throw new IllegalArgumentException("String '" + string.getName() + "' already exists in object '" + getName() + "'.");
+
+        strings.put(string.getName(), string);
+        size += string.getSize();
+        stringCount = strings.size();
+    }
+
+    public SerialString getString(String name)
+    {
+        SerialString result = strings.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Object '" + getName() + "' does not contain string '" + name + "'.");
+
+        return result;
+    }
+
+    public void addArray(SerialArray array)
+    {
+        if (arrays.containsKey(array.getName()))
+            throw new IllegalArgumentException("Array '" + array.getName() + "' already exists in object '" + getName() + "'.");
+
+        arrays.put(array.getName(), array);
+        size += array.getSize();
+        arrayCount = arrays.size();
+    }
+
+    public SerialArray getArray(String name)
+    {
+        SerialArray result = arrays.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Object '" + getName() + "' does not contain array '" + name + "'.");
+
+        return result;
+    }
+
+    public int getBytes(byte[] dest, int pointer)
+    {
+        pointer = writeBytes(dest, pointer, CONTAINER_TYPE);
+        pointer = writeBytes(dest, pointer, nameLength);
+        pointer = writeBytes(dest, pointer, name);
+        pointer = writeBytes(dest, pointer, size);
+
+        pointer = writeBytes(dest, pointer, fieldCount);
+        for (SerialField field : fields.values())
+            pointer = field.getBytes(dest, pointer);
+
+        pointer = writeBytes(dest, pointer, stringCount);
+        for (SerialString string : strings.values())
+            pointer = string.getBytes(dest, pointer);
+
+        pointer = writeBytes(dest, pointer, arrayCount);
+        for (SerialArray array : arrays.values())
+            pointer = array.getBytes(dest, pointer);
+
+        return pointer;
     }
 }

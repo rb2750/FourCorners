@@ -72,28 +72,31 @@ public class NetworkMain
     {
         SerialDatabase database = SerialDatabase.deserializeFromFile("test.rcl");
 
-        System.out.println("Database: " + database.getName());
+        System.out.println("Database v" + SerialDatabase.VERSION + ": " + database.getName());
 
-        for (SerialObject object : database.objects)
+        for (SerialObject object : database.objects.values())
         {
             System.out.println("\tObject: " + object.getName());
 
-            for (SerialField field : object.fields)
+            for (SerialField field : object.fields.values())
             {
                 System.out.println("\t\tField Name: " + field.getName());
             }
 
-            for (SerialString string : object.strings)
+            for (SerialString string : object.strings.values())
             {
                 System.out.println("\t\tString Name: " + string.getName());
                 System.out.println("\t\t\tValue: " + string.getString());
             }
 
-            for (SerialArray array : object.arrays)
+            for (SerialArray array : object.arrays.values())
             {
-                System.out.println("\t\tArray Name:" + array.getName());
+                System.out.println("\t\tArray Name: " + array.getName());
             }
         }
+
+        System.out.println(database.getObject("A good object 2").getField("A good boolean").getBoolean());
+        System.out.println(database.getObject("Entity").getString("Example Serial String").getString());
     }
 
     public static void main(String[] args)
