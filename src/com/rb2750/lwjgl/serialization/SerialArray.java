@@ -115,6 +115,64 @@ public class SerialArray
         return serialArray;
     }
 
+    public static SerialArray deserialize(byte[] data, int pointer)
+    {
+        byte containerType = data[pointer++];
+        assert (containerType == CONTAINER_TYPE);
+
+        SerialArray result = new SerialArray();
+        result.nameLength = readShort(data, pointer);
+        pointer += 2;
+        result.name = readString(data, pointer, result.nameLength).getBytes();
+        pointer += result.nameLength;
+
+        result.size = readInt(data, pointer);
+        pointer += 4;
+
+        result.type = data[pointer++];
+
+        result.count = readInt(data, pointer);
+        pointer += 4;
+
+        switch (result.type)
+        {
+            case SerialType.BYTE:
+                result.data = new byte[result.count];
+                readBytes(data, pointer, result.data);
+                break;
+            case SerialType.SHORT:
+                result.shortData = new short[result.count];
+                readShorts(data, pointer, result.shortData);
+                break;
+            case SerialType.CHAR:
+                result.charData = new char[result.count];
+                readChars(data, pointer, result.charData);
+                break;
+            case SerialType.INTEGER:
+                result.intData = new int[result.count];
+                readInts(data, pointer, result.intData);
+                break;
+            case SerialType.LONG:
+                result.longData = new long[result.count];
+                readLongs(data, pointer, result.longData);
+                break;
+            case SerialType.FLOAT:
+                result.floatData = new float[result.count];
+                readFloats(data, pointer, result.floatData);
+                break;
+            case SerialType.DOUBLE:
+                result.doubleData = new double[result.count];
+                readDoubles(data, pointer, result.doubleData);
+                break;
+            case SerialType.BOOLEAN:
+                result.booleanData = new boolean[result.count];
+                readBooleans(data, pointer, result.booleanData);
+                break;
+        }
+
+        return result;
+    }
+
     private void updateSize()
     {
         size += getDataSize();
@@ -189,5 +247,10 @@ public class SerialArray
 
         assert (false);
         return 1;
+    }
+
+    public String getName()
+    {
+        return new String(name, 0, nameLength);
     }
 }

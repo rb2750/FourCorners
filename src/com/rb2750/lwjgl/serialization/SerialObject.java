@@ -20,14 +20,14 @@ public class SerialObject
 
     private static final int SIZE_OFFSET = 1 + 2 + 4;
 
-    public int fieldCount;
-    private List<SerialField> fields = new ArrayList<>();
+    private int fieldCount;
+    public List<SerialField> fields = new ArrayList<>();
 
-    public int stringCount;
-    private List<SerialString> strings = new ArrayList<>();
+    private int stringCount;
+    public List<SerialString> strings = new ArrayList<>();
 
-    public int arrayCount;
-    private List<SerialArray> arrays = new ArrayList<>();
+    private int arrayCount;
+    public List<SerialArray> arrays = new ArrayList<>();
 
     public SerialObject(String name)
     {
@@ -108,25 +108,35 @@ public class SerialObject
         result.size = readInt(data, pointer);
         pointer += 4;
 
-        pointer += result.size - SIZE_OFFSET - result.nameLength;
-
-        if (true)
-            return result;
-
         result.fieldCount = readInt(data, pointer);
         pointer += 4;
 
-        // TODO: Fields
+        for (int i = 0; i < result.fieldCount; i++)
+        {
+            SerialField field = SerialField.deserialize(data, pointer);
+            result.fields.add(field);
+            pointer += field.getSize();
+        }
 
         result.stringCount = readInt(data, pointer);
         pointer += 4;
 
-        // TODO: Strings
+        for (int i = 0; i < result.stringCount; i++)
+        {
+            SerialString string = SerialString.deserialize(data, pointer);
+            result.strings.add(string);
+            pointer += string.getSize();
+        }
 
         result.arrayCount = readInt(data, pointer);
         pointer += 4;
 
-        // TODO: Arrays
+        for (int i = 0; i < result.arrayCount; i++)
+        {
+            SerialArray array = SerialArray.deserialize(data, pointer);
+            result.arrays.add(array);
+            pointer += array.getSize();
+        }
 
         return result;
     }

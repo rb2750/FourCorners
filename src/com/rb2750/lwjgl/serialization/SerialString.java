@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static com.rb2750.lwjgl.serialization.Serialization.writeBytes;
+import static com.rb2750.lwjgl.serialization.Serialization.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SerialString
@@ -27,6 +27,29 @@ public class SerialString
         serialString.updateSize();
 
         return serialString;
+    }
+
+    public static SerialString deserialize(byte[] data, int pointer)
+    {
+        byte containerType = data[pointer++];
+        assert (containerType == CONTAINER_TYPE);
+
+        SerialString result = new SerialString();
+        result.nameLength = readShort(data, pointer);
+        pointer += 2;
+        result.name = readString(data, pointer, result.nameLength).getBytes();
+        pointer += result.nameLength;
+
+        result.size = readInt(data, pointer);
+        pointer += 4;
+
+        result.count = readInt(data, pointer);
+        pointer += 4;
+
+        result.characters = new char[result.count];
+        readChars(data, pointer, result.characters);
+
+        return result;
     }
 
     public void setName(String name)
@@ -61,5 +84,15 @@ public class SerialString
     public int getDataSize()
     {
         return characters.length * SerialType.getSize(SerialType.CHAR);
+    }
+
+    public String getName()
+    {
+        return new String(name, 0, nameLength);
+    }
+
+    public String getString()
+    {
+        return new String(characters);
     }
 }

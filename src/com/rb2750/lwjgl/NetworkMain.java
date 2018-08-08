@@ -74,9 +74,25 @@ public class NetworkMain
 
         System.out.println("Database: " + database.getName());
 
-        for (int i = 0; i < database.objects.size(); i++)
+        for (SerialObject object : database.objects)
         {
-            System.out.println("\t" + database.objects.get(i).getName());
+            System.out.println("\tObject: " + object.getName());
+
+            for (SerialField field : object.fields)
+            {
+                System.out.println("\t\tField Name: " + field.getName());
+            }
+
+            for (SerialString string : object.strings)
+            {
+                System.out.println("\t\tString Name: " + string.getName());
+                System.out.println("\t\t\tValue: " + string.getString());
+            }
+
+            for (SerialArray array : object.arrays)
+            {
+                System.out.println("\t\tArray Name:" + array.getName());
+            }
         }
     }
 

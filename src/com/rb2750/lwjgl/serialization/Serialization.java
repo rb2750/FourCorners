@@ -1,7 +1,11 @@
 package com.rb2750.lwjgl.serialization;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.nio.ByteBuffer;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Serialization
 {
     public static final byte[] HEADER = "RCL".getBytes();
@@ -186,14 +190,40 @@ public class Serialization
         return src[pointer];
     }
 
+    public static void readBytes(byte[] src, int pointer, byte[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = src[pointer + i];
+        }
+    }
+
     public static short readShort(byte[] src, int pointer)
     {
         return (short) ((src[pointer] << 8) | (src[pointer + 1]));
     }
 
+    public static void readShorts(byte[] src, int pointer, short[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readShort(src, pointer);
+            pointer += 2;
+        }
+    }
+
     public static char readChar(byte[] src, int pointer)
     {
         return (char) ((src[pointer] << 8) | (src[pointer + 1]));
+    }
+
+    public static void readChars(byte[] src, int pointer, char[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readChar(src, pointer);
+            pointer += 2;
+        }
     }
 
     public static int readInt(byte[] src, int pointer)
@@ -202,10 +232,28 @@ public class Serialization
         //return (int)((src[pointer] << 24) | (src[pointer + 1] << 16) | (src[pointer + 2] << 8) | (src[pointer + 3]));
     }
 
+    public static void readInts(byte[] src, int pointer, int[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readShort(src, pointer);
+            pointer += 4;
+        }
+    }
+
     public static long readLong(byte[] src, int pointer)
     {
         return (long)((src[pointer] << 56) | (src[pointer + 1] << 48) | (src[pointer + 2] << 40) | (src[pointer + 3] << 32) |
                       (src[pointer + 4] << 24) | (src[pointer + 5] << 16) | (src[pointer + 6] << 8) | (src[pointer + 7]));
+    }
+
+    public static void readLongs(byte[] src, int pointer, long[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readShort(src, pointer);
+            pointer += 8;
+        }
     }
 
     public static float readFloat(byte[] src, int pointer)
@@ -213,14 +261,41 @@ public class Serialization
         return Float.intBitsToFloat(readInt(src, pointer));
     }
 
+    public static void readFloats(byte[] src, int pointer, float[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readFloat(src, pointer);
+            pointer += 4;
+        }
+    }
+
     public static double readDouble(byte[] src, int pointer)
     {
         return Double.longBitsToDouble(readLong(src, pointer));
     }
 
+    public static void readDoubles(byte[] src, int pointer, double[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readDouble(src, pointer);
+            pointer += 8;
+        }
+    }
+
     public static boolean readBoolean(byte[] src, int pointer)
     {
         return src[pointer] != 0;
+    }
+
+    public static void readBooleans(byte[] src, int pointer, boolean[] dest)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] = readBoolean(src, pointer);
+            pointer += 1;
+        }
     }
 
     public static String readString(byte[] src, int pointer, int length)

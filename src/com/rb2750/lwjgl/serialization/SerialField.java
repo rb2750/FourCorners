@@ -88,6 +88,25 @@ public class SerialField
         return field;
     }
 
+    public static SerialField deserialize(byte[] data, int pointer)
+    {
+        byte containerType = data[pointer++];
+        assert (containerType == CONTAINER_TYPE);
+
+        SerialField result = new SerialField();
+        result.nameLength = readShort(data, pointer);
+        pointer += 2;
+        result.name = readString(data, pointer, result.nameLength).getBytes();
+        pointer += result.nameLength;
+
+        result.type = data[pointer++];
+
+        result.data = new byte[SerialType.getSize(result.type)];
+        readBytes(data, pointer, result.data);
+
+        return result;
+    }
+
     public int getSize()
     {
         assert(data.length == SerialType.getSize(type));
@@ -110,5 +129,10 @@ public class SerialField
         pointer = writeBytes(dest, pointer, data);
 
         return pointer;
+    }
+
+    public String getName()
+    {
+        return new String(name, 0, nameLength);
     }
 }
