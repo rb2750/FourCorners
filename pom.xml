@@ -1,7 +1,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rb2750</groupId>
-    <artifactId>LWJGL Test</artifactId>
+    <artifactId>lwjgl-test</artifactId>
     <version>1.1.0</version>
     <repositories>
         <repository>
