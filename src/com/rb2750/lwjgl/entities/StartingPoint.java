@@ -1,8 +1,6 @@
 package com.rb2750.lwjgl.entities;
 
-import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
-import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 public class StartingPoint extends Tile {
@@ -18,6 +16,7 @@ public class StartingPoint extends Tile {
     @Override
     public void update() {
         super.update();
+        getBaseColour().w = 100;
 //        text.setPosition(new Vector2f(location.getX(), Main.getGameHeight() - location.getY() - size.getHeight()).mul(1f / Main.getGameWidth(), 1f / Main.getGameHeight()));
     }
 }

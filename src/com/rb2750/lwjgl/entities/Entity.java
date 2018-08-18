@@ -196,12 +196,12 @@ public abstract class Entity extends DisplayObject implements Cloneable {
 
     /**
      * Called whenever another entity interacts with the current one
-     *
-     * @param x The entity that is interacting with it on the x axis
+     *  @param x The entity that is interacting with it on the x axis
      * @param y The entity that is interacting with it on the y axis
      */
-    public void onInteract(Entity x, Entity y) {
+    public boolean onInteract(Entity x, Entity y) {
         //Empty stub
+        return true;
     }
 
     /**

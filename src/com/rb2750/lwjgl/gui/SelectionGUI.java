@@ -20,7 +20,7 @@ public class SelectionGUI extends GUI {
     private Circle selector;
     private Vector4f selectColor = new Vector4f(60, 179, 113, 255);
     private Vector4f defaultColor = new Vector4f(220, 220, 220, 255);
-    private List<Class<? extends DisplayObject>> objects = Arrays.asList(BouncyTile.class, Tile.class, StartingPoint.class, Tile.class);
+    private List<Class<? extends DisplayObject>> objects = Arrays.asList(BouncyTile.class, Tile.class, StartingPoint.class, OneWayTile.class);
     private List<DisplayObject> misc = new ArrayList<>();
     private static int selectedSection = -1;
     private static int mouseSection = -1;
@@ -47,6 +47,7 @@ public class SelectionGUI extends GUI {
         if (selector == null) {
             selector = new Circle(new Location(world, circleLocation.x, circleLocation.y));
             selector.setBaseColour(new Vector4f(150, 150, 150, 200));
+            selector.setAbsoluteLocation(true);
             selector.size = new Size(15, 15);
             selector.setLayer(2000);
             world.addDisplayObject(selector);
@@ -84,7 +85,9 @@ public class SelectionGUI extends GUI {
         circle.size = object.size.clone().subtract(new Size(12, 12));
         circle.setBaseColour(new Vector4f(defaultColor).sub(20, 20, 20, 0));
         circle.setLayer(120);
+        circle.setAbsoluteLocation(true);
         object.setLayer(130);
+        object.setAbsoluteLocation(true);
         world.addDisplayObject(object);
         world.addDisplayObject(circle);
         misc.add(circle);
@@ -94,6 +97,7 @@ public class SelectionGUI extends GUI {
     private void addSector(World world, Vector2f location, int zrot, int index) {
         CircularSector sector = new CircularSector(new Location(world, location.x, location.y), defaultColor);
         sector.size = new Size(circleRadius, circleRadius);
+        sector.setAbsoluteLocation(true);
         sector.rotate(new Vector3f(0, 0, zrot));
         sector.setLayer(100);
         sectors[index] = sector;
@@ -151,15 +155,25 @@ public class SelectionGUI extends GUI {
 
     }
 
+    private long lastScroll;
+
     @Override
     public void handleMouseInput(Mouse mouse) {
-        if (mouse.getScrollDy() > 0) mouseSection += 1;
+        if (mouse.getScrollDy() > 0) {
+            mouseSection += 1;
+            lastScroll = System.currentTimeMillis();
+        }
         if (mouse.getScrollDy() < 0) {
+            lastScroll = System.currentTimeMillis();
             mouseSection -= 1;
             if (mouseSection < 0) mouseSection = 3;
         }
         mouseSection %= 4;
 
         if (mouse.isMiddleMouseDown()) select();
+
+        if (lastScroll > 0 && System.currentTimeMillis() - lastScroll > 1200) {
+            hide();
+        }
     }
 }

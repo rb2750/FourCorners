@@ -6,10 +6,10 @@ import lombok.Setter;
 public class WorldSettings {
     @Getter
     @Setter
-    private int worldWidth = 80;
+    private int worldWidth = 400;
     @Getter
     @Setter
-    private int worldHeight = 50;
+    private int worldHeight = 400;
     @Getter
     @Setter
     private float gravity = 1.2f;

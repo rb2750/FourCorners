@@ -25,5 +25,6 @@ void main() {
 	vs_out.tc = tc;
 
 	vs_out.normal = (ml_matrix * vec4(normal, 0.0)).xyz;
+
 	vs_out.worldPos = worldPosition.xyz;
 }

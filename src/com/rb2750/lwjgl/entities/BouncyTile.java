@@ -17,7 +17,7 @@ public class BouncyTile extends Tile {
     }
 
     @Override
-    public void onInteract(Entity x, Entity y) {
+    public boolean onInteract(Entity x, Entity y) {
         if (y != null) {
             if (y.getAcceleration().y < -7) {
                 boolean a = Main.instance.getInputManager().getCurrentControllerState() != null && Main.instance.getInputManager().getCurrentControllerState().isAHeld() || Main.instance.getInputManager().getKeyboard().isKeyDown(GLFW_KEY_SPACE);
@@ -34,5 +34,6 @@ public class BouncyTile extends Tile {
                 }
             }
         }
+        return false;
     }
 }

@@ -176,15 +176,12 @@ public class World {
                     skipY = true;
                 } else {
                     entity.setInteractingWithX(interactingWithX);
-                    updateInteractEvents(entity);
-
-                    if (interactingWithX != null) {
-//                        interactingWithX.onInteract(entity, null);
+                    if (!updateInteractEvents(entity)) entity.getLocation().setX(x);
+                    else if (interactingWithX != null) {
                         float pointX = (float) Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
                         if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.getSize().getWidth();
                         entity.getLocation().setX(pointX);
                     }
-//                    entity.getAcceleration().x = 0;
                 }
             }
 
@@ -197,10 +194,12 @@ public class World {
                 } else {
                     entity.setInteractingWithY(interactingWithY);
                     updateInteractEvents(entity);
-
-                    if (interactingWithY != null) {
+//                    if (!updateInteractEvents(entity)) {
+//                        entity.getLocation().setY(y);
+                    /*} else */if (interactingWithY != null) {
                         float pointY = (float) Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
-                        if (pointY == interactingWithY.getRectangle().getY()) pointY -= entity.getSize().getHeight();
+                        if (pointY == interactingWithY.getRectangle().getY())
+                            pointY -= entity.getSize().getHeight();
                         entity.getLocation().setY(pointY);
                         if (entity.getAcceleration().y < -25) entity.addAnimation(new SquashAnimation());
                         if (entity.getAcceleration().y < 0 || entity.getLocation().getY() + entity.size.getHeight() <= interactingWithY.getLocation().getY() && entity.getAcceleration().y > 0)
@@ -211,16 +210,27 @@ public class World {
         }
     }
 
-    public void updateInteractEvents(Entity entity) {
+    /**
+     * Call the interaction events
+     *
+     * @param entity The entity the events are related to.
+     * @return Whether the interaction should be allowed or denied.
+     */
+    public boolean updateInteractEvents(Entity entity) {
+        boolean denyInteraction = false;
         if (entity.getInteractingWithX() != null || entity.getInteractingWithY() != null) {
-            entity.onInteract(entity.getInteractingWithX(), entity.getInteractingWithY());
+            if (entity.onInteract(entity.getInteractingWithX(), entity.getInteractingWithY()))
+                denyInteraction = true;
             if (entity.getInteractingWithX() != null && entity.getInteractingWithX().equals(entity.getInteractingWithY())) {
-                entity.getInteractingWithX().onInteract(entity, entity);
+                if (entity.getInteractingWithX().onInteract(entity, entity)) denyInteraction = true;
             } else {
-                if (entity.getInteractingWithX() != null) entity.getInteractingWithX().onInteract(entity, null);
-                if (entity.getInteractingWithY() != null) entity.getInteractingWithY().onInteract(null, entity);
+                if (entity.getInteractingWithX() != null)
+                    if (entity.getInteractingWithX().onInteract(entity, null)) denyInteraction = true;
+                if (entity.getInteractingWithY() != null)
+                    if (entity.getInteractingWithY().onInteract(null, entity)) denyInteraction = true;
             }
         }
+        return denyInteraction;
     }
 
     public void renderWorld(Camera camera, Vector4f clipPlane) {
@@ -231,7 +241,8 @@ public class World {
                 if (tile != null && !tile.isInvisible())
                     renderObject(tile, camera, clipPlane);
         for (Entity entity : entities) if (!entity.isInvisible()) renderObject(entity, camera, clipPlane);
-        for (DisplayObject object : displayObjects) if (!object.isInvisible()) renderObject(object, camera, clipPlane);
+        for (DisplayObject object : displayObjects)
+            if (!object.isInvisible()) renderObject(object, camera, clipPlane);
     }
 
     private void prepareShaders() {

@@ -1,14 +1,18 @@
 package com.rb2750.lwjgl.entities;
 
-import com.rb2750.lwjgl.animations.*;
+import com.rb2750.lwjgl.animations.FlipAnimation;
+import com.rb2750.lwjgl.animations.SquashAnimation;
+import com.rb2750.lwjgl.animations.SquatAnimation;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.input.InputListener;
 import com.rb2750.lwjgl.input.InputManager;
-import com.rb2750.lwjgl.input.controllers.*;
+import com.rb2750.lwjgl.input.controllers.Controller;
+import com.rb2750.lwjgl.input.controllers.Keyboard;
+import com.rb2750.lwjgl.input.controllers.Mouse;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Player extends Entity implements InputListener {
@@ -102,7 +106,7 @@ public class Player extends Entity implements InputListener {
 
         normals = calcNormals();
 
-        layer = -45.0f;
+        layer = 0.0f;
         texturePath = "res/textures/blue.png";
 
         createMesh();
@@ -148,7 +152,7 @@ public class Player extends Entity implements InputListener {
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
-        getAcceleration().x = keyboard.isKeyDown(GLFW_KEY_RIGHT) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) ? -speed : 0;
+        getAcceleration().x = keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0;
 
         if (!animationExists(SquatAnimation.class)) {
             if (keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) && !keyboard.wasKeyDown(GLFW_KEY_LEFT_SHIFT))

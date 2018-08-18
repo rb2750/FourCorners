@@ -215,9 +215,9 @@ public class Main implements InputListener {
         fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
         posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
 
-        loadWorld();
-
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
+
+        loadWorld();
     }
 
     private Stack<Runnable> toRun = new Stack<>();
@@ -271,6 +271,8 @@ public class Main implements InputListener {
 //        text.setColour(1, 1, 0);
                 fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
                 posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
+
+                loadWorld();
             }
         });
 
@@ -431,7 +433,7 @@ public class Main implements InputListener {
 
 //            camera.setPosition(new Vector3f(0, 0f, 0));
 
-//            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
+            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
             posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
@@ -623,6 +625,9 @@ public class Main implements InputListener {
         float x = (float) (halfGameWidth * state.getAnalogRight().x() + halfGameWidth);
         float y = (float) (halfGameHeight * state.getAnalogRight().y() + halfGameHeight);
 
+        x += camera.getPosition().x;
+        y += camera.getPosition().y;
+
         Vector2f location = snapToGrid(new Vector2f(x, y));
 
         tryCreateSelectyObject();
@@ -655,7 +660,7 @@ public class Main implements InputListener {
                 if (guiManager.getDisplayedGUI() == null) guiManager.displayGUI(new SelectionGUI());
             } else if (guiManager.getDisplayedGUI() instanceof SelectionGUI) guiManager.hideGUI(player.getWorld());
 
-            if (state.isHomeHeld() && !last.isHomeHeld())
+            if (state.isRightCenterHeld() && !last.isRightCenterHeld())
                 if (guiManager.getDisplayedGUI() == null)
                     guiManager.displayGUI(new StandardGUI(
                             new StandardGUI.GUIOption("Save").setOnClick(this::saveWorld),
@@ -750,6 +755,7 @@ public class Main implements InputListener {
 
         Vector2f tileLocation = asGridLocation(location);
 
+
         player.getWorld().getWorldTiles()[(int) tileLocation.x][(int) tileLocation.y] = newObject;
     }
 
@@ -786,14 +792,16 @@ public class Main implements InputListener {
         if (keyboard.isKeyDown(GLFW_KEY_X)) player.addAnimation(new TestAnimation());
     }
 
-    private long lastScroll;
-
     @Override
     public void handleMouseInput(Mouse mouse) {
         tryCreateSelectyObject();
 
         float x = Math.max(0, mouse.getX());
         float y = Math.max(0, mouse.getY());
+
+        x += camera.getPosition().x;
+        y += camera.getPosition().y;
+
         Vector2f location = snapToGrid(new Vector2f(x, y));
 
         int size = 100;
@@ -803,15 +811,8 @@ public class Main implements InputListener {
         selectedObject.setSize(s, true);
 
         if (mouse.getScrollDy() != 0) {
-            lastScroll = System.currentTimeMillis();
             if (guiManager.getDisplayedGUI() == null)
                 runOnUIThread(() -> guiManager.displayGUI(new SelectionGUI()));
-        }
-
-        if (System.currentTimeMillis() - lastScroll > 1200) {
-            runOnUIThread(() -> {
-                if (guiManager.getDisplayedGUI() instanceof SelectionGUI) guiManager.hideGUI(player.getWorld());
-            });
         }
 
         if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.setInvisible(true);

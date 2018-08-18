@@ -81,7 +81,7 @@ public class Shader
         glUniform1f(getUniform(name), value);
     }
 
-    public void loadBoolean(String name, boolean value)
+    public void setBoolean(String name, boolean value)
     {
         checkShader();
         setUniform1f(name, value ? 1.0f : 0.0f);

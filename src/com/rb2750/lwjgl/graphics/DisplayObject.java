@@ -3,15 +3,19 @@ package com.rb2750.lwjgl.graphics;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.maths.MatrixUtil;
-import com.rb2750.lwjgl.util.*;
+import com.rb2750.lwjgl.util.Location;
+import com.rb2750.lwjgl.util.OBJLoader;
+import com.rb2750.lwjgl.util.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import static org.lwjgl.opengl.GL11.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class DisplayObject {
     private VertexArray mesh;
@@ -45,6 +49,9 @@ public class DisplayObject {
     private boolean invisible = false;
     @Getter
     private Vector4f lastColor;
+    @Getter
+    @Setter
+    private boolean absoluteLocation = false;
 
     public DisplayObject(Location location, Size size, Shader shader, Vector4f baseColour) {
         this.location = location;
@@ -140,7 +147,13 @@ public class DisplayObject {
 //        System.out.println(rotation);
         shader.enable();
 //        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(Conversions.odeVec3ToVec3f(body.getPosition()), Conversions.odeQuatToQuatF(body.getQuaternion()), new Vector3f(size.getWidth(), size.getHeight(), size.getWidth())));
-        shader.setUniformMat4f("ml_matrix", MatrixUtil.transformation(new Vector3f((float) location.getX(), (float) location.getY(), layer), rotation.x, rotation.y, rotation.z, new Vector3f((float) size.getWidth(), (float) size.getHeight(), (float) size.getDepth())));
+        Matrix4f ml_matrix;
+        Vector3f location = new Vector3f(this.location.getX(), this.location.getY(), layer);
+
+        if (absoluteLocation) location.add(camera.getPosition());
+
+        ml_matrix = MatrixUtil.transformation(new Vector3f(location.x, location.y, layer), rotation.x, rotation.y, rotation.z, new Vector3f(size.getWidth(), size.getHeight(), size.getDepth()));
+        shader.setUniformMat4f("ml_matrix", ml_matrix);
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 
         if (shader != Shader.BASIC_TEX && shader != Shader.BASIC_COLOUR) {
@@ -154,6 +167,7 @@ public class DisplayObject {
         if (shader == Shader.BASIC_COLOUR) {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            shader.setBoolean("absoluteLocation", false/*absoluteLocation*/);
             shader.setUniform4f("colour", new Vector4f(baseColour).div(255, 255, 255, 255));
             shader.setUniform1f("borderSize", borderSize);
             shader.setUniform4f("borderColour", new Vector4f(borderColour).div(255, 255, 255, 255));
@@ -163,32 +177,7 @@ public class DisplayObject {
         shader.setUniform4f("clipPlane", clipPlane);
         texture.bind();
 
-//        if (borderSize != 0) {
-//            glClearStencil(0);
-//            glClear(GL_STENCIL_BUFFER_BIT);
-//
-//            glEnable(GL_STENCIL_TEST);
-//
-//            glStencilFunc(GL_ALWAYS, 1, -1);
-//            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-//
-//            mesh.render();
-//
-//            glStencilFunc(GL_NOTEQUAL, 1, -1);
-//            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-//
-////            glColor3f(0, 255, 0);
-//
-//            glLineWidth(borderSize);
-//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//        }
-
         mesh.render();
-
-//        if (borderSize != 0) {
-//            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//            glDisable(GL_STENCIL_TEST);
-//        }
 
         glDisable(GL_BLEND);
         shader.disable();

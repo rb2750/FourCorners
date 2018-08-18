@@ -98,6 +98,7 @@ public class StandardGUI extends GUI {
         basePlate.setBorderColour(new Vector4f(139, 139, 139, 255));
         basePlate.setBaseColour(new Vector4f(198, 198, 198, 255));
         basePlate.setLayer(250);
+        basePlate.setAbsoluteLocation(true);
         basePlate.size = basePlateSize;
         world.addDisplayObject(basePlate);
         objects.add(basePlate);
@@ -110,6 +111,7 @@ public class StandardGUI extends GUI {
         button.setBaseColour(new Vector4f(139, 139, 139, 255));
         button.setBorderColour(new Vector4f(85, 85, 85, 255));
         button.setLayer(300);
+        button.setAbsoluteLocation(true);
         world.addDisplayObject(button);
         objects.add(button);
         buttons.add(button);
