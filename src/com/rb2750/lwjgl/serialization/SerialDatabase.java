@@ -1,40 +1,46 @@
 package com.rb2750.lwjgl.serialization;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.rb2750.lwjgl.serialization.Serialization.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SerialDatabase
+public class SerialDatabase extends SerialBase
 {
     public static final byte[] HEADER = "RCLDB".getBytes();
+    public static final short VERSION = 0x0100;
     public static final byte CONTAINER_TYPE = SerialContainerType.DATABASE;
-    public short nameLength;
-    public byte[] name;
-    @Getter
-    private int size = HEADER.length + 1 + 2 + 4 + 4;
 
     private int objectCount;
-    private List<SerialObject> objects = new ArrayList<>();
+    public Map<String, SerialObject> objects = new HashMap<>();
 
     public SerialDatabase(String name)
     {
+        size += HEADER.length + 2 + 1 + 4;
         setName(name);
     }
 
     public static SerialDatabase deserialize(byte[] data)
     {
         int pointer = 0;
+        //assert(readString(data, pointer, HEADER.length).getBytes().equals(HEADER));
         pointer += HEADER.length;
+
+        if (readShort(data, pointer) != VERSION)
+        {
+            System.err.println("Unable to deserialize database: invalid version.");
+            return null;
+        }
+
+        pointer += 2;
 
         byte containerType = readByte(data, pointer++);
         assert(containerType == CONTAINER_TYPE);
@@ -49,8 +55,15 @@ public class SerialDatabase
         result.size = readInt(data, pointer);
         pointer += 4;
 
-        result.objectCount = readShort(data, pointer);
-        pointer += 2;
+        result.objectCount = readInt(data, pointer);
+        pointer += 4;
+
+        for (int i = 0; i < result.objectCount; i++)
+        {
+            SerialObject object = SerialObject.deserialize(data, pointer);
+            result.objects.put(object.getName(), object);
+            pointer += object.getSize();
+        }
 
         return result;
     }
@@ -74,40 +87,37 @@ public class SerialDatabase
         return deserialize(buffer);
     }
 
-    public String getName()
-    {
-        return new String(name, 0, nameLength);
-    }
-
-    public void setName(String name)
-    {
-        assert(name.length() < Short.MAX_VALUE);
-
-        if (this.name != null)
-            size -= this.name.length;
-
-        nameLength = (short)name.length();
-        this.name = name.getBytes();
-        size += nameLength;
-    }
-
     public void addObject(SerialObject object)
     {
-        objects.add(object);
+        if (objects.containsKey(object.getName()))
+            throw new IllegalArgumentException("Object " + object.getName() + " already exists in database " + getName() + ".");
+
+        objects.put(object.getName(), object);
         size += object.getSize();
         objectCount = objects.size();
+    }
+
+    public SerialObject getObject(String name)
+    {
+        SerialObject result = objects.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Database '" + getName() + "' does not contain object '" + name + "'.");
+
+        return result;
     }
 
     public int getBytes(byte[] dest, int pointer)
     {
         pointer = writeBytes(dest, pointer, HEADER);
+        pointer = writeBytes(dest, pointer, VERSION);
         pointer = writeBytes(dest, pointer, CONTAINER_TYPE);
         pointer = writeBytes(dest, pointer, nameLength);
         pointer = writeBytes(dest, pointer, name);
         pointer = writeBytes(dest, pointer, size);
 
         pointer = writeBytes(dest, pointer, objectCount);
-        for (SerialObject object : objects)
+        for (SerialObject object : objects.values())
             pointer = object.getBytes(dest, pointer);
 
         return pointer;

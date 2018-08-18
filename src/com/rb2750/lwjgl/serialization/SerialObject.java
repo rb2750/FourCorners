@@ -1,57 +1,140 @@
 package com.rb2750.lwjgl.serialization;
 
-import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.rb2750.lwjgl.serialization.Serialization.writeBytes;
+import static com.rb2750.lwjgl.serialization.Serialization.*;
 
-public class SerialObject
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class SerialObject extends SerialBase
 {
     public static final byte CONTAINER_TYPE = SerialContainerType.OBJECT;
-    public short nameLength;
-    public byte[] name;
-    @Getter
-    private int size = 1 + 2 + 4 + 4 + 4 + 4;
 
-    private List<SerialField> fields = new ArrayList<>();
-    private List<SerialString> strings = new ArrayList<>();
-    private List<SerialArray> arrays = new ArrayList<>();
+    private int fieldCount;
+    public Map<String, SerialField> fields = new HashMap<>();
+
+    private int stringCount;
+    public Map<String, SerialString> strings = new HashMap<>();
+
+    private int arrayCount;
+    public Map<String, SerialArray> arrays = new HashMap<>();
 
     public SerialObject(String name)
     {
+        size += 1 + 4 + 4 + 4;
         setName(name);
     }
 
-    public void setName(String name)
+    public static SerialObject deserialize(byte[] data, Integer pointer)
     {
-        assert(name.length() < Short.MAX_VALUE);
+        byte containerType = data[pointer++];
+        assert(containerType == CONTAINER_TYPE);
 
-        if (this.name != null)
-            size -= this.name.length;
+        SerialObject result = new SerialObject();
+        result.nameLength = readShort(data, pointer);
+        pointer += 2;
+        result.name = readString(data, pointer, result.nameLength).getBytes();
+        pointer += result.nameLength;
 
-        nameLength = (short)name.length();
-        this.name = name.getBytes();
-        size += nameLength;
+        result.size = readInt(data, pointer);
+        pointer += 4;
+
+        result.fieldCount = readInt(data, pointer);
+        pointer += 4;
+
+        for (int i = 0; i < result.fieldCount; i++)
+        {
+            SerialField field = SerialField.deserialize(data, pointer);
+            result.fields.put(field.getName(), field);
+            pointer += field.getSize();
+        }
+
+        result.stringCount = readInt(data, pointer);
+        pointer += 4;
+
+        for (int i = 0; i < result.stringCount; i++)
+        {
+            SerialString string = SerialString.deserialize(data, pointer);
+            result.strings.put(string.getName(), string);
+            pointer += string.getSize();
+        }
+
+        result.arrayCount = readInt(data, pointer);
+        pointer += 4;
+
+        for (int i = 0; i < result.arrayCount; i++)
+        {
+            SerialArray array = SerialArray.deserialize(data, pointer);
+            result.arrays.put(array.getName(), array);
+            pointer += array.getSize();
+        }
+
+        return result;
     }
 
     public void addField(SerialField field)
     {
-        fields.add(field);
+        if (fields.containsKey(field.getName()))
+            throw new IllegalArgumentException("Field '" + field.getName() + "' already exists in object '" + getName() + "'.");
+
+        fields.put(field.getName(), field);
         size += field.getSize();
+        fieldCount = fields.size();
+    }
+
+    public SerialField getField(String name)
+    {
+        SerialField result = fields.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Object '" + getName() + "' does not contain field '" + name + "'.");
+
+        return result;
     }
 
     public void addString(SerialString string)
     {
-        strings.add(string);
+        if (strings.containsKey(string.getName()))
+            throw new IllegalArgumentException("String '" + string.getName() + "' already exists in object '" + getName() + "'.");
+
+        strings.put(string.getName(), string);
         size += string.getSize();
+        stringCount = strings.size();
+    }
+
+    public SerialString getString(String name)
+    {
+        SerialString result = strings.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Object '" + getName() + "' does not contain string '" + name + "'.");
+
+        return result;
     }
 
     public void addArray(SerialArray array)
     {
-        arrays.add(array);
+        if (arrays.containsKey(array.getName()))
+            throw new IllegalArgumentException("Array '" + array.getName() + "' already exists in object '" + getName() + "'.");
+
+        arrays.put(array.getName(), array);
         size += array.getSize();
+        arrayCount = arrays.size();
+    }
+
+    public SerialArray getArray(String name)
+    {
+        SerialArray result = arrays.get(name);
+
+        if (result == null)
+            throw new IllegalArgumentException("Object '" + getName() + "' does not contain array '" + name + "'.");
+
+        return result;
     }
 
     public int getBytes(byte[] dest, int pointer)
@@ -61,16 +144,16 @@ public class SerialObject
         pointer = writeBytes(dest, pointer, name);
         pointer = writeBytes(dest, pointer, size);
 
-        pointer = writeBytes(dest, pointer, fields.size());
-        for (SerialField field : fields)
+        pointer = writeBytes(dest, pointer, fieldCount);
+        for (SerialField field : fields.values())
             pointer = field.getBytes(dest, pointer);
 
-        pointer = writeBytes(dest, pointer, strings.size());
-        for (SerialString string : strings)
+        pointer = writeBytes(dest, pointer, stringCount);
+        for (SerialString string : strings.values())
             pointer = string.getBytes(dest, pointer);
 
-        pointer = writeBytes(dest, pointer, arrays.size());
-        for (SerialArray array : arrays)
+        pointer = writeBytes(dest, pointer, arrayCount);
+        for (SerialArray array : arrays.values())
             pointer = array.getBytes(dest, pointer);
 
         return pointer;

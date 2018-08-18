@@ -1,22 +1,19 @@
 package com.rb2750.lwjgl.serialization;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import static com.rb2750.lwjgl.serialization.Serialization.*;
 
-import static com.rb2750.lwjgl.serialization.Serialization.writeBytes;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SerialString
+public class SerialString extends SerialBase
 {
     public static final byte CONTAINER_TYPE = SerialContainerType.STRING;
-    public short nameLength;
-    public byte[] name;
-    @Getter
-    public int size = 1 + 2 + 4 + 4;
+
     public int count = 0;
 
     public char[] characters;
+
+    private SerialString()
+    {
+        size += 1 + 4;
+    }
 
     public static SerialString create(String name, String data)
     {
@@ -29,16 +26,27 @@ public class SerialString
         return serialString;
     }
 
-    public void setName(String name)
+    public static SerialString deserialize(byte[] data, int pointer)
     {
-        assert(name.length() < Short.MAX_VALUE);
+        byte containerType = data[pointer++];
+        assert (containerType == CONTAINER_TYPE);
 
-        if (this.name != null)
-            size -= this.name.length;
+        SerialString result = new SerialString();
+        result.nameLength = readShort(data, pointer);
+        pointer += 2;
+        result.name = readString(data, pointer, result.nameLength).getBytes();
+        pointer += result.nameLength;
 
-        nameLength = (short)name.length();
-        this.name = name.getBytes();
-        size += nameLength;
+        result.size = readInt(data, pointer);
+        pointer += 4;
+
+        result.count = readInt(data, pointer);
+        pointer += 4;
+
+        result.characters = new char[result.count];
+        readChars(data, pointer, result.characters);
+
+        return result;
     }
 
     private void updateSize()
@@ -61,5 +69,10 @@ public class SerialString
     public int getDataSize()
     {
         return characters.length * SerialType.getSize(SerialType.CHAR);
+    }
+
+    public String getString()
+    {
+        return new String(characters);
     }
 }

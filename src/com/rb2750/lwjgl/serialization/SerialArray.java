@@ -1,19 +1,10 @@
 package com.rb2750.lwjgl.serialization;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import static com.rb2750.lwjgl.serialization.Serialization.*;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SerialArray
+public class SerialArray extends SerialBase
 {
     public static final byte CONTAINER_TYPE = SerialContainerType.ARRAY;
-    public short nameLength;
-    public byte[] name;
-    @Getter
-    public int size = 1 + 2 + 4 + 1 + 4;
     public byte type;
     public int count;
 
@@ -25,6 +16,11 @@ public class SerialArray
     public float[] floatData;
     public double[] doubleData;
     public boolean[] booleanData;
+
+    private SerialArray()
+    {
+        size += 1 + 1 + 4;
+    }
 
     private static SerialArray createArray(String name, byte type)
     {
@@ -57,7 +53,7 @@ public class SerialArray
 
     public static SerialArray createChar(String name, char[] values)
     {
-        SerialArray serialArray = createArray(name, SerialType.SHORT);
+        SerialArray serialArray = createArray(name, SerialType.CHAR);
         serialArray.count = values.length;
         serialArray.charData = values;
         serialArray.updateSize();
@@ -113,6 +109,64 @@ public class SerialArray
         serialArray.updateSize();
 
         return serialArray;
+    }
+
+    public static SerialArray deserialize(byte[] data, int pointer)
+    {
+        byte containerType = data[pointer++];
+        assert (containerType == CONTAINER_TYPE);
+
+        SerialArray result = new SerialArray();
+        result.nameLength = readShort(data, pointer);
+        pointer += 2;
+        result.name = readString(data, pointer, result.nameLength).getBytes();
+        pointer += result.nameLength;
+
+        result.size = readInt(data, pointer);
+        pointer += 4;
+
+        result.type = data[pointer++];
+
+        result.count = readInt(data, pointer);
+        pointer += 4;
+
+        switch (result.type)
+        {
+            case SerialType.BYTE:
+                result.data = new byte[result.count];
+                readBytes(data, pointer, result.data);
+                break;
+            case SerialType.SHORT:
+                result.shortData = new short[result.count];
+                readShorts(data, pointer, result.shortData);
+                break;
+            case SerialType.CHAR:
+                result.charData = new char[result.count];
+                readChars(data, pointer, result.charData);
+                break;
+            case SerialType.INTEGER:
+                result.intData = new int[result.count];
+                readInts(data, pointer, result.intData);
+                break;
+            case SerialType.LONG:
+                result.longData = new long[result.count];
+                readLongs(data, pointer, result.longData);
+                break;
+            case SerialType.FLOAT:
+                result.floatData = new float[result.count];
+                readFloats(data, pointer, result.floatData);
+                break;
+            case SerialType.DOUBLE:
+                result.doubleData = new double[result.count];
+                readDoubles(data, pointer, result.doubleData);
+                break;
+            case SerialType.BOOLEAN:
+                result.booleanData = new boolean[result.count];
+                readBooleans(data, pointer, result.booleanData);
+                break;
+        }
+
+        return result;
     }
 
     private void updateSize()
@@ -189,5 +243,74 @@ public class SerialArray
 
         assert (false);
         return 1;
+    }
+
+    public String getName()
+    {
+        return new String(name, 0, nameLength);
+    }
+
+    public byte[] getData()
+    {
+        if (type != SerialType.BYTE)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a byte array.");
+
+        return data;
+    }
+
+    public short[] getShortData()
+    {
+        if (type != SerialType.SHORT)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a short array.");
+
+        return shortData;
+    }
+
+    public char[] getCharData()
+    {
+        if (type != SerialType.CHAR)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a char array.");
+
+        return charData;
+    }
+
+    public int[] getIntegerData()
+    {
+        if (type != SerialType.INTEGER)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not an integer array.");
+
+        return intData;
+    }
+
+    public long[] getLongData()
+    {
+        if (type != SerialType.LONG)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a long array.");
+
+        return longData;
+    }
+
+    public float[] getFloatData()
+    {
+        if (type != SerialType.FLOAT)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a float array.");
+
+        return floatData;
+    }
+
+    public double[] getDoubleData()
+    {
+        if (type != SerialType.DOUBLE)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a double array.");
+
+        return doubleData;
+    }
+
+    public boolean[] getBooleanData()
+    {
+        if (type != SerialType.BOOLEAN)
+            throw new IllegalArgumentException("Array '" + getName() + "' is not a boolean array.");
+
+        return booleanData;
     }
 }
