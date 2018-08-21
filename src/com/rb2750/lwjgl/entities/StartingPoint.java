@@ -10,7 +10,7 @@ public class StartingPoint extends Tile {
         super();
 //        text = new GUIText("SP", 3, Main.instance.getFont(), new Vector2f(0.0f, 0.0f), size.getWidth() / Main.getGameWidth(), true);
         setBaseColour(new Vector4f(247, 160, 9, 100));
-        setCanInteract(false);
+        canInteract = false;
     }
 
     @Override

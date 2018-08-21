@@ -9,12 +9,15 @@ import com.rb2750.lwjgl.animations.TestAnimation;
 import com.rb2750.lwjgl.debug.Timer;
 import com.rb2750.lwjgl.entities.*;
 import com.rb2750.lwjgl.graphics.*;
+import com.rb2750.lwjgl.graphics.postprocess.WaterFrameBuffers;
 import com.rb2750.lwjgl.gui.*;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
 import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
 import com.rb2750.lwjgl.input.*;
 import com.rb2750.lwjgl.input.controllers.*;
+import com.rb2750.lwjgl.networking.client.Client;
+import com.rb2750.lwjgl.serialization.SerialDatabase;
 import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import com.rb2750.lwjgl.world.WorldManager;
@@ -104,6 +107,12 @@ public class Main implements InputListener {
 
     private void init() {
         GLFWErrorCallback.createPrint(System.err).set();
+
+        Client client = new Client("localhost", 2626);
+        client.connect();
+
+        SerialDatabase database = SerialDatabase.deserializeFromFile("test.rcl");
+        client.send(database);
 
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
@@ -421,6 +430,8 @@ public class Main implements InputListener {
         float maxUpdatesPerSecond = 60;
         float lastUpdate = 0;
 
+        player.getWorld().save("WorldSaveText.rcl");
+
         while (!glfwWindowShouldClose(handle)) {
             deltaTime = (float) (Util.getTime() - lastFrame) / 1000.0f;
             lastFrame = Util.getTime();
@@ -433,7 +444,7 @@ public class Main implements InputListener {
 
 //            camera.setPosition(new Vector3f(0, 0f, 0));
 
-            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
+            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.size.width / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.size.height / 2), 0));
             posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
@@ -640,12 +651,13 @@ public class Main implements InputListener {
         }
 
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral()) {
-            selectedObject.setInvisible(true);
-            pointer.setInvisible(true);
+            selectedObject.invisible = true;
+            pointer.invisible = true;
         } else {
-            selectedObject.setInvisible(false);
-            pointer.setInvisible(false);
+            selectedObject.invisible = false;
+            pointer.invisible = false;
         }
+
         selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
         pointer.teleport(new Location(player.getWorld(), x, y));
         if (getTileAtLocation(new Vector2f(x, y)) != null || intersectsWithEntity(new Vector2f(x, y)))
@@ -780,7 +792,7 @@ public class Main implements InputListener {
             pointer = new Circle(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
             pointer.setBaseColour(new Vector4f(150, 150, 150, 200));
             pointer.size = new Size(15, 15);
-            pointer.setLayer(50);
+            pointer.layer = 50;
             player.getWorld().addDisplayObject(pointer);
         }
         selectedObject.teleport(new Location(player.getWorld(), Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -815,8 +827,8 @@ public class Main implements InputListener {
                 runOnUIThread(() -> guiManager.displayGUI(new SelectionGUI()));
         }
 
-        if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.setInvisible(true);
-        else selectedObject.setInvisible(false);
+        if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.invisible = true;
+        else selectedObject.invisible = false;
         selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
 
         if (mouse.isLeftMouseDown()) {

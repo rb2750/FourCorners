@@ -1,6 +1,7 @@
 package com.rb2750.lwjgl.graphics;
 
 import com.rb2750.lwjgl.entities.Camera;
+import com.rb2750.lwjgl.graphics.postprocess.WaterFrameBuffers;
 import com.rb2750.lwjgl.maths.MatrixUtil;
 import com.rb2750.lwjgl.util.Util;
 import org.joml.Matrix4f;

@@ -1,18 +1,11 @@
 package com.rb2750.lwjgl.util;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.rb2750.lwjgl.serialization.SerialObject;
 
 public class Size implements Cloneable {
-    @Getter
-    @Setter
-    private float width;
-    @Getter
-    @Setter
-    private float height;
-    @Getter
-    @Setter
-    private float depth;
+    public float width;
+    public float height;
+    public float depth;
 
     public Size(float width, float height) {
         this.width = width;

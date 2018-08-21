@@ -56,12 +56,12 @@ public abstract class Animation {
         Keyframe nextFrame = frames[currentFrame + 1];
 
         if (currFrame.size != null && nextFrame.size != null) {
-            Vector2f currsize = new Vector2f(currFrame.size.getWidth(), currFrame.size.getHeight());
-            Vector2f nextsize = new Vector2f(nextFrame.size.getWidth(), nextFrame.size.getHeight());
+            Vector2f currsize = new Vector2f(currFrame.size.width, currFrame.size.height);
+            Vector2f nextsize = new Vector2f(nextFrame.size.width, nextFrame.size.height);
 
             Vector2f newSize = new Vector2f(currsize).lerp(new Vector2f(nextsize), lerpAmount);
 
-            Vector2f oldSize = new Vector2f(entity.getSize().getWidth(), entity.getSize().getHeight());
+            Vector2f oldSize = new Vector2f(entity.size.width, entity.size.height);
 
             if (entity.setSize(new Size(newSize.x, newSize.y))) {
                 if (!entity.move(new Location(entity.getLocation().asVector().sub(new Vector2f(newSize).sub(oldSize).mul(0.5f).x, 0)).setWorld(entity.getWorld())))
@@ -86,7 +86,7 @@ public abstract class Animation {
 
         //entity.move(original.getLocation());
         entity.setRotation(original.getRotation());
-        entity.setSize(original.getSize());
+        entity.setSize(original.size);
     }
 
     public void Pause() {

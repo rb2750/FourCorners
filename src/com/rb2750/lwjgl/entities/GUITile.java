@@ -9,7 +9,7 @@ public class GUITile extends Entity {
     public GUITile() {
         super(new Size(100, 100, 100), Shader.BASIC_COLOUR, new Vector4f(180, 0.0f, 0.0f, 255.0f));
 
-        setAbsoluteLocation(true);
+        absoluteLocation = true;
 
         vertices = new float[]{
                 -0.5f, 0.5f, -0.5f,
@@ -88,7 +88,7 @@ public class GUITile extends Entity {
 
         normals = calcNormals();
 
-        setLayer(-120f);
+        layer = -120f;
 
         this.texturePath = "res/textures/red.png";
         createMesh();
