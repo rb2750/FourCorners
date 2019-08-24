@@ -2,6 +2,7 @@ package com.rb2750.lwjgl.entities;
 
 import com.rb2750.lwjgl.graphics.DisplayObject;
 import com.rb2750.lwjgl.graphics.Shader;
+import com.rb2750.lwjgl.serialization.SerialObject;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
 import org.joml.Vector3f;
@@ -13,5 +14,12 @@ public class Circle extends DisplayObject {
 
         this.texturePath = "res/textures/red.png";
         createMesh("res/models/circle.obj");
+    }
+
+    @Override
+    public SerialObject serialize(String name)
+    {
+        // TODO
+        return null;
     }
 }

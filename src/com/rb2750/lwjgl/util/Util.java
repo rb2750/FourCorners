@@ -104,7 +104,7 @@ public class Util {
     }
 
     public static Rectangle2D getRectangle(Location location, Size size) {
-        return new Rectangle2D.Double(location.getX(), location.getY(), size.getWidth(), size.getHeight());
+        return new Rectangle2D.Double(location.getX(), location.getY(), size.width, size.height);
     }
 
     public static Rectangle2D getRectangle(Location location, double width, double height) {
@@ -112,7 +112,7 @@ public class Util {
     }
 
     public static Rectangle2D getRectangle(double x, double y, Size size) {
-        return new Rectangle2D.Double(x, y, size.getWidth(), size.getHeight());
+        return new Rectangle2D.Double(x, y, size.width, size.height);
     }
 
     private static double clamp(double x, double lower, double upper) {

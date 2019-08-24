@@ -24,7 +24,7 @@ public class Player extends Entity implements InputListener {
 
     public Player(Location location) {
         super(location, new Size(100, 100), Shader.BASIC_TEX, new Vector4f(0.0f, 0.0f, 255.0f, 255.0f));
-        setGravity(true);
+        gravity = true;
 
         InputManager.registerInputListener(this);
 
@@ -132,7 +132,7 @@ public class Player extends Entity implements InputListener {
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
-        getAcceleration().x = (float) (speed * state.getAnalogStick().x());
+        acceleration.x = (float) (speed * state.getAnalogStick().x());
 
         if (!animationExists(SquatAnimation.class)) {
             if (state.isXHeld() && !last.isXHeld()) addAnimation(new SquatAnimation());
@@ -143,21 +143,20 @@ public class Player extends Entity implements InputListener {
 
         //Let's assume the squash animation 'sticks them to the ground' here.
         //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
-        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && (getAcceleration().y >= 0 || !doubleJump) && getAcceleration().y <= 21) {
+        if (state.isAHeld() && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && (acceleration.y >= 0 || !doubleJump) && acceleration.y <= 21) {
             if (!doubleJump && jumping && !onGround() && !last.isAHeld()) {
                 doubleJump = true;
                 jumping = false;
                 addAnimation(new FlipAnimation());
             } else if (!onGround()) return;
             else jumping = true;
-            getAcceleration().y = 21;
+            acceleration.y = 21;
         }
     }
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
-//        getBody().translate(new Vector2(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0));
-//        getBody().applyForce(new Vector2(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0));
+        acceleration.x = keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0;
 
         location.add(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0);
 
@@ -171,15 +170,14 @@ public class Player extends Entity implements InputListener {
 
         //Let's assume the squash animation 'sticks them to the ground' here.
         //Let's also stop them from jumping while squatting because hey, that's pretty stupid.
-        if (keyboard.isKeyDown(GLFW_KEY_SPACE) && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && getAcceleration().y >= 0 && getAcceleration().y <= 21) {
+        if (keyboard.isKeyDown(GLFW_KEY_SPACE) && !animationExists(SquashAnimation.class) && !animationExists(SquatAnimation.class) && acceleration.y >= 0 && acceleration.y <= 21) {
             if (!doubleJump && jumping && !onGround() && !keyboard.wasKeyDown(GLFW_KEY_SPACE)) {
                 doubleJump = true;
                 jumping = false;
                 addAnimation(new FlipAnimation());
             } else if (!onGround()) return;
             else jumping = true;
-            getAcceleration().y = 21;
-//            getBody().applyForce(new Vector2(0, 21));
+            acceleration.y = 21;
         }
     }
 

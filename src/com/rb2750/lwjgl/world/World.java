@@ -4,8 +4,13 @@ import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.graphics.*;
-import com.rb2750.lwjgl.world.collisions.StandardCollision;
+import com.rb2750.lwjgl.serialization.SerialDatabase;
+import com.rb2750.lwjgl.serialization.SerialField;
+import com.rb2750.lwjgl.serialization.SerialObject;
+import com.rb2750.lwjgl.util.Util;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.dyn4j.geometry.Vector2;
 import org.joml.Vector3f;
@@ -15,6 +20,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class World {
     @Getter
     private List<Entity> entities = new ArrayList<>();
@@ -121,7 +127,7 @@ public class World {
     }
 
     private void handleGravity(Entity entity) {
-        if (!entity.isGravity()) return;
+        if (!entity.gravity) return;
 
         if (entity.getLocation().getY() > 0) {
             entity.getAcceleration().y = (float) (entity.getAcceleration().y - settings.getGravity());
@@ -143,7 +149,7 @@ public class World {
         List<Entity> interactionEntities = new ArrayList<>(entities);
         for (Entity[] tiles : worldTiles)
             for (Entity tile : tiles)
-                if (tile != null && !tile.isInvisible())
+                if (tile != null && !tile.invisible)
                     interactionEntities.add(tile);
         return interactionEntities;
     }
@@ -158,13 +164,60 @@ public class World {
             float x = Math.max(entity.getLocation().getX() + entity.getAcceleration().x, 0);
             float y = Math.max(entity.getLocation().getY() + entity.getAcceleration().y, 0);
 
-            if (!entity.isCanInteract()) {
+            if (!entity.canInteract) {
                 entity.getLocation().setX(x);
                 entity.getLocation().setY(y);
                 return;
             }
 
 
+            if (entity.getAcceleration().x != 0 && ((interact = intersects(entity, entity.getRectangle())) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.size))) == null)) {
+                if (interact != null && entity.getAcceleration().x >= 0 && entity.size.height < interact.size.height) {
+                    entity.getLocation().setX((float) Util.getNearestPointInPerimeter(interact.getRectangle(), x, y).getX() - entity.size.width); //TODO FIX
+                } else {
+                    entity.getLocation().setX(x);
+                    entity.interactingWithX = null;
+                }
+            } else {
+                /*
+                  Handle steps
+                 */
+
+                if (interactingWithX != null && interactingWithX.getLocation().getY() + interactingWithX.size.height - entity.getLocation().getY() < 60 && entity.onGround() && entity.move(entity.getLocation().clone().setY(interactingWithX.getLocation().getY() + interactingWithX.size.height))) {
+                    skipY = true;
+                } else {
+                    entity.interactingWithX = interactingWithX;
+                    if (!updateInteractEvents(entity)) entity.getLocation().setX(x);
+                    else if (interactingWithX != null) {
+                        float pointX = (float) Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
+                        if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.size.width;
+                        entity.getLocation().setX(pointX);
+                    }
+                }
+            }
+
+            if (!skipY) {
+                Entity interactingWithY = null;
+
+                if (entity.getAcceleration().y != 0 && (interactingWithY = intersects(entity, Util.getRectangle(entity.getRectangle().getX(), y, entity.size))) == null) {
+                    entity.getLocation().setY(y);
+                    entity.interactingWithY = null;
+                } else {
+                    entity.interactingWithY = interactingWithY;
+                    updateInteractEvents(entity);
+//                    if (!updateInteractEvents(entity)) {
+//                        entity.getLocation().setY(y);
+                    /*} else */if (interactingWithY != null) {
+                        float pointY = (float) Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
+                        if (pointY == interactingWithY.getRectangle().getY())
+                            pointY -= entity.size.height;
+                        entity.getLocation().setY(pointY);
+                        if (entity.getAcceleration().y < -25) entity.addAnimation(new SquashAnimation());
+                        if (entity.getAcceleration().y < 0 || entity.getLocation().getY() + entity.size.height <= interactingWithY.getLocation().getY() && entity.getAcceleration().y > 0)
+                            entity.getAcceleration().y = 0;
+                    }
+                }
+            }
         }
     }
 
@@ -176,16 +229,16 @@ public class World {
      */
     public boolean updateInteractEvents(Entity entity) {
         boolean denyInteraction = false;
-        if (entity.getInteractingWithX() != null || entity.getInteractingWithY() != null) {
-            if (entity.onInteract(entity.getInteractingWithX(), entity.getInteractingWithY()))
+        if (entity.interactingWithX != null || entity.interactingWithY != null) {
+            if (entity.onInteract(entity.interactingWithX, entity.interactingWithY))
                 denyInteraction = true;
-            if (entity.getInteractingWithX() != null && entity.getInteractingWithX().equals(entity.getInteractingWithY())) {
-                if (entity.getInteractingWithX().onInteract(entity, entity)) denyInteraction = true;
+            if (entity.interactingWithX != null && entity.interactingWithX.equals(entity.interactingWithY)) {
+                if (entity.interactingWithX.onInteract(entity, entity)) denyInteraction = true;
             } else {
-                if (entity.getInteractingWithX() != null)
-                    if (entity.getInteractingWithX().onInteract(entity, null)) denyInteraction = true;
-                if (entity.getInteractingWithY() != null)
-                    if (entity.getInteractingWithY().onInteract(null, entity)) denyInteraction = true;
+                if (entity.interactingWithX != null)
+                    if (entity.interactingWithX.onInteract(entity, null)) denyInteraction = true;
+                if (entity.interactingWithY != null)
+                    if (entity.interactingWithY.onInteract(null, entity)) denyInteraction = true;
             }
         }
         return denyInteraction;
@@ -196,11 +249,11 @@ public class World {
 
         for (Entity[] tiles : worldTiles)
             for (Entity tile : tiles)
-                if (tile != null && !tile.isInvisible())
+                if (tile != null && !tile.invisible)
                     renderObject(tile, camera, clipPlane);
-        for (Entity entity : entities) if (!entity.isInvisible()) renderObject(entity, camera, clipPlane);
+        for (Entity entity : entities) if (!entity.invisible) renderObject(entity, camera, clipPlane);
         for (DisplayObject object : displayObjects)
-            if (!object.isInvisible()) renderObject(object, camera, clipPlane);
+            if (!object.invisible) renderObject(object, camera, clipPlane);
     }
 
     private void prepareShaders() {
@@ -273,7 +326,7 @@ public class World {
 
     public Entity intersects(Entity e, Rectangle2D rect) {
         for (Entity entity : getInteractionEntities()) {
-            if (e == entity || !entity.isCanInteract()) continue;
+            if (e == entity || !entity.canInteract) continue;
             if (entity.getRectangle().intersects(rect)) {
                 return entity;
             }
@@ -285,5 +338,85 @@ public class World {
 //        space.collide(null, nearCallback);
 //        physicsWorld.quickStep(deltaTime);
         handleEntities();
+    }
+
+    public SerialDatabase serialize(String name)
+    {
+        SerialDatabase result = new SerialDatabase(name);
+
+        int it = 1;
+
+        for (Entity entity : entities)
+        {
+            result.addObject(entity.serialize("E" + it));
+            it++;
+        }
+
+        for (int i = 0; i < worldTiles.length; i++)
+        {
+            for (int j = 0; j < worldTiles[i].length; j++)
+            {
+                if (worldTiles[i][j] == null)
+                    break;
+
+                result.addObject(worldTiles[i][j].serialize("T " + i + " " + j));
+            }
+        }
+
+        SerialObject ambientLightObject = new SerialObject("AL");
+
+        ambientLightObject.addField(SerialField.createFloat("R", ambientLight.x));
+        ambientLightObject.addField(SerialField.createFloat("G", ambientLight.y));
+        ambientLightObject.addField(SerialField.createFloat("B", ambientLight.z));
+
+        result.addObject(ambientLightObject);
+
+        if (directionalLight != null)
+            result.addObject(directionalLight.serialize("DL"));
+
+        it = 1;
+
+        for (PointLight pointLight : pointLights)
+        {
+            result.addObject(pointLight.serialize("PL" + it));
+            it++;
+        }
+
+        it = 1;
+
+        for (SpotLight spotLight : spotLights)
+        {
+            result.addObject(spotLight.serialize("SL" + it));
+            it++;
+        }
+
+        SerialObject worldSettings = new SerialObject("Settings");
+
+        worldSettings.addField(SerialField.createInteger("Width", settings.getWorldWidth()));
+        worldSettings.addField(SerialField.createInteger("Height", settings.getWorldHeight()));
+        worldSettings.addField(SerialField.createFloat("Gravity", settings.getGravity()));
+        worldSettings.addField(SerialField.createFloat("FrictionG", settings.getFrictionGround()));
+        worldSettings.addField(SerialField.createFloat("FrictionA", settings.getFrictionAir()));
+
+        result.addObject(worldSettings);
+
+        return result;
+    }
+
+    public void save(String path)
+    {
+        serialize("WorldSave").serializeToFile(path);
+    }
+
+    public static World deserialize(SerialDatabase database)
+    {
+        World result = new World();
+
+        for (SerialObject object : database.objects.values())
+        {
+
+        }
+
+        return result;
     }
 }

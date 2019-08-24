@@ -10,7 +10,7 @@ public class FlipAnimation extends Animation {
 
     @Override
     public Keyframe[] getKeyFrames(Entity entity) {
-        int facing = entity == null ? 1 : entity.getFacing();
+        int facing = entity == null ? 1 : entity.facing;
 
         return new Keyframe[]{
                 new Keyframe(null, new Vector3f(0, 0, 90 * facing), null, false),

@@ -3,18 +3,11 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.DisplayObject;
 import com.rb2750.lwjgl.graphics.Shader;
-import com.rb2750.lwjgl.util.Direction;
-import com.rb2750.lwjgl.util.Location;
-import com.rb2750.lwjgl.util.Size;
-import com.rb2750.lwjgl.util.Util;
+import com.rb2750.lwjgl.serialization.SerialObject;
+import com.rb2750.lwjgl.util.*;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
-import lombok.Setter;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.geometry.MassType;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -22,31 +15,18 @@ import java.util.List;
 
 public abstract class Entity extends DisplayObject implements Cloneable {
     @Getter
-    @Setter
-    private Vector2f acceleration = new Vector2f(0, 0);
-    @Getter
-    @Setter
-    private boolean gravity = false;
-    @Getter
-    @Setter
-    private Entity interactingWithX = null;
-    @Getter
-    @Setter
-    private Entity interactingWithY = null;
-    @Getter
-    @Setter
-    private int facing = Direction.RIGHT;
+    protected Vector2f acceleration = new Vector2f(0, 0);
+    public boolean gravity = false;
+    public Entity interactingWithX = null;
+    public Entity interactingWithY = null;
+    public int facing = Direction.RIGHT;
     @Getter
     private java.util.List<Animation> animations = new ArrayList<>();
     private List<Animation> pendingAnimations = new ArrayList<>();
-    @Getter
-    @Setter
-    private boolean squat = false;
+    public boolean squat = false;
     private Size originalSize;
     private Vector3f originalRotation;
-    @Getter
-    @Setter
-    private boolean canInteract = true;
+    public boolean canInteract = true;
 
     Entity(Size size, Shader shader, Vector4f baseColour) {
         super(size, shader, baseColour);
@@ -88,7 +68,7 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      */
     private boolean canMove(Location location) {
         if (location == null) return false;
-        return location.getWorld().intersects(this, Util.getRectangle(location, getSize())) == null && location.getY() >= 0 && location.getX() >= 0;
+        return location.getWorld().intersects(this, Util.getRectangle(location, size)) == null && location.getY() >= 0 && location.getX() >= 0;
     }
 
     /**
@@ -152,6 +132,36 @@ public abstract class Entity extends DisplayObject implements Cloneable {
 //            }
 //        }
 
+            if (intersectsWith != null) {
+                boolean left = intersectsWith.getLocation().getX() + intersectsWith.size.width <= getLocation().getX();
+                boolean right = intersectsWith.getLocation().getX() <= getLocation().getX() + size.width;
+                boolean top = intersectsWith.getLocation().getY() <= getLocation().getY() + size.height && intersectsWith.getLocation().getY() > getLocation().getY();
+
+//                if (top && !left && !right)
+//                    return false;
+
+                Location moveTo = null;
+
+                if (left)
+                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() + intersectsWith.size.width + size.width, getLocation().getY());
+                if (right)
+                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() - size.width - 1, getLocation().getY());
+                if (top) {
+                    this.size.height = intersectsWith.getLocation().getY() - this.location.getY();
+                    System.out.println(this.size.height);
+//                    return false;
+                }
+
+                if (moveTo != null) {
+                    Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
+
+                    if (intersects == null && this.location.asVector().distance(moveTo.asVector()) < 15)
+                        this.location = moveTo;
+                    else return false;
+                }
+            }
+        }
+
         this.size = size;
         return true;
     }
@@ -162,7 +172,7 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      * @return Is the entity on the ground
      */
     public boolean onGround() {
-        return getLocation().getY() <= 0 || (interactingWithY != null && interactingWithY.getLocation().getY() + interactingWithY.getSize().getHeight() <= getLocation().getY());
+        return getLocation().getY() <= 0 || (interactingWithY != null && interactingWithY.getLocation().getY() + interactingWithY.size.height <= getLocation().getY());
     }
 
     /**
@@ -171,7 +181,7 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      * @return the entity Rectangle2D
      */
     public Rectangle2D getRectangle() {
-        return Util.getRectangle(getLocation(), getSize());
+        return Util.getRectangle(getLocation(), size);
     }
 
     /**
@@ -187,8 +197,8 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      * The update function of the entity. Should be called every frame
      */
     public void update() {
-        if (getAcceleration().x < 0) setFacing(Direction.LEFT);
-        if (getAcceleration().x > 0) setFacing(Direction.RIGHT);
+        if (acceleration.x < 0) facing = Direction.LEFT;
+        if (acceleration.x > 0) facing = Direction.RIGHT;
 //        body.setPosition(location.getX(), location.getY(), layer);
 //        body.setRotation(Conversions.mat4fToOdeMat3f(MatrixUtil.rotate(rotation.x, rotation.y, -rotation.z)));
         handleAnimations();
@@ -202,6 +212,16 @@ public abstract class Entity extends DisplayObject implements Cloneable {
 //                if (interactingWithY != null) interactingWithY.onInteract(null, this);
 //            }
 //        }
+    }
+
+    /**
+     * Updates entity from a {@link SerialObject}. Used for networking. Should be called whenever a serial object is
+     * available.
+     * @param object {@link SerialObject} to update entity from.
+     */
+    public void update(SerialObject object)
+    {
+
     }
 
     /**
@@ -313,5 +333,13 @@ public abstract class Entity extends DisplayObject implements Cloneable {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public SerialObject serialize(String name)
+    {
+        SerialObject result = super.serialize(name);
+
+        return result;
     }
 }

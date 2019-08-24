@@ -47,9 +47,9 @@ public class SelectionGUI extends GUI {
         if (selector == null) {
             selector = new Circle(new Location(world, circleLocation.x, circleLocation.y));
             selector.setBaseColour(new Vector4f(150, 150, 150, 200));
-            selector.setAbsoluteLocation(true);
+            selector.absoluteLocation = true;
             selector.size = new Size(15, 15);
-            selector.setLayer(2000);
+            selector.layer = 2000;
             world.addDisplayObject(selector);
         }
         selector.teleport(new Location(world, selectorLocation));
@@ -77,17 +77,17 @@ public class SelectionGUI extends GUI {
 
         Vector2f base = new Vector2f((float) (circleRadius * Math.sin(Math.toRadians(angle))), (float) (circleRadius * Math.cos(Math.toRadians(angle))));
         base.mul(0.6f);
-        base.x -= object.size.getWidth() / 2;
-        base.y -= object.size.getHeight() / 2;
+        base.x -= object.size.width / 2;
+        base.y -= object.size.height / 2;
 
         object.teleport(circleLoc.clone().add(base.x, base.y));
-        Circle circle = new Circle(object.getLocation().clone().add(object.size.getWidth() / 2f, object.size.getHeight() / 2f));
+        Circle circle = new Circle(object.getLocation().clone().add(object.size.width / 2f, object.size.height / 2f));
         circle.size = object.size.clone().subtract(new Size(12, 12));
         circle.setBaseColour(new Vector4f(defaultColor).sub(20, 20, 20, 0));
-        circle.setLayer(120);
-        circle.setAbsoluteLocation(true);
-        object.setLayer(130);
-        object.setAbsoluteLocation(true);
+        circle.layer = 120;
+        circle.absoluteLocation = true;
+        object.layer = 130;
+        object.absoluteLocation = true;
         world.addDisplayObject(object);
         world.addDisplayObject(circle);
         misc.add(circle);
@@ -97,9 +97,9 @@ public class SelectionGUI extends GUI {
     private void addSector(World world, Vector2f location, int zrot, int index) {
         CircularSector sector = new CircularSector(new Location(world, location.x, location.y), defaultColor);
         sector.size = new Size(circleRadius, circleRadius);
-        sector.setAbsoluteLocation(true);
+        sector.absoluteLocation = true;
         sector.rotate(new Vector3f(0, 0, zrot));
-        sector.setLayer(100);
+        sector.layer = 100;
         sectors[index] = sector;
         world.addDisplayObject(sector);
     }
@@ -127,7 +127,7 @@ public class SelectionGUI extends GUI {
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-        Main.selectedObject.setLayer(-40f);
+        Main.selectedObject.layer = -40f;
         Main.selectedObject.getBaseColour().w = 100;
         Main.instance.getPlayer().getWorld().addDisplayObject(Main.selectedObject);
         selectedSection = section;

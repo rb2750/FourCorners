@@ -1,4 +1,4 @@
-package com.rb2750.lwjgl.graphics;
+package com.rb2750.lwjgl.graphics.postprocess;
 
 import com.rb2750.lwjgl.Main;
 import lombok.Getter;

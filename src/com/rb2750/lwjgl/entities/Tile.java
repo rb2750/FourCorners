@@ -87,7 +87,7 @@ public class Tile extends Entity {
 
         normals = calcNormals();
 
-        setLayer(-120f);
+        layer = -120f;
 
         this.texturePath = "res/textures/red.png";
         createMesh();

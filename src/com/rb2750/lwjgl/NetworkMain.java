@@ -1,36 +1,18 @@
 package com.rb2750.lwjgl;
 
+import com.rb2750.lwjgl.networking.client.Client;
+import com.rb2750.lwjgl.networking.server.Server;
 import com.rb2750.lwjgl.serialization.*;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Random;
 
 public class NetworkMain
 {
     private static Random random = new Random();
-
-    private static void printBytes(byte[] data)
-    {
-        for (int i = 0; i < data.length; i++)
-        {
-            System.out.printf("0x%x ", data[i]);
-        }
-    }
-
-    private static void saveToFile(String path, byte[] data)
-    {
-        try
-        {
-            BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
-            stream.write(data);
-            stream.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
 
     public static void serializationTest()
     {
@@ -63,9 +45,7 @@ public class NetworkMain
         database.addObject(new SerialObject("A good object 3"));
         database.addObject(new SerialObject("A good object 4"));
 
-        byte[] stream = new byte[database.getSize()];
-        database.getBytes(stream, 0);
-        saveToFile("test.rcl", stream);
+        database.serializeToFile("test.rcl");
     }
 
     public static void deserializationTest()
@@ -101,7 +81,22 @@ public class NetworkMain
 
     public static void main(String[] args)
     {
-        serializationTest();
-        deserializationTest();
+        Server server = new Server(2626);
+        server.start();
+
+        InetAddress address = null;
+
+        try
+        {
+            address = InetAddress.getByName("localhost");
+        }
+        catch (UnknownHostException e)
+        {
+            e.printStackTrace();
+        }
+
+        int port = 8192;
+        //server.send(new byte[] {0, 1, 2}, address, port);
+
     }
 }

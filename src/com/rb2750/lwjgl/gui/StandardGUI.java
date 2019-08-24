@@ -36,8 +36,8 @@ public class StandardGUI extends GUI {
     @Override
     void draw(World world) {
         if (basePlateSize == null) basePlateSize = new Size(Main.getGameWidth() / 5f, Main.getGameHeight() / 2f, 1);
-        sideSpacing = basePlateSize.getWidth() / 8f;
-        buttonSize.setWidth(basePlateSize.getWidth() - (sideSpacing * 2));
+        sideSpacing = basePlateSize.width / 8f;
+        buttonSize.width = basePlateSize.width - (sideSpacing * 2);
 
         if (basePlate == null) createBasePlate(world);
 
@@ -48,9 +48,9 @@ public class StandardGUI extends GUI {
 
             float buttonHeight = 0;
 
-            for (DisplayObject button : buttons) buttonHeight += button.getSize().getHeight();
+            for (DisplayObject button : buttons) buttonHeight += button.size.height;
 
-            basePlateSize.setHeight((sideSpacing * 2) + buttonHeight + (buttonSpacing * (buttons.size() - 1)));
+            basePlateSize.height = (sideSpacing * 2) + buttonHeight + (buttonSpacing * (buttons.size() - 1));
 
             basePlate.size = basePlateSize;
             updateBasePlateLocation(world);
@@ -62,13 +62,13 @@ public class StandardGUI extends GUI {
             if (i == buttons.size() - 1 - selectedOption) {
                 buttons.get(i).setBaseColour(new Vector4f(50, 205, 50, 255));
             } else buttons.get(i).setBaseColour(new Vector4f(139, 139, 139, 255));
-            button.setBorderColour(new Vector4f(button.getBaseColour().x - 40, button.getBaseColour().y - 40, button.getBaseColour().z - 40, 255));
+            button.borderColour = new Vector4f(button.getBaseColour().x - 40, button.getBaseColour().y - 40, button.getBaseColour().z - 40, 255);
         }
     }
 
     private void updateBasePlateLocation(World world) {
         basePlateLocation = new Vector2f(Main.getGameWidth() / 2f, Main.getGameHeight() / 2f);
-        basePlateLocation.sub(new Vector2f(basePlateSize.getWidth(), basePlateSize.getHeight()).mul(0.5f));
+        basePlateLocation.sub(new Vector2f(basePlateSize.width, basePlateSize.height).mul(0.5f));
         basePlate.teleport(new Location(world, basePlateLocation));
     }
 
@@ -87,18 +87,18 @@ public class StandardGUI extends GUI {
 //            button.size = buttonSize;
             button.teleport(new Location(world, new Vector2f(basePlateLocation).add(sideSpacing, sideSpacing + buttonHeight + (buttonSpacing * buttonNumber))));
             text.get(buttonNumber).setPosition(button.getLocation().asVector().add(0, 5)/*sub(0, button.getSize().getHeight() / 2f)*/.mul(1f / Main.getGameWidth(), 1f / Main.getGameHeight()));
-            buttonHeight += button.getSize().getHeight();
+            buttonHeight += button.size.height;
             buttonNumber += 1;
         }
     }
 
     private void createBasePlate(World world) {
         basePlate = new Tile(new Location(world, basePlateLocation.x, basePlateLocation.y));
-        basePlate.setBorderSize(0.008f);
-        basePlate.setBorderColour(new Vector4f(139, 139, 139, 255));
+        basePlate.borderSize = 0.008f;
+        basePlate.borderColour = new Vector4f(139, 139, 139, 255);
         basePlate.setBaseColour(new Vector4f(198, 198, 198, 255));
-        basePlate.setLayer(250);
-        basePlate.setAbsoluteLocation(true);
+        basePlate.layer = 250;
+        basePlate.absoluteLocation = true;
         basePlate.size = basePlateSize;
         world.addDisplayObject(basePlate);
         objects.add(basePlate);
@@ -107,16 +107,16 @@ public class StandardGUI extends GUI {
     private void addOption(World world, String option) {
         Tile button = new Tile(new Location(world, new Vector2f(0, 0)));
         button.size = buttonSize;
-        button.setBorderSize(0.015f);
+        button.borderSize = 0.015f;
         button.setBaseColour(new Vector4f(139, 139, 139, 255));
-        button.setBorderColour(new Vector4f(85, 85, 85, 255));
-        button.setLayer(300);
-        button.setAbsoluteLocation(true);
+        button.borderColour = new Vector4f(85, 85, 85, 255);
+        button.layer = 300;
+        button.absoluteLocation = true;
         world.addDisplayObject(button);
         objects.add(button);
         buttons.add(button);
 
-        text.add(new GUIText(option, 2, Main.instance.getFont(), new Vector2f(0.0f, 0.0f), button.size.getWidth() / Main.getGameWidth(), true));
+        text.add(new GUIText(option, 2, Main.instance.getFont(), new Vector2f(0.0f, 0.0f), button.size.width / Main.getGameWidth(), true));
     }
 
     private void close() {

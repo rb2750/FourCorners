@@ -3,6 +3,11 @@ package com.rb2750.lwjgl.graphics;
 import com.rb2750.lwjgl.Main;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.maths.MatrixUtil;
+import com.rb2750.lwjgl.networking.client.Client;
+import com.rb2750.lwjgl.networking.server.Server;
+import com.rb2750.lwjgl.serialization.SerialDatabase;
+import com.rb2750.lwjgl.serialization.SerialField;
+import com.rb2750.lwjgl.serialization.SerialObject;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.OBJLoader;
 import com.rb2750.lwjgl.util.Size;
@@ -18,7 +23,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class DisplayObject {
+public abstract class DisplayObject {
     private VertexArray mesh;
     @Getter
     protected Texture texture;
@@ -28,26 +33,17 @@ public class DisplayObject {
     protected int[] indices;
     protected float[] tcs;
     protected float[] normals;
-    @Getter
-    @Setter
-    protected float layer = 0.0f;
+    public float layer = 0.0f;
     @Getter
     protected Vector4f baseColour;
     @Getter
     protected Location location;
-    @Getter
     public Size size;
     @Getter
-    protected Vector3f rotation = new Vector3f(0, 0, 0);
-    @Getter
-    @Setter
-    private float borderSize = 0;
-    @Getter
-    @Setter
-    private Vector4f borderColour = new Vector4f();
-    @Getter
-    @Setter
-    private boolean invisible = false;
+    private Vector3f rotation = new Vector3f(0, 0, 0);
+    public float borderSize = 0;
+    public Vector4f borderColour = new Vector4f();
+    public boolean invisible = false;
     @Getter
     private Vector4f lastColor;
     @Getter
@@ -223,7 +219,7 @@ public class DisplayObject {
     /**
      * Create new mesh from an obj file
      *
-     * @param filePath Path to the obj tile
+     * @param filePath Path to the obj file
      */
     protected void createMesh(String filePath) {
         Main.instance.runOnUIThread(() -> {
@@ -231,5 +227,53 @@ public class DisplayObject {
             texture = new Texture(texturePath);
             texture.setReflectivity(0.5f);
         });
+    }
+
+    /**
+     * Serializes {@link DisplayObject} with all its details.
+     * @param name Name that should be given to the {@link SerialObject}.
+     * @return {@link SerialObject} prepared to be put into a {@link SerialDatabase}.
+     * @see SerialDatabase
+     * @see SerialObject
+     */
+    public SerialObject serialize(String name)
+    {
+        SerialObject result = new SerialObject(name);
+
+        result.addField(SerialField.createFloat("X", location.getX()));
+        result.addField(SerialField.createFloat("Y", location.getY()));
+
+        result.addField(SerialField.createFloat("W", size.width));
+        result.addField(SerialField.createFloat("H", size.height));
+        result.addField(SerialField.createFloat("D", size.depth));
+
+        result.addField(SerialField.createFloat("RX", rotation.x));
+        result.addField(SerialField.createFloat("RY", rotation.y));
+        result.addField(SerialField.createFloat("RZ", rotation.z));
+
+        return result;
+    }
+
+//    /**
+//     * Serializes {@link DisplayObject} with limited details. Useful for networking where not all details are necessary.
+//     * @param name Name that should be given to the {@link SerialObject}.
+//     * @return {@link SerialObject} prepared to be put into a {@link SerialDatabase}.
+//     * @see SerialDatabase
+//     * @see SerialObject
+//     * @see Client
+//     * @see Server
+//     */
+//    public SerialObject serializeForNetwork(String name)
+//    {
+//        SerialObject result = new SerialObject(name);
+//
+//        // TODO
+//
+//        return result;
+//    }
+
+    protected void deserialize(SerialObject object)
+    {
+        // TODO
     }
 }

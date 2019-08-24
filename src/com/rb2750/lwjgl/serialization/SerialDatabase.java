@@ -3,8 +3,7 @@ package com.rb2750.lwjgl.serialization;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,7 @@ import static com.rb2750.lwjgl.serialization.Serialization.*;
 public class SerialDatabase extends SerialBase
 {
     public static final byte[] HEADER = "RCLDB".getBytes();
+    public static final String HEADER_STRING = new String(HEADER);
     public static final short VERSION = 0x0100;
     public static final byte CONTAINER_TYPE = SerialContainerType.DATABASE;
 
@@ -36,7 +36,7 @@ public class SerialDatabase extends SerialBase
 
         if (readShort(data, pointer) != VERSION)
         {
-            System.err.println("Unable to deserialize database: invalid version.");
+            System.err.println("[SerialDatabase] Unable to deserialize database: invalid version.");
             return null;
         }
 
@@ -85,6 +85,24 @@ public class SerialDatabase extends SerialBase
         }
 
         return deserialize(buffer);
+    }
+
+    public void serializeToFile(String path)
+    {
+        byte[] data = new byte[getSize()];
+
+        getBytes(data, 0);
+
+        try
+        {
+            BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
+            stream.write(data);
+            stream.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public void addObject(SerialObject object)

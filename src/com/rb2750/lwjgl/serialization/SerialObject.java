@@ -137,6 +137,31 @@ public class SerialObject extends SerialBase
         return result;
     }
 
+    /**
+     * Combines this SerialObject with the given SerialObject.
+     * @param object SerialObject to combine from.
+     * @return This SerialObject.
+     */
+    public SerialObject combineObject(SerialObject object)
+    {
+        for (SerialField field : object.fields.values())
+        {
+            addField(field);
+        }
+
+        for (SerialString string : object.strings.values())
+        {
+            addString(string);
+        }
+
+        for (SerialArray array : object.arrays.values())
+        {
+            addArray(array);
+        }
+
+        return this;
+    }
+
     public int getBytes(byte[] dest, int pointer)
     {
         pointer = writeBytes(dest, pointer, CONTAINER_TYPE);
