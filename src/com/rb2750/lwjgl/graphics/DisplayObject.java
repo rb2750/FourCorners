@@ -8,6 +8,7 @@ import com.rb2750.lwjgl.util.OBJLoader;
 import com.rb2750.lwjgl.util.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.dyn4j.dynamics.Body;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -52,6 +53,9 @@ public class DisplayObject {
     @Getter
     @Setter
     private boolean absoluteLocation = false;
+    @Getter
+    @Setter
+    protected Body body;
 
     public DisplayObject(Location location, Size size, Shader shader, Vector4f baseColour) {
         this.location = location;
@@ -78,6 +82,7 @@ public class DisplayObject {
      * @param location Location to move to
      */
     public void teleport(Location location) {
+        if (body != null) body.translate(location.getX(), location.getY());
         this.location = location;
     }
 
@@ -152,7 +157,10 @@ public class DisplayObject {
 
         if (absoluteLocation) location.add(camera.getPosition());
 
-        ml_matrix = MatrixUtil.transformation(new Vector3f(location.x, location.y, layer), rotation.x, rotation.y, rotation.z, new Vector3f(size.getWidth(), size.getHeight(), size.getDepth()));
+//        if (body != null)
+//            ml_matrix = MatrixUtil.transformation(new Vector3f((float) body.getTransform().getTranslationX(), (float) body.getTransform().getTranslationY(), layer), 0, 0, (float) body.getTransform().getRotation(), new Vector3f(size.getWidth(), size.getHeight(), size.getDepth()));
+//        else
+            ml_matrix = MatrixUtil.transformation(new Vector3f(location.x, location.y, layer), rotation.x, rotation.y, rotation.z, new Vector3f(size.getWidth(), size.getHeight(), size.getDepth()));
         shader.setUniformMat4f("ml_matrix", ml_matrix);
         shader.setUniformMat4f("vw_matrix", MatrixUtil.view(camera));
 

@@ -11,6 +11,8 @@ import com.rb2750.lwjgl.input.controllers.Keyboard;
 import com.rb2750.lwjgl.input.controllers.Mouse;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.Vector2;
 import org.joml.Vector4f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -110,6 +112,8 @@ public class Player extends Entity implements InputListener {
         texturePath = "res/textures/blue.png";
 
         createMesh();
+
+        body.addFixture(Geometry.createSquare(getSize().getWidth()));
 //        createMesh("res/models/newplayer.obj");
     }
 
@@ -152,7 +156,10 @@ public class Player extends Entity implements InputListener {
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
-        getAcceleration().x = keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0;
+//        getBody().translate(new Vector2(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0));
+//        getBody().applyForce(new Vector2(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0));
+
+        location.add(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0);
 
         if (!animationExists(SquatAnimation.class)) {
             if (keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT) && !keyboard.wasKeyDown(GLFW_KEY_LEFT_SHIFT))
@@ -172,6 +179,7 @@ public class Player extends Entity implements InputListener {
             } else if (!onGround()) return;
             else jumping = true;
             getAcceleration().y = 21;
+//            getBody().applyForce(new Vector2(0, 21));
         }
     }
 

@@ -4,9 +4,10 @@ import com.rb2750.lwjgl.animations.SquashAnimation;
 import com.rb2750.lwjgl.entities.Camera;
 import com.rb2750.lwjgl.entities.Entity;
 import com.rb2750.lwjgl.graphics.*;
-import com.rb2750.lwjgl.util.Util;
+import com.rb2750.lwjgl.world.collisions.StandardCollision;
 import lombok.Getter;
 import lombok.Setter;
+import org.dyn4j.geometry.Vector2;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -23,6 +24,8 @@ public class World {
     private List<DisplayObject> displayObjects = new ArrayList<>();
     @Getter
     private WorldSettings settings;
+    @Getter
+    private org.dyn4j.dynamics.World physicsWorld;
 
 //    @Getter
 //    private DSpace space;
@@ -40,6 +43,8 @@ public class World {
     public World(WorldSettings settings) {
         this.settings = settings;
         worldTiles = new Entity[settings.getWorldWidth()][settings.getWorldHeight()];
+        physicsWorld = new org.dyn4j.dynamics.World();
+        physicsWorld.setGravity(new Vector2(0, -1));
 
 //        physicsWorld = OdeHelper.createWorld();
 //        physicsWorld.setGravity(0, 0, 0);
@@ -84,6 +89,9 @@ public class World {
 
     public void addEntity(Entity entity) {
         entities.add(entity);
+//        if (entity.getBody() == null || physicsWorld.getBodies().contains(entity.getBody())) return;
+//        physicsWorld.addBody(entity.getBody());
+//        physicsWorld.addListener(new StandardCollision(entity.getBody()));
     }
 
     public void addDisplayObject(DisplayObject object) {
@@ -147,7 +155,6 @@ public class World {
 
             entity.update();
 
-            boolean skipY = false;
             float x = Math.max(entity.getLocation().getX() + entity.getAcceleration().x, 0);
             float y = Math.max(entity.getLocation().getY() + entity.getAcceleration().y, 0);
 
@@ -157,56 +164,7 @@ public class World {
                 return;
             }
 
-            Entity interactingWithX = null;
-            Entity interact;
 
-            if (entity.getAcceleration().x != 0 && ((interact = intersects(entity, entity.getRectangle())) != null || (interactingWithX = intersects(entity, Util.getRectangle(x, entity.getRectangle().getY(), entity.getSize()))) == null)) {
-                if (interact != null && entity.getAcceleration().x >= 0 && entity.size.getHeight() < interact.size.getHeight()) {
-                    entity.getLocation().setX((float) Util.getNearestPointInPerimeter(interact.getRectangle(), x, y).getX() - entity.getSize().getWidth()); //TODO FIX
-                } else {
-                    entity.getLocation().setX(x);
-                    entity.setInteractingWithX(null);
-                }
-            } else {
-                /*
-                  Handle steps
-                 */
-
-                if (interactingWithX != null && interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight() - entity.getLocation().getY() < 60 && entity.onGround() && entity.move(entity.getLocation().clone().setY(interactingWithX.getLocation().getY() + interactingWithX.getSize().getHeight()))) {
-                    skipY = true;
-                } else {
-                    entity.setInteractingWithX(interactingWithX);
-                    if (!updateInteractEvents(entity)) entity.getLocation().setX(x);
-                    else if (interactingWithX != null) {
-                        float pointX = (float) Util.getNearestPointInPerimeter(interactingWithX.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getX();
-                        if (pointX == interactingWithX.getRectangle().getX()) pointX -= entity.getSize().getWidth();
-                        entity.getLocation().setX(pointX);
-                    }
-                }
-            }
-
-            if (!skipY) {
-                Entity interactingWithY = null;
-
-                if (entity.getAcceleration().y != 0 && (interactingWithY = intersects(entity, Util.getRectangle(entity.getRectangle().getX(), y, entity.getSize()))) == null) {
-                    entity.getLocation().setY(y);
-                    entity.setInteractingWithY(null);
-                } else {
-                    entity.setInteractingWithY(interactingWithY);
-                    updateInteractEvents(entity);
-//                    if (!updateInteractEvents(entity)) {
-//                        entity.getLocation().setY(y);
-                    /*} else */if (interactingWithY != null) {
-                        float pointY = (float) Util.getNearestPointInPerimeter(interactingWithY.getRectangle(), entity.getLocation().getX(), entity.getLocation().getY()).getY();
-                        if (pointY == interactingWithY.getRectangle().getY())
-                            pointY -= entity.getSize().getHeight();
-                        entity.getLocation().setY(pointY);
-                        if (entity.getAcceleration().y < -25) entity.addAnimation(new SquashAnimation());
-                        if (entity.getAcceleration().y < 0 || entity.getLocation().getY() + entity.size.getHeight() <= interactingWithY.getLocation().getY() && entity.getAcceleration().y > 0)
-                            entity.getAcceleration().y = 0;
-                    }
-                }
-            }
         }
     }
 

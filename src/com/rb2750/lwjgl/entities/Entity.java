@@ -3,11 +3,18 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.DisplayObject;
 import com.rb2750.lwjgl.graphics.Shader;
-import com.rb2750.lwjgl.util.*;
+import com.rb2750.lwjgl.util.Direction;
+import com.rb2750.lwjgl.util.Location;
+import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
 import lombok.Setter;
-import org.joml.*;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.MassType;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -43,6 +50,9 @@ public abstract class Entity extends DisplayObject implements Cloneable {
 
     Entity(Size size, Shader shader, Vector4f baseColour) {
         super(size, shader, baseColour);
+
+        body = new Body();
+        body.setMass(MassType.NORMAL);
 
 //        body = OdeHelper.createBody(location.getWorld().getPhysicsWorld());
 //        body.setPosition(location.getX(), location.getY(), layer);
@@ -109,38 +119,38 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      * @return Was the size of the entity changed
      */
     public boolean setSize(Size size, boolean force) {
-        if (!force) {
-            Entity intersectsWith = location.getWorld().intersects(this, Util.getRectangle(getLocation(), size));
-
-            if (intersectsWith != null) {
-                boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
-                boolean right = intersectsWith.getLocation().getX() <= getLocation().getX() + size.getWidth();
-                boolean top = intersectsWith.getLocation().getY() <= getLocation().getY() + size.getHeight() && intersectsWith.getLocation().getY() > getLocation().getY();
-
-//                if (top && !left && !right)
-//                    return false;
-
-                Location moveTo = null;
-
-                if (left)
-                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() + size.getWidth(), getLocation().getY());
-                if (right)
-                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() - size.getWidth() - 1, getLocation().getY());
-                if (top) {
-                    this.size.setHeight(intersectsWith.getLocation().getY() - this.location.getY());
-                    System.out.println(this.size.getHeight());
-//                    return false;
-                }
-
-                if (moveTo != null) {
-                    Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
-
-                    if (intersects == null && this.location.asVector().distance(moveTo.asVector()) < 15)
-                        this.location = moveTo;
-                    else return false;
-                }
-            }
-        }
+//        if (!force) {
+//            Entity intersectsWith = location.getWorld().intersects(this, Util.getRectangle(getLocation(), size));
+//
+//            if (intersectsWith != null) {
+//                boolean left = intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() <= getLocation().getX();
+//                boolean right = intersectsWith.getLocation().getX() <= getLocation().getX() + size.getWidth();
+//                boolean top = intersectsWith.getLocation().getY() <= getLocation().getY() + size.getHeight() && intersectsWith.getLocation().getY() > getLocation().getY();
+//
+////                if (top && !left && !right)
+////                    return false;
+//
+//                Location moveTo = null;
+//
+//                if (left)
+//                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() + intersectsWith.getSize().getWidth() + size.getWidth(), getLocation().getY());
+//                if (right)
+//                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() - size.getWidth() - 1, getLocation().getY());
+//                if (top) {
+//                    this.size.setHeight(intersectsWith.getLocation().getY() - this.location.getY());
+//                    System.out.println(this.size.getHeight());
+////                    return false;
+//                }
+//
+//                if (moveTo != null) {
+//                    Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
+//
+//                    if (intersects == null && this.location.asVector().distance(moveTo.asVector()) < 15)
+//                        this.location = moveTo;
+//                    else return false;
+//                }
+//            }
+//        }
 
         this.size = size;
         return true;
@@ -196,7 +206,8 @@ public abstract class Entity extends DisplayObject implements Cloneable {
 
     /**
      * Called whenever another entity interacts with the current one
-     *  @param x The entity that is interacting with it on the x axis
+     *
+     * @param x The entity that is interacting with it on the x axis
      * @param y The entity that is interacting with it on the y axis
      */
     public boolean onInteract(Entity x, Entity y) {

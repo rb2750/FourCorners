@@ -135,6 +135,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.dyn4j</groupId>
+            <artifactId>dyn4j</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.strikerx3</groupId>
             <artifactId>jxinput</artifactId>
             <version>ca55984</version>    <!-- JXInput 0.8 -->

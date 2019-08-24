@@ -1,6 +1,9 @@
 package com.rb2750.lwjgl;
 
-import com.ivan.xinput.*;
+import com.ivan.xinput.XInputButtons;
+import com.ivan.xinput.XInputComponents;
+import com.ivan.xinput.XInputDevice;
+import com.ivan.xinput.XInputDevice14;
 import com.ivan.xinput.enums.XInputButton;
 import com.ivan.xinput.exceptions.XInputNotLoadedException;
 import com.ivan.xinput.listener.SimpleXInputDeviceListener;
@@ -13,34 +16,50 @@ import com.rb2750.lwjgl.gui.*;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
 import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
-import com.rb2750.lwjgl.input.*;
-import com.rb2750.lwjgl.input.controllers.*;
-import com.rb2750.lwjgl.util.*;
+import com.rb2750.lwjgl.input.InputListener;
+import com.rb2750.lwjgl.input.InputManager;
+import com.rb2750.lwjgl.input.XInputState;
+import com.rb2750.lwjgl.input.controllers.Controller;
+import com.rb2750.lwjgl.input.controllers.Keyboard;
+import com.rb2750.lwjgl.input.controllers.Mouse;
+import com.rb2750.lwjgl.util.Location;
+import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Sync;
+import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
 import com.rb2750.lwjgl.world.WorldManager;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.Version;
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.*;
-import org.lwjgl.glfw.*;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFWWindowFocusCallback;
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL30.GL_CLIP_DISTANCE0;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.lang.Math;
 import java.nio.IntBuffer;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Stack;
+
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL30.GL_CLIP_DISTANCE0;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Main implements InputListener {
     public static Main instance;
@@ -433,7 +452,7 @@ public class Main implements InputListener {
 
 //            camera.setPosition(new Vector3f(0, 0f, 0));
 
-            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
+            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float) gameWidth / 2.0f) + (player.getSize().getWidth() / 2), player.getLocation().getY() - ((float) gameHeight / 2.0f) + (player.getSize().getHeight() / 2), 0));
             posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
@@ -740,6 +759,7 @@ public class Main implements InputListener {
 
     private void tryPlaceObject(float objectX, float objectY, Size size, Vector3f rotation) {
         Vector2f location = new Vector2f(objectX, objectY);
+        if (location.x < 0 || location.y < 0) return;
 
         Entity newObject = null;
         try {
@@ -755,7 +775,6 @@ public class Main implements InputListener {
 
         Vector2f tileLocation = asGridLocation(location);
 
-
         player.getWorld().getWorldTiles()[(int) tileLocation.x][(int) tileLocation.y] = newObject;
     }
 
@@ -768,6 +787,7 @@ public class Main implements InputListener {
         }
 
         player.getWorld().addEntity(player);
+        player.teleport(new Location(player.getWorld(), 0, 0));
     }
 
     private void tryCreateSelectyObject() {

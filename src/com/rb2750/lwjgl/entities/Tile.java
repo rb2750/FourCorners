@@ -3,6 +3,7 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
+import org.dyn4j.geometry.Geometry;
 import org.joml.Vector4f;
 
 public class Tile extends Entity {
@@ -90,6 +91,8 @@ public class Tile extends Entity {
 
         this.texturePath = "res/textures/red.png";
         createMesh();
+
+        body.addFixture(Geometry.createSquare(getSize().getWidth()));
     }
 
     public Tile(Location location) {
