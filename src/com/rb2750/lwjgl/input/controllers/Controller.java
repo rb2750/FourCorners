@@ -188,9 +188,9 @@ public class Controller {
     }
 
     public Controller updateLastXInput() {
-        analogLeft = new Analog2D(XInputState.getAxes().lx, XInputState.getAxes().ly);
-        analogRight = new Analog2D(XInputState.getAxes().rx, XInputState.getAxes().ry);
-        analogStick = new Analog2D(XInputState.getAxes().lx, XInputState.getAxes().ly);
+        analogLeft = new Analog2D(XInputState.getAxes().lx, XInputState.getPrevAxes().ly);
+        analogRight = new Analog2D(XInputState.getAxes().rx, XInputState.getPrevAxes().ry);
+        analogStick = new Analog2D(XInputState.getAxes().lx, XInputState.getPrevAxes().ly);
         aHeld = XInputState.getFromPrevious(XInputButton.A);
         bHeld = XInputState.getFromPrevious(XInputButton.B);
         xHeld = XInputState.getFromPrevious(XInputButton.X);

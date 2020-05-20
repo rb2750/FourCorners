@@ -128,9 +128,11 @@ public class StandardGUI extends GUI {
         if (state.isHomeHeld() && !last.isHomeHeld() || state.isBHeld() && !last.isBHeld())
             close();
 
+
+
         if (last.getAnalogStick().y() == 0 && !buttons.isEmpty()) {
-            if (state.getAnalogStick().y() > 0) selectedOption -= 1;
-            if (state.getAnalogStick().y() < 0) selectedOption += 1;
+            if (state.getAnalogLeft().y() > 0) selectedOption -= 1;
+            if (state.getAnalogLeft().y() < 0) selectedOption += 1;
             if (selectedOption < 0) selectedOption = buttons.size() - 1;
             selectedOption %= buttons.size();
         }
