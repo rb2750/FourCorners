@@ -60,9 +60,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.GL_CLIP_DISTANCE0;
-import static org.lwjgl.opengl.GL43.nglDebugMessageControl;
-import static org.lwjgl.opengl.GL43C.GL_DEBUG_SEVERITY_NOTIFICATION;
-import static org.lwjgl.opengl.GL43C.GL_DEBUG_TYPE_OTHER;
+import static org.lwjgl.opengl.GL43.*;
 import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SOURCE_API;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -138,34 +136,13 @@ public class Main implements InputListener {
 
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        // Create the handle
-        handle = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
+        setupGLWindow();
 
         if (handle == NULL)
             throw new RuntimeException("Failed to create the GLFW handle");
 
-        try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
-            glfwGetWindowSize(handle, pWidth, pHeight);
-            // Get the resolution of the primary monitor
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-            // Center the handle
-            assert vidmode != null;
-            glfwSetWindowPos(
-                    handle,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
-        }
+        setupGLResolution();
 
         glfwMakeContextCurrent(handle);
 
@@ -193,11 +170,64 @@ public class Main implements InputListener {
         currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
         //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
 
+        setupShaders();
+
+        WorldManager.createDefaultWorld();
+
+        World world = WorldManager.getWorlds().get(0);
+
+        player = new Player(new Location(world, 0, 0));
+        world.addEntity(player);
+
+        directionalLight = new DirectionalLight(new Light(new Vector3f(1, 1, 1), 0.8f),
+                new Vector3f(1, 1, 1));
+
+        InputManager.registerInputListener(this);
+        inputManager.Setup();
+
+        TextMaster.init();
+
+        //Disables nvidia debug messages
+        nglDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, false);
+
+        displayDebugText();
+        loadWorld();
+    }
+
+    private void setupGLWindow() {
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        // Create the handle
+        handle = glfwCreateWindow(gameWidth, gameHeight, "LWJGL Test", NULL, NULL);
+    }
+
+    private void setupGLResolution() {
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer pWidth = stack.mallocInt(1);
+            IntBuffer pHeight = stack.mallocInt(1);
+            glfwGetWindowSize(handle, pWidth, pHeight);
+            // Get the resolution of the primary monitor
+            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+            // Center the handle
+            assert vidmode != null;
+            glfwSetWindowPos(
+                    handle,
+                    (vidmode.width() - pWidth.get(0)) / 2,
+                    (vidmode.height() - pHeight.get(0)) / 2
+            );
+        }
+    }
+
+    private void setupShaders() {
         Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.GENERAL.disable();
 
-//        Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
-//        Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
         Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
         Shader.WATER.setUniform1f("nearPlane", ORTHO_FAR_PLANE);
 
@@ -213,42 +243,12 @@ public class Main implements InputListener {
 
         Shader.BASIC_COLOUR.setUniformMat4f("pr_matrix", currentProjMatrix);
         Shader.BASIC_COLOUR.disable();
+    }
 
-        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
-
-        WorldManager.createDefaultWorld();
-
-        World world = WorldManager.getWorlds().get(0);
-
-        player = new Player(new Location(world, 0, 0));
-        world.addEntity(player);
-
-        directionalLight = new DirectionalLight(new Light(new Vector3f(1, 1, 1), 0.8f),
-                new Vector3f(1, 1, 1));
-
-        //world.setDirectionalLight(directionalLight);
-//        world.addPointLight(new PointLight(new Light(new Vector3f(1, 0, 0), 0.8f),
-//                new Attenution(0, 0, 1),
-//                new Vector3f(-2, 0, 5), 6.0f));
-//        world.addPointLight(new PointLight(new Light(new Vector3f(0, 0, 1), 0.8f),
-//                new Attenution(0, 0, 1),
-//                new Vector3f(2, 0, 7), 6.0f));
-
-        InputManager.registerInputListener(this);
-        inputManager.Setup();
-
-        TextMaster.init();
-        nglDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, false);
-
+    private void displayDebugText() {
         font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
-//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
-//        text.setColour(1, 1, 0);
         fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
         posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
-
-        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
-
-        loadWorld();
     }
 
     private Stack<Runnable> toRun = new Stack<>();
@@ -264,44 +264,36 @@ public class Main implements InputListener {
     @Getter
     private Camera camera;
 
+    private void updateShaders() {
+        Shader.WATER.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
+        Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
+        Shader.WATER.disable();
+        Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.GENERAL.disable();
+        Shader.BASIC_TEX.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.BASIC_TEX.disable();
+        Shader.BASIC_COLOUR.setUniformMat4f("pr_matrix", currentProjMatrix);
+        Shader.BASIC_COLOUR.disable();
+    }
+
     private void loop() {
-
-
         glfwSetWindowSizeCallback(handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
                 gameWidth = width;
                 gameHeight = height;
                 glViewport(0, 0, width, height);
-//                Shader.GENERAL.setUniformMat4f("pr_matrix", new Matrix4f().ortho(0, gameWidth, 0, gameHeight, -1, 1));
-//                System.out.println("AR: " + ((float) gameWidth / (float) gameHeight));
                 currentProjMatrix = new Matrix4f().ortho(0, gameWidth, 0, gameHeight, ORTHO_NEAR_PLANE, ORTHO_FAR_PLANE);
-                //  currentProjMatrix = new Matrix4f().perspective(70.0f, (float) gameWidth / (float) gameHeight, PERSP_NEAR_PLANE, PERSP_FAR_PLANE);
-//                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
-//                Shader.GENERAL.disable();
-                Shader.WATER.setUniformMat4f("pr_matrix", currentProjMatrix);
-//                Shader.WATER.setUniform1f("nearPlane", PERSP_NEAR_PLANE);
-//                Shader.WATER.setUniform1f("farPlane", PERSP_FAR_PLANE);
-                Shader.WATER.setUniform1f("nearPlane", ORTHO_NEAR_PLANE);
-                Shader.WATER.setUniform1f("farPlane", ORTHO_FAR_PLANE);
-                Shader.WATER.disable();
-                Shader.GENERAL.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.GENERAL.disable();
-                Shader.BASIC_TEX.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.BASIC_TEX.disable();
-                Shader.BASIC_COLOUR.setUniformMat4f("pr_matrix", currentProjMatrix);
-                Shader.BASIC_COLOUR.disable();
+
+                updateShaders();
 
                 TextMaster.cleanUp();
 
                 guiManager.hideGUI(player.getWorld());
 
 
-                font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
-//        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
-//        text.setColour(1, 1, 0);
-                fpsText = new GUIText("", 1, font, new Vector2f(0.0f, 0.0f), 1f, false);
-                posText = new GUIText("", 1, font, new Vector2f(0.85f, 0f), 1f, false);
+                displayDebugText();
 
                 loadWorld();
             }
@@ -687,7 +679,7 @@ public class Main implements InputListener {
 
         selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
         pointer.teleport(new Location(player.getWorld(), x, y));
-        if (getTileAtLocation(new Vector2f(x, y)) != null || intersectsWithEntity(new Vector2f(x, y)))
+        if (getTileAtLocation(new Vector2f(x, y)) != null || intersectsWithEntity(new Vector2f(x, y)) || x < 0 || y < 0)
             pointer.setBaseColour(new Vector4f(255, 0, 0, 255));
         else pointer.setBaseColour(new Vector4f(0, 255, 0, 200));
 
@@ -779,6 +771,9 @@ public class Main implements InputListener {
 
     private void tryPlaceObject(float objectX, float objectY, Size size, Vector3f rotation) {
         Vector2f location = new Vector2f(objectX, objectY);
+        Vector2f tileLocation = asGridLocation(location);
+
+        if (tileLocation.x < 0 || tileLocation.y < 0) return;
 
         Entity newObject = null;
         try {
@@ -791,8 +786,6 @@ public class Main implements InputListener {
         newObject.setRotation(rotation);
 
         if (getTileAtLocation(location) != null || intersectsWithEntity(location)) return;
-
-        Vector2f tileLocation = asGridLocation(location);
 
 
         player.getWorld().getWorldTiles()[(int) tileLocation.x][(int) tileLocation.y] = newObject;
