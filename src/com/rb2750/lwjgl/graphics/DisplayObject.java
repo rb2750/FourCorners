@@ -38,6 +38,7 @@ public abstract class DisplayObject {
     protected Vector4f baseColour;
     @Getter
     protected Location location;
+    @Getter
     public Size size;
     @Getter
     private Vector3f rotation = new Vector3f(0, 0, 0);
@@ -48,7 +49,7 @@ public abstract class DisplayObject {
     private Vector4f lastColor;
     @Getter
     @Setter
-    private boolean absoluteLocation = false;
+    public boolean absoluteLocation = false;
     @Getter
     @Setter
     protected Body body;

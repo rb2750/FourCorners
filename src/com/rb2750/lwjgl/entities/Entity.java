@@ -4,10 +4,17 @@ import com.rb2750.lwjgl.animations.Animation;
 import com.rb2750.lwjgl.graphics.DisplayObject;
 import com.rb2750.lwjgl.graphics.Shader;
 import com.rb2750.lwjgl.serialization.SerialObject;
-import com.rb2750.lwjgl.util.*;
+import com.rb2750.lwjgl.util.Direction;
+import com.rb2750.lwjgl.util.Location;
+import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
 import lombok.Getter;
-import org.joml.*;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.MassType;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -132,33 +139,32 @@ public abstract class Entity extends DisplayObject implements Cloneable {
 //            }
 //        }
 
-            if (intersectsWith != null) {
-                boolean left = intersectsWith.getLocation().getX() + intersectsWith.size.width <= getLocation().getX();
-                boolean right = intersectsWith.getLocation().getX() <= getLocation().getX() + size.width;
-                boolean top = intersectsWith.getLocation().getY() <= getLocation().getY() + size.height && intersectsWith.getLocation().getY() > getLocation().getY();
+        if (interactingWithX != null || interactingWithY != null) {
+            boolean left = interactingWithX != null && interactingWithX.getLocation().getX() + interactingWithX.size.width <= getLocation().getX();
+            boolean right = interactingWithX != null && interactingWithX.getLocation().getX() <= getLocation().getX() + size.width;
+            boolean top = interactingWithY != null && (interactingWithY.getLocation().getY() <= getLocation().getY() + size.height && interactingWithY.getLocation().getY() > getLocation().getY());
 
 //                if (top && !left && !right)
 //                    return false;
 
-                Location moveTo = null;
+            Location moveTo = null;
 
-                if (left)
-                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() + intersectsWith.size.width + size.width, getLocation().getY());
-                if (right)
-                    moveTo = new Location(getWorld(), intersectsWith.getLocation().getX() - size.width - 1, getLocation().getY());
-                if (top) {
-                    this.size.height = intersectsWith.getLocation().getY() - this.location.getY();
-                    System.out.println(this.size.height);
+            if (left)
+                moveTo = new Location(getWorld(), interactingWithX.getLocation().getX() + interactingWithX.size.width + size.width, getLocation().getY());
+            if (right)
+                moveTo = new Location(getWorld(), interactingWithX.getLocation().getX() - size.width - 1, getLocation().getY());
+            if (top) {
+                this.size.height = interactingWithY.getLocation().getY() - this.location.getY();
+                System.out.println(this.size.height);
 //                    return false;
-                }
+            }
 
-                if (moveTo != null) {
-                    Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
+            if (moveTo != null) {
+                Entity intersects = location.getWorld().intersects(this, Util.getRectangle(moveTo, size));
 
-                    if (intersects == null && this.location.asVector().distance(moveTo.asVector()) < 15)
-                        this.location = moveTo;
-                    else return false;
-                }
+                if (intersects == null && this.location.asVector().distance(moveTo.asVector()) < 15)
+                    this.location = moveTo;
+                else return false;
             }
         }
 
@@ -217,10 +223,10 @@ public abstract class Entity extends DisplayObject implements Cloneable {
     /**
      * Updates entity from a {@link SerialObject}. Used for networking. Should be called whenever a serial object is
      * available.
+     *
      * @param object {@link SerialObject} to update entity from.
      */
-    public void update(SerialObject object)
-    {
+    public void update(SerialObject object) {
 
     }
 
@@ -336,8 +342,7 @@ public abstract class Entity extends DisplayObject implements Cloneable {
     }
 
     @Override
-    public SerialObject serialize(String name)
-    {
+    public SerialObject serialize(String name) {
         SerialObject result = super.serialize(name);
 
         return result;
