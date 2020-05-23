@@ -130,9 +130,12 @@ public class Player extends Entity implements InputListener {
         if (onGround()) doubleJump = false;
     }
 
+    boolean controller = false;
+
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         acceleration.x = (float) (speed * state.getAnalogStick().x());
+        controller = true;
 
         if (!animationExists(SquatAnimation.class)) {
             if (state.isXHeld() && !last.isXHeld()) addAnimation(new SquatAnimation());
@@ -156,6 +159,7 @@ public class Player extends Entity implements InputListener {
 
     @Override
     public void handleKeyboardInput(Keyboard keyboard) {
+        if (acceleration.x != 0 && controller) return;
         acceleration.x = keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0;
 
         location.add(keyboard.isKeyDown(GLFW_KEY_RIGHT) || keyboard.isKeyDown(GLFW_KEY_D) ? speed : keyboard.isKeyDown(GLFW_KEY_LEFT) || keyboard.isKeyDown(GLFW_KEY_A) ? -speed : 0, 0);

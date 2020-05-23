@@ -139,7 +139,11 @@ public class SelectionGUI extends GUI {
 
     @Override
     public void handleControllerInput(Controller state, Controller last) {
-        if (state.isBHeld() && !last.isBHeld() || !state.isLeftPadTouched()) hide();
+        if (!state.isYHeld()/* && !last.isHeld() || !state.isLeftPadTouched()*/) {
+            select();
+            hide();
+        }
+//        if (state.isBHeld() && !last.isBHeld() || !state.isLeftPadTouched()) hide();
 
         float selectorX = (float) (circleRadius * state.getAnalogLeft().x() + circleLocation.x);
         float selectorY = (float) (circleRadius * state.getAnalogLeft().y() + circleLocation.y);

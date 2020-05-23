@@ -17,11 +17,17 @@ import com.rb2750.lwjgl.gui.*;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.FontType;
 import com.rb2750.lwjgl.gui.fonts.fontcreator.GUIText;
 import com.rb2750.lwjgl.gui.fonts.fontrenderer.TextMaster;
-import com.rb2750.lwjgl.input.*;
-import com.rb2750.lwjgl.input.controllers.*;
+import com.rb2750.lwjgl.input.InputListener;
+import com.rb2750.lwjgl.input.InputManager;
+import com.rb2750.lwjgl.input.XInputState;
+import com.rb2750.lwjgl.input.controllers.Controller;
+import com.rb2750.lwjgl.input.controllers.Keyboard;
+import com.rb2750.lwjgl.input.controllers.Mouse;
 import com.rb2750.lwjgl.networking.client.Client;
-import com.rb2750.lwjgl.serialization.SerialDatabase;
-import com.rb2750.lwjgl.util.*;
+import com.rb2750.lwjgl.util.Location;
+import com.rb2750.lwjgl.util.Size;
+import com.rb2750.lwjgl.util.Sync;
+import com.rb2750.lwjgl.util.Util;
 import com.rb2750.lwjgl.world.World;
 import com.rb2750.lwjgl.world.WorldManager;
 import lombok.Getter;
@@ -54,6 +60,10 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.GL_CLIP_DISTANCE0;
+import static org.lwjgl.opengl.GL43.nglDebugMessageControl;
+import static org.lwjgl.opengl.GL43C.GL_DEBUG_SEVERITY_NOTIFICATION;
+import static org.lwjgl.opengl.GL43C.GL_DEBUG_TYPE_OTHER;
+import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SOURCE_API;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -123,12 +133,11 @@ public class Main implements InputListener {
         Client client = new Client("localhost", 2626);
         client.connect();
 
-        SerialDatabase database = SerialDatabase.deserializeFromFile("test.rcl");
-        client.send(database);
+//        SerialDatabase database = SerialDatabase.deserializeFromFile("test.rcl");
+//        client.send(database);
 
         if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
-
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -229,6 +238,7 @@ public class Main implements InputListener {
         inputManager.Setup();
 
         TextMaster.init();
+        nglDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, false);
 
         font = new FontType(new Texture("res/fonts/calibriHR.png").getTexture(), new File("res/fonts/calibriHR.fnt"));
 //        GUIText text = new GUIText("The quick brown fox jumps over the lazy dog.", 2, font, new Vector2f(0.0f, 0.0f), 1f, true);
@@ -456,7 +466,7 @@ public class Main implements InputListener {
 
 //            camera.setPosition(new Vector3f(0, 0f, 0));
 
-            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float)gameWidth / 2.0f) + (player.size.width / 2), player.getLocation().getY() - ((float)gameHeight / 2.0f) + (player.size.height / 2), 0));
+            camera.setPosition(new Vector3f(player.getLocation().getX() - ((float) gameWidth / 2.0f) + (player.size.width / 2), player.getLocation().getY() - ((float) gameHeight / 2.0f) + (player.size.height / 2), 0));
             posText.setText("X: " + (int) player.getLocation().getX() + " Y: " + (int) player.getLocation().getY());
 
             //camera.setPosition(new Vector3f(camera.getPosition().x, camera.getPosition().y + 0.5f, camera.getPosition().z + 0.5f));
@@ -477,19 +487,19 @@ public class Main implements InputListener {
             if (xInputDevice != null) {
                 if (xInputDevice instanceof XInputDevice14) {
                     if (XInputState.getAxes() == null)
-                        XInputState.setAxes(((XInputDevice14) xInputDevice).getComponents().getAxes(), 0.23f, 0.23f);
+                        XInputState.setAxes(((XInputDevice14) xInputDevice).getComponents().getAxes(), /*0.23f*/0.1f, /*0.23f*/0.1f);
 
                     if (((XInputDevice14) xInputDevice).poll()) {
                         XInputComponents components = ((XInputDevice14) xInputDevice).getComponents();
                         XInputButtons buttons = components.getButtons();
-                        XInputState.setAxes(components.getAxes(), 0.23f, 0.23f);
+                        XInputState.setAxes(components.getAxes(), /*0.23f*/0.1f, /*0.23f*/0.1f);
 
                         if (XInputDevice14.isGuideButtonSupported()) {
                             XInputState.setButton(XInputButton.GUIDE_BUTTON, buttons.guide);
                         }
                     }
 
-                    //((XInputDevice14) xInputDevice).setVibration(20000, 20000);
+//                    ((XInputDevice14) xInputDevice).setVibration(20000, 20000);
                 } else {
                     if (XInputState.getAxes() == null)
                         XInputState.setAxes(((XInputDevice) xInputDevice).getComponents().getAxes(), 0.23f, 0.23f);
@@ -640,6 +650,8 @@ public class Main implements InputListener {
         return new Vector2f((float) Math.floor(location.x / gridSize), (float) Math.floor(location.y / gridSize));
     }
 
+    boolean usingControllerMouse = false;
+
     @Override
     public void handleControllerInput(Controller state, Controller last) {
         double halfGameWidth = gameWidth / 2f;
@@ -662,10 +674,13 @@ public class Main implements InputListener {
             removeEntityAtLocation(location);
         }
 
+        selectedObject.setSize(size, true);
         if (!state.isRightPadTouched() || state.getAnalogRight().isNeutral()) {
             selectedObject.invisible = true;
             pointer.invisible = true;
+            usingControllerMouse = false;
         } else {
+            usingControllerMouse = true;
             selectedObject.invisible = false;
             pointer.invisible = false;
         }
@@ -677,14 +692,14 @@ public class Main implements InputListener {
         else pointer.setBaseColour(new Vector4f(0, 255, 0, 200));
 
         runOnUIThread(() -> {
-            if (state.isRightPadPressed() || state.getRightTrigger() == 1)
+            if (state.isRightPadPressed() || state.getRightTrigger() > 0)
                 tryPlaceObject(location.x, location.y, size, rot);
 
-            if (state.isLeftPadTouched()) {
+            if (state.isYHeld() && !last.isYHeld()) {
                 if (guiManager.getDisplayedGUI() == null) guiManager.displayGUI(new SelectionGUI());
-            } else if (guiManager.getDisplayedGUI() instanceof SelectionGUI) guiManager.hideGUI(player.getWorld());
+            } //else if (guiManager.getDisplayedGUI() instanceof SelectionGUI) guiManager.hideGUI(player.getWorld());
 
-            if (state.isRightCenterHeld() && !last.isRightCenterHeld())
+            if (/*state.isRightCenterHeld() && !last.isRightCenterHeld()*/state.isHomeHeld() && !last.isHomeHeld())
                 if (guiManager.getDisplayedGUI() == null)
                     guiManager.displayGUI(new StandardGUI(
                             new StandardGUI.GUIOption("Save").setOnClick(this::saveWorld),
@@ -819,8 +834,6 @@ public class Main implements InputListener {
 
     @Override
     public void handleMouseInput(Mouse mouse) {
-        tryCreateSelectyObject();
-
         float x = Math.max(0, mouse.getX());
         float y = Math.max(0, mouse.getY());
 
@@ -839,10 +852,13 @@ public class Main implements InputListener {
             if (guiManager.getDisplayedGUI() == null)
                 runOnUIThread(() -> guiManager.displayGUI(new SelectionGUI()));
         }
-
-        if (System.currentTimeMillis() - mouse.getLastUsed() > 900) selectedObject.invisible = true;
-        else selectedObject.invisible = false;
-        selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
+        if (!usingControllerMouse) {
+            tryCreateSelectyObject();
+            if (System.currentTimeMillis() - mouse.getLastUsed() > 900)
+                selectedObject.invisible = true;
+            else selectedObject.invisible = false;
+            selectedObject.teleport(new Location(player.getWorld(), location.x, location.y));
+        }
 
         if (mouse.isLeftMouseDown()) {
             tryPlaceObject(location.x, location.y, s, new Vector3f());
