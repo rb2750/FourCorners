@@ -4,7 +4,6 @@ package com.rb2750.lwjgl.entities;
 import com.rb2750.lwjgl.graphics.*;
 import com.rb2750.lwjgl.util.Location;
 import com.rb2750.lwjgl.util.Size;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 public class Cube extends Entity {

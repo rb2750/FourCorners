@@ -198,7 +198,7 @@ public abstract class Entity extends DisplayObject implements Cloneable {
      */
     public boolean onInteract(Entity x, Entity y) {
         //Empty stub
-        return true;
+        return false;
     }
 
     /**
