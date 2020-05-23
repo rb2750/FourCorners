@@ -130,6 +130,11 @@ public class Player extends Entity implements InputListener {
         if (onGround()) doubleJump = false;
     }
 
+    @Override
+    public boolean onInteract(Entity x, Entity y) {
+        return false;
+    }
+
     boolean controller = false;
 
     @Override

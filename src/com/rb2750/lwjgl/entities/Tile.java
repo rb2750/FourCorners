@@ -100,6 +100,11 @@ public class Tile extends Entity {
         this.location = location;
     }
 
+    @Override
+    public boolean onInteract(Entity x, Entity y) {
+        return true;
+    }
+
 //    @Override
 //    public void renderEntity(Camera camera) {
 //        drawSquare(getLocation().getX(), getLocation().getY(), getSize().getWidth(), getSize().getHeight());

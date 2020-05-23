@@ -15,6 +15,6 @@ public class OneWayTile extends Tile {
 
     @Override
     public boolean onInteract(Entity x, Entity y) {
-        return x != null && x.acceleration.x < 0;
+        return y == null && x != null && x.acceleration.x < 0;
     }
 }

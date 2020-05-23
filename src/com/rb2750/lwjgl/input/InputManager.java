@@ -58,16 +58,16 @@ public class InputManager {
         });
 
         //Steam Controller
-        try {
-            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
-            listener.open();
-            listener.addSubscriber((state, last) -> {
-                if (new Controller().updateSteam(state).isKeyDown()) mode = InputMode.STEAM_CONTROLLER;
-                queue.add(new SteamQueuedEvent(currentControllerState = new Controller().updateSteam(state), new Controller().updateSteam(last)));
-            });
-        } catch (IndexOutOfBoundsException e) {
-            System.err.println("Failed to find Steam Controller.");
-        }
+//        try {
+//            SteamControllerListener listener = new SteamControllerListener(SteamController.getConnectedControllers().get(0));
+//            listener.open();
+//            listener.addSubscriber((state, last) -> {
+//                if (new Controller().updateSteam(state).isKeyDown()) mode = InputMode.STEAM_CONTROLLER;
+//                queue.add(new SteamQueuedEvent(currentControllerState = new Controller().updateSteam(state), new Controller().updateSteam(last)));
+//            });
+//        } catch (IndexOutOfBoundsException e) {
+//            System.err.println("Failed to find Steam Controller.");
+//        }
     }
 
     public static void registerInputListener(InputListener listener) {

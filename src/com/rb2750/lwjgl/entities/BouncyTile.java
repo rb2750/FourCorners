@@ -36,6 +36,6 @@ public class BouncyTile extends Tile {
                 }
             }
         }
-        return false;
+        return true;
     }
 }
