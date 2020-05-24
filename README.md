@@ -2,6 +2,9 @@
 FourCorners is a simple platformer made in LWJGL, initially made to test a steam controller library. It was gradually adapted into a more advanced game.
 The game now supports all forms of controllers including Xbox and DualShock.
 
+## Setup
+Simply import the pom.xml as a maven project. The required dependencies should then be installed and the project should be ready to run.
+
 ## Block Types
 ### Tile
 This is a standard building tile, nothing particularly special about it.
